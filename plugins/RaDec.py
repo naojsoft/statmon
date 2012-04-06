@@ -10,7 +10,7 @@ import PlBase
 from PyQt4 import QtGui, QtCore
 
 labels = (('ra', 'FITS.SBR.RA'), ('dec', 'FITS.SBR.DEC'),
-          ('az', 'FITS.SBR.AZIMUTH'), ('el', 'FITS.SBR.ELEVATION'),
+          ('az', 'FITS.SBR.AZIMUTH'), ('el', 'FITS.SBR.ALTITUDE'),
           ('rot', 'FITS.SBR.INSROT'),
           )
 
@@ -24,7 +24,7 @@ class RaDec(PlBase.Plugin):
         layout.setSpacing(2)
         container.setLayout(layout)
         
-        self.msgFont = QtGui.QFont("Fixed", 32)
+        self.msgFont = QtGui.QFont("Fixed", 24)
 
         self.w = {}
         for name, alias in labels:
@@ -40,7 +40,7 @@ class RaDec(PlBase.Plugin):
     def update(self, statusDict):
         for name, alias in labels:
             w = self.w[name]
-            w.setText(statusDict[alias])
+            w.setText(str(statusDict[alias]))
         
     
     def __str__(self):
