@@ -3,12 +3,12 @@
 # statmon.py -- Flexible Gen2 status monitor.
 #
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Fri Mar 30 17:27:25 HST 2012
+#  Last edit: Thu Apr  5 14:20:34 HST 2012
 #]
 #
 """
 Usage:
-    statmon.py 
+    statmon.py --monport=NNNNN --plugins=X,Y,Z
 """
 
 # stdlib imports
@@ -16,10 +16,12 @@ import sys, os
 import threading
 import ssdlog
 
+from PyQt4 import QtGui, QtCore
+
 moduleHome = os.path.split(sys.modules[__name__].__file__)[0]
 sys.path.insert(0, moduleHome)
-widgetHome = os.path.join(moduleHome, 'view')
-sys.path.insert(0, widgetHome)
+pluginHome = os.path.join(moduleHome, 'plugins')
+sys.path.insert(0, pluginHome)
 
 # Subaru python stdlib imports
 import remoteObjects as ro
@@ -30,35 +32,62 @@ import Settings
 
 # Local application imports
 import Model
-## import View
-## import Control
+from View import Viewer
+from Control import Controller
 
 defaultServiceName = 'statmon'
-version = "20120329.0"
+version = "20120405.0"
 
-default_layout = ['hpanel', {},
-                  ['ws', dict(name='left', width=280),
-                   # (tabname, layout), ...
-                   [("Info", ['vpanel', {},
-                              ['ws', dict(name='uleft', height=280,
-                                          show_tabs=False)],
-                              ['ws', dict(name='lleft', show_tabs=False)],
-                              ]
-                     )]
-                     ],
-                  ['vbox', dict(name='main', width=700)],
-                  ['ws', dict(name='right', width=400),
-                   # (tabname, layout), ...
-                   [("Dialogs", ['ws', dict(name='dialogs')
-                                 ]
-                     )]
-                    ],
+default_layout = ['vpanel', {},
+                  ['ws', dict(name='top', height=120, show_tabs=False), ],
+                  ['hpanel', dict(height=900),
+                   ['ws', dict(name='left', width=400), ],
+                   ['ws', dict(name='middle', width=400), ],
+                   ['ws', dict(name='right', width=400), ],
+                   ],
+                  ['ws', dict(name='bottom', height=50, show_tabs=False), ],
                   ]
 
+plugins = [
+    # pluginName, moduleName, className, workspaceName, tabName
+    ('debug', 'Debug', 'Debug', 'right', 'Debug'),
+    ('radec', 'RaDec', 'RaDec', 'top', ''),
+    ]
 
-def foo(d):
-    print "callback got:", d
-    
+class StatMon(Controller, Viewer):
+
+    def __init__(self, logger, threadPool, module_manager, settings,
+                 soundsink, ev_quit, model):
+
+        self.soundsink = soundsink
+        
+        Viewer.__init__(self)
+        Controller.__init__(self, logger, threadPool, module_manager,
+                            settings, ev_quit, model)
+
+    def play_soundfile(self, filepath, format=None, priority=20):
+        self.soundsink.playFile(filepath, format=format,
+                                priority=priority)
+        
+    def add_menus(self):
+        menubar = QtGui.QMenuBar()
+        self.w.mframe.addWidget(menubar, stretch=0)
+
+        # create a File pulldown menu, and add it to the menu bar
+        filemenu = menubar.addMenu("File")
+
+        sep = QtGui.QAction(menubar)
+        sep.setSeparator(True)
+        filemenu.addAction(sep)
+        
+        item = QtGui.QAction(QtCore.QString("Quit"), menubar)
+        item.triggered.connect(self.quit)
+        filemenu.addAction(item)
+
+        # create a Option pulldown menu, and add it to the menu bar
+        ## optionmenu = menubar.addMenu("Option")
+
+   
 def main(options, args):
     # Create top level logger.
     svcname = options.svcname
@@ -102,29 +131,37 @@ def main(options, args):
 
     mm = ModuleManager.ModuleManager(logger)
 
+    # Add any custom modules
+    if options.modules:
+        modules = options.modules.split(',')
+        for mdlname in modules:
+            #self.mm.loadModule(name, pfx=pluginconfpfx)
+            self.mm.loadModule(name)
+
     model = Model.StatusModel(logger)
-    model.register_select('foo', foo, ['FOO.BAR'])
     
-    ## # Start up the display engine
-    ## viewer = Viewer.Viewer(logger, threadPool, mm, settings,
-    ##                         sndsink, ev_quit)
+    # Start up the control/display engine
+    statmon = StatMon(logger, threadPool, mm, settings,
+                      sndsink, ev_quit, model)
 
-    ## # Build desired layout
-    ## viewer.build_toplevel(layout=default_layout)
+    # Build desired layout
+    root = statmon.build_toplevel(layout=default_layout)
+    root.show()
 
-    ## # Add any custom plugins
+    # Add any custom plugins
     ## if options.plugins:
     ##     plugins = options.plugins.split(',')
     ##     for plname in plugins:
-    ##         viewer.add_local_plugin(plname)
+    ##         statmon.load_plugin(plname)
+    for pluginName, moduleName, className, wsName, tabName in plugins:
+        statmon.load_plugin(pluginName, moduleName, className,
+                            wsName, tabName)
 
-    ## viewer.update_pending()
-
-    ## controller = Controller(viewer, mymon, logger)
+    statmon.update_pending()
 
     # Did user specify geometry
-    ## if options.geometry:
-    ##     viewer.setGeometry(options.geometry)
+    if options.geometry:
+        statmon.setGeometry(options.geometry)
 
     server_started = False
 
@@ -147,22 +184,20 @@ def main(options, args):
         # Register local status info subscription callback
         mymon.subscribe_cb(model.arr_status, ['status'])
 
-        ## # Create our remote service object
-        ## ctrlsvc = ro.remoteObjectServer(svcname=options.svcname,
-        ##                                 obj=controller,
-        ##                                 logger=logger, ev_quit=ev_quit,
-        ##                                 port=options.port,
-        ##                                 usethread=True,
-        ##                                 threadPool=threadPool)
+        # Create our remote service object
+        ctrlsvc = ro.remoteObjectServer(svcname=options.svcname,
+                                        obj=statmon,
+                                        logger=logger, ev_quit=ev_quit,
+                                        port=options.port,
+                                        usethread=True,
+                                        threadPool=threadPool)
 
         logger.info("Starting statmon service.")
-        ## ctrlsvc.ro_start()
+        ctrlsvc.ro_start()
 
         try:
             # Main loop to handle GUI events
-            #viewer.mainloop(timeout=0.001)
-            while True:
-                ev_quit.wait(1.0)
+            statmon.mainloop(timeout=0.001)
 
         except KeyboardInterrupt:
             logger.error("Received keyboard interrupt!")
@@ -170,8 +205,8 @@ def main(options, args):
     finally:
         logger.info("Shutting down...")
 
-        ## viewer.stop()
-        ## ctrlsvc.ro_stop(wait=True)
+        statmon.stop()
+        ctrlsvc.ro_stop(wait=True)
         mymon.stop_server(wait=True)
         mymon.stop(wait=True)
 
