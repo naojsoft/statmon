@@ -14,7 +14,7 @@ import PlBase
 import Bunch
 
 from PyQt4 import QtGui, QtCore
-import QtHelp
+from Gen2.Fitsview.qtw import QtHelp
 
 # For "RaDec" plugin
 al_ra = 'FITS.SBR.RA'
@@ -32,9 +32,6 @@ al_rot_cmd = 'FITS.SBR.INSROT_CMD'
 al_epoch = 'FITS.SBR.EPOCH'
 al_ras = 'STATS.RA'
 al_ut1utc = 'FITS.SBR.UT1_UTC'
-
-# Font typeface to use
-typeface = "Helvetica"
 
 
 class RaDec(PlBase.Plugin):
@@ -68,9 +65,9 @@ class RaDec(PlBase.Plugin):
         layout.setSpacing(2)
         container.setLayout(layout)
 
-        self.bigfont = QtGui.QFont("%s Bold" % typeface, 32)
-        self.midfont = QtGui.QFont("%s Bold" % typeface, 24)
-        self.smfont = QtGui.QFont("%s" % typeface, 18)
+        self.bigfont = QtGui.QFont("Arial Black", 28)
+        self.midfont = QtGui.QFont("Arial", 18)
+        self.smfont = QtGui.QFont("Arial", 12)
 
         self.w = Bunch.Bunch()
 
@@ -181,7 +178,7 @@ class Times(PlBase.Plugin):
         layout.setSpacing(0)
         container.setLayout(layout)
         
-        self.bigfont = QtGui.QFont("%s Bold" % typeface, 24)
+        self.bigfont = QtGui.QFont("Arial Black", 24)
 
         self.w = Bunch.Bunch()
 
