@@ -39,9 +39,15 @@ class StatusModel(Callback.Callbacks):
             return
         
         statusInfo = bnch.value
+
+        self.update_statusInfo(statusInfo)
+
+    def store(self, statusInfo):
         with self.lock:
             self.statusDict.update(statusInfo)
 
+    def update_statusInfo(self, statusInfo):
+        self.store(statusInfo)
         self.make_callback('status-arrived', statusInfo)
 
     def fetch(self, fetchDict):
@@ -49,5 +55,14 @@ class StatusModel(Callback.Callbacks):
             for key in fetchDict.keys():
                 fetchDict[key] = self.statusDict.get(key, statNone)
                 
+    def calc_missing_aliases(self, aliasset):
+        with self.lock:
+            aliases = self.statusDict.keys()
+
+        # Figure out the set of aliases we don't yet have
+        need_aliases = aliasset.difference(set(aliases))
+        return need_aliases
+
+        
 # END
 
