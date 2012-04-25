@@ -3,7 +3,7 @@
 # statmon.py -- Flexible Gen2 status monitor.
 #
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Thu Apr  5 14:20:34 HST 2012
+#  Last edit: Fri Apr 20 13:37:35 HST 2012
 #]
 #
 """
@@ -56,6 +56,7 @@ plugins = [
     # pluginName, moduleName, className, workspaceName, tabName
     ('debug', 'Debug', 'Debug', 'right', 'Debug'),
     ('radec', 'RaDec', 'RaDec', 'top', ''),
+    ('times', 'RaDec', 'Times', 'bottom', ''),
     ]
 
 class StatMon(Controller, Viewer):

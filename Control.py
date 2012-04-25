@@ -2,7 +2,7 @@
 # Control.py -- Controller for StatMon.
 #
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Thu Apr  5 14:23:24 HST 2012
+#  Last edit: Mon Apr 23 11:35:51 HST 2012
 #]
 #
 # stdlib imports
@@ -12,6 +12,7 @@ import time
 import thread, threading
 import Queue
 
+import remoteObjects as ro
 import Bunch
 import Callback
 import Future
@@ -45,17 +46,24 @@ class Controller(Callback.Callbacks):
         self.shares = ['threadPool', 'logger']
 
         self.lock = threading.RLock()
+        # Time limit (secs) that GUI should update within or get a warning
+        self.update_limit = 1.0
 
         # Holds plugin registrations for specific status items
         self.regSelect = {}
         self.model.add_callback('status-arrived', self.update_status)
-        
+
+        self.get_status_handle()
+
 
     def get_model(self):
         return self.model
     
     def stop(self):
         self.ev_quit.set()
+
+    def get_status_handle(self):
+        self.proxystatus = ro.remoteObjectProxy('status')
 
     def update_status(self, model, statusInfo):
         self.logger.debug("status arrived: %s" % (str(statusInfo)))
@@ -90,8 +98,25 @@ class Controller(Callback.Callbacks):
                 diff))
 
     def register_select(self, ident, cb_fn, aliases):
-        self.regSelect[ident] = (set(aliases), cb_fn)
-            
+        aliases = set(aliases)
+        self.regSelect[ident] = (aliases, cb_fn)
+
+        need_aliases = self.model.calc_missing_aliases(aliases)
+        self.nongui_do(self.fetch_missing_aliases, aliases)
+
+
+    def fetch_missing_aliases(self, aliases):
+        # Fetch those aliases and update our model
+        statusDict = {}.fromkeys(aliases)
+        try:
+            statusInfo = self.proxystatus.fetch(statusDict)
+
+        except Exception, e:
+            self.logger.error("Error fetching needed status items: %s" % (
+                str(e)))
+
+        self.model.update_statusInfo(statusInfo)
+
 
     def play_soundfile(self, filepath, format=None, priority=20):
         self.logger.debug("Subclass could override this to play sound file '%s'" % (
