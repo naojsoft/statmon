@@ -58,6 +58,7 @@ plugins = [
     ('radec', 'RaDec', 'RaDec', 'top', ''),
     ('times', 'RaDec', 'Times', 'bottom', ''),
     ('envmon', 'EnvMon', 'EnvMon', 'right', "EnvMon"),
+    ('alarm', 'Alarm', 'Alarm', 'right', 'Alarm'),
     ]
 
 class StatMon(Controller, Viewer):
