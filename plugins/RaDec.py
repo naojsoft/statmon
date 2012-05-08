@@ -2,7 +2,7 @@
 # RaDec.py -- RA/DEC plugin for StatMon
 # 
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Mon Apr 23 17:32:22 HST 2012
+#  Last edit: Fri Apr 27 17:57:38 HST 2012
 #]
 #
 import time
@@ -65,9 +65,10 @@ class RaDec(PlBase.Plugin):
         layout.setSpacing(2)
         container.setLayout(layout)
 
-        self.bigfont = QtGui.QFont("Arial Black", 28)
-        self.midfont = QtGui.QFont("Arial", 18)
-        self.smfont = QtGui.QFont("Arial", 12)
+        #self.bigfont = QtGui.QFont("Arial Black", 28)
+        self.bigfont = QtGui.QFont("Helvetica", 28, QtGui.QFont.Bold)
+        self.midfont = QtGui.QFont("Helvetica", 18, QtGui.QFont.Bold)
+        self.smfont = QtGui.QFont("Helvetica", 12, QtGui.QFont.Bold)
 
         self.w = Bunch.Bunch()
 

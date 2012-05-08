@@ -3,7 +3,7 @@
 # statmon.py -- Flexible Gen2 status monitor.
 #
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Fri Apr 20 13:37:35 HST 2012
+#  Last edit: Fri Apr 27 14:42:26 HST 2012
 #]
 #
 """
@@ -54,9 +54,10 @@ default_layout = ['vpanel', {},
 
 plugins = [
     # pluginName, moduleName, className, workspaceName, tabName
-    ('debug', 'Debug', 'Debug', 'right', 'Debug'),
+    ('debug', 'Debug', 'Debug', 'right', "Debug"),
     ('radec', 'RaDec', 'RaDec', 'top', ''),
     ('times', 'RaDec', 'Times', 'bottom', ''),
+    ('envmon', 'EnvMon', 'EnvMon', 'right', "EnvMon"),
     ]
 
 class StatMon(Controller, Viewer):

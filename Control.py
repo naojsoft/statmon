@@ -2,7 +2,7 @@
 # Control.py -- Controller for StatMon.
 #
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Mon Apr 23 11:35:51 HST 2012
+#  Last edit: Fri Apr 27 14:48:11 HST 2012
 #]
 #
 # stdlib imports
@@ -111,11 +111,12 @@ class Controller(Callback.Callbacks):
         try:
             statusInfo = self.proxystatus.fetch(statusDict)
 
+            self.model.update_statusInfo(statusInfo)
+
         except Exception, e:
             self.logger.error("Error fetching needed status items: %s" % (
                 str(e)))
 
-        self.model.update_statusInfo(statusInfo)
 
 
     def play_soundfile(self, filepath, format=None, priority=20):
