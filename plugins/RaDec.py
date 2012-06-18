@@ -2,7 +2,7 @@
 # RaDec.py -- RA/DEC plugin for StatMon
 # 
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Fri Apr 27 17:57:38 HST 2012
+#  Last edit: Thu May 17 23:44:51 HST 2012
 #]
 #
 import time
@@ -208,14 +208,14 @@ class Times(PlBase.Plugin):
 
         ra_deg = radec.funkyHMStoDeg(statusDict[al_ras])
         ha_sec = wcs.calcHA_sec(lst_sec, ra_deg)
-        ha_abs = math.fabs(ha_sec)
-        ha_hrs = ha_abs // 3600
-        ha_abs -= ha_hrs
-        ha_min = ha_abs // 60
-        ha_sec = ha_abs - ha_min
         c = '+'
         if ha_sec < 0.0:
             c = '-'
+        ha_abs = math.fabs(ha_sec)
+        ha_hrs = ha_abs // 3600
+        ha_abs -= (ha_hrs * 3600)
+        ha_min = ha_abs // 60
+        ha_sec = ha_abs - (ha_min * 60)
         # TODO
         ha = '%s%02dh:%02dm' % (c, ha_hrs, ha_min)
 
