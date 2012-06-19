@@ -5,14 +5,16 @@
 # that can be "plugged in" to statmon.
 # 
 #[ Russell Kackley (rkackley@naoj.org) --
-#  Last edit: Tue May  1 16:33:29 HST 2012
+#  Last edit: Tue Jun 19 08:25:40 HST 2012
 #]
 #
 import os
+import threading
 from PyQt4 import QtGui, QtCore
 import remoteObjects as ro
 import Gen2.alarm.alarm_gui as AlarmGui
 import Gen2.alarm.StatusVar as StatusVar
+import Gen2.alarm.StatusValHistory as StatusValHistory
 import PlBase
 
 class Alarm(PlBase.Plugin):
@@ -37,6 +39,8 @@ class Alarm(PlBase.Plugin):
         layout.addWidget(self.mw, stretch=1)
 
     def start(self):
+        persistDatafileLock = threading.RLock()
+
         # The configuration files tell us which Gen2 aliases we want
         # to monitor. The configuration files are normally in
         # $PYHOME/cfg/alarm. If $PYHOME is not defined, use the
@@ -50,7 +54,7 @@ class Alarm(PlBase.Plugin):
 
         # StatusVarConfig reads in the configuration files
         try:
-            self.svConfig = StatusVar.StatusVarConfig(alarm_cfg_file, self.logger)
+            self.svConfig = StatusVar.StatusVarConfig(alarm_cfg_file, persistDatafileLock, self.logger)
         except Exception, e:
             self.logger.error('Error opening configuration file(s): %s' % str(e))
 
@@ -60,6 +64,19 @@ class Alarm(PlBase.Plugin):
             if self.svConfig.configID[ID].Alarm:
                 self.aliases.append('ALARM_' + ID)
         self.aliases.append('STS.TIME1')
+
+        # Default persistent data file
+        default_persist_data_filename = 'alarm_handler.shelve'
+        try:
+            pyhome = os.environ['GEN2COMMON']
+            persist_data_dir = os.path.join(pyhome, 'db')
+        except:
+            persist_data_dir =  os.path.join('/gen2/share/db')
+        default_persist_data_file = os.path.join(persist_data_dir, default_persist_data_filename)
+
+        # Load the status value history
+        self.statusValHistory = StatusValHistory.StatusValHistory(persistDatafileLock, self.logger)
+        self.statusValHistory.loadHistory(default_persist_data_file, self.svConfig)
 
         # Register the update callback function and tell the
         # controller the names of the Gen2 aliases we want to monitor.
@@ -103,7 +120,7 @@ class Alarm(PlBase.Plugin):
         # updateAlarmWindow.
         if self.firstTime:
             self.logger.debug(statusDict)
-            AlarmGui.initializeAlarmWindow(self.mw, self.svConfig, statusDict)
+            AlarmGui.initializeAlarmWindow(self.mw, self.svConfig, self.statusValHistory, statusDict)
             self.firstTime = False
         else:
             changedStatusDict = self.changedStatus(statusDict)
