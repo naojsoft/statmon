@@ -19,7 +19,6 @@ import Gen2.senvmon.statusGraph as StatusGraph
 import Gen2.senvmon.timeValueGraph as timeValueGraph
 # Needed for unpickling...ugh
 from Gen2.senvmon.timeValueGraph import Global
-import Gen2.senvmon.TVData as TVData
 # Hack required by timeValueGraph
 timeValueGraph.Global.persistentData = {}
 import Gen2.senvmon.resourceMon as rmon
