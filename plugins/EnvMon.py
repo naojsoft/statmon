@@ -19,7 +19,6 @@ import Gen2.senvmon.statusGraph as StatusGraph
 import Gen2.senvmon.timeValueGraph as timeValueGraph
 # Needed for unpickling...ugh
 from Gen2.senvmon.timeValueGraph import Global
-import Gen2.senvmon.TVData as TVData
 # Hack required by timeValueGraph
 timeValueGraph.Global.persistentData = {}
 import Gen2.senvmon.resourceMon as rmon
@@ -177,8 +176,7 @@ class EnvMon(PlBase.Plugin):
     
         # wind direction 
         wind_dir = dr.Directions(statusKeys=(al_az, al_windd, al_windsO),
-                                 logger=self.logger)
-        wind_dir.resize(180, 180)
+                                 size=(150,100), logger=self.logger)
         coordinator.graphs.append(wind_dir)
 
         hbox.addWidget(rs, stretch=0, alignment=QtCore.Qt.AlignLeft)
