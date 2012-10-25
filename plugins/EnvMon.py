@@ -176,8 +176,7 @@ class EnvMon(PlBase.Plugin):
     
         # wind direction 
         wind_dir = dr.Directions(statusKeys=(al_az, al_windd, al_windsO),
-                                 logger=self.logger)
-        wind_dir.resize(180, 180)
+                                 size=(150,100), logger=self.logger)
         coordinator.graphs.append(wind_dir)
 
         hbox.addWidget(rs, stretch=0, alignment=QtCore.Qt.AlignLeft)
