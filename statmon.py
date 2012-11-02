@@ -194,8 +194,7 @@ def main(options, args):
         # Create our remote service object
         ctrlsvc = ro.remoteObjectServer(svcname=options.svcname,
                                         obj=statmon,
-                                        method_list=['reload_plugin',
-                                                     'close_plugin',
+                                        method_list=['close_plugin',
                                                      'close_all_plugins'],
                                         logger=logger, ev_quit=ev_quit,
                                         port=options.port,
