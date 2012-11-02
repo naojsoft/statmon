@@ -68,7 +68,7 @@ class EnvMon(PlBase.Plugin):
         key='envi_key'
 
         try:
-            load_data(envi_file, key, 3600, self.logger)
+            load_data(envi_file, key, 5 * 3600, self.logger)
         except Exception, e:
             self.logger.error("Error loading persistent data: %s" % (str(e)))
 
@@ -203,6 +203,9 @@ class EnvMon(PlBase.Plugin):
         except Exception, e:
             self.logger.error("Error updating status: %s" % (str(e)))
             
+    def stop(self):
+        self.sc.saveDatastoresShelve()
+
     def __str__(self):
         return 'envmon'
 

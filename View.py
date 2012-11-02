@@ -148,11 +148,17 @@ class Viewer(object):
             pluginObj = klass(self.model, self, self.controller,
                               self.logger)
 
+            # Save a reference to the plugin object so we can use it
+            # later
+            self.plugins[pluginName].setvals(obj=pluginObj)
+
             # Build the plugin GUI
             pluginObj.build_gui(widget)
 
-            # Add the widget to a workspace
-            self.ds.add_page(wsName, widget, 2, tabName)
+            # Add the widget to a workspace and save the tab name in
+            # case we need to delete the widget later on.
+            dsTabName = self.ds.add_page(wsName, widget, 2, tabName)
+            self.plugins[pluginName].setvals(wsTabName=dsTabName)
 
             # Start the plugin
             pluginObj.start()
@@ -184,8 +190,20 @@ class Viewer(object):
             self.ds.add_page(wsName, widget, 2, tabName)
 
     def close_plugin(self, pluginName):
-        # TODO
-        pass
+        bnch = self.plugins[pluginName]
+        self.logger.info('calling stop() for plugin %s' % (pluginName))
+        bnch.obj.stop()
+        self.logger.info('calling remove_tab() for plugin %s' % (pluginName))
+        self.ds.remove_tab(bnch.wsTabName)
+        return True
+     
+    def close_all_plugins(self):
+        for pluginName in self.plugins:
+            try:
+                self.close_plugin(pluginName)
+            except Exception as e:
+                self.logger.error('Exception while calling stop for plugin %s: %s' % (pluginName, e))
+        return True
     
     def reload_plugin(self, pluginName):
         pInfo = self.plugins[pluginName]
