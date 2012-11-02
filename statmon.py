@@ -285,6 +285,8 @@ def main(options, args):
         # Create our remote service object
         ctrlsvc = ro.remoteObjectServer(svcname=options.svcname,
                                         obj=statmon,
+                                        method_list=['close_plugin',
+                                                     'close_all_plugins'],
                                         logger=logger, ev_quit=ev_quit,
                                         port=options.port,
                                         usethread=True,
@@ -303,6 +305,7 @@ def main(options, args):
     finally:
         logger.info("Shutting down...")
 
+        statmon.close_all_plugins()
         statmon.stop()
         ctrlsvc.ro_stop(wait=True)
         mymon.stop_server(wait=True)
