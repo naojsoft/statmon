@@ -19,6 +19,7 @@ import Gen2.senvmon.statusGraph as StatusGraph
 import Gen2.senvmon.timeValueGraph as timeValueGraph
 # Needed for unpickling...ugh
 from Gen2.senvmon.timeValueGraph import Global
+import Gen2.senvmon.TVData as TVData
 # Hack required by timeValueGraph
 timeValueGraph.Global.persistentData = {}
 import Gen2.senvmon.resourceMon as rmon
@@ -68,7 +69,7 @@ class EnvMon(PlBase.Plugin):
         key='envi_key'
 
         try:
-            load_data(envi_file, key, 5 * 3600, self.logger)
+            load_data(envi_file, key, 3600, self.logger)
         except Exception, e:
             self.logger.error("Error loading persistent data: %s" % (str(e)))
 
@@ -176,7 +177,8 @@ class EnvMon(PlBase.Plugin):
     
         # wind direction 
         wind_dir = dr.Directions(statusKeys=(al_az, al_windd, al_windsO),
-                                 size=(150,100), logger=self.logger)
+                                 logger=self.logger)
+        wind_dir.resize(180, 180)
         coordinator.graphs.append(wind_dir)
 
         hbox.addWidget(rs, stretch=0, alignment=QtCore.Qt.AlignLeft)
@@ -203,9 +205,6 @@ class EnvMon(PlBase.Plugin):
         except Exception, e:
             self.logger.error("Error updating status: %s" % (str(e)))
             
-    def stop(self):
-        self.sc.saveDatastoresShelve()
-
     def __str__(self):
         return 'envmon'
 

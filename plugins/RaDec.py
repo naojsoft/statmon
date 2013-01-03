@@ -27,6 +27,8 @@ al_el = 'TSCS.EL'
 al_el_cmd = 'TSCS.EL_CMD'
 al_rot = 'FITS.SBR.INSROT'
 al_rot_cmd = 'FITS.SBR.INSROT_CMD'
+al_airmass = 'TSCS.EL'
+al_airmass_cmd = 'TSCS.EL'
 
 # For "Times" plugin
 al_epoch = 'FITS.SBR.EPOCH'
@@ -57,8 +59,7 @@ class RaDec(PlBase.Plugin):
 
         self.labels = (('ra', al_ra, al_ra_cmd), ('dec', al_dec, al_dec_cmd),
                        ('az', al_az, al_az_cmd), ('el', al_el, al_el_cmd),
-                       ('rot', al_rot, al_rot_cmd),
-                       )
+                       ('rot', al_rot, al_rot_cmd), ('airmass', al_el, al_el))
         
         layout = QtGui.QHBoxLayout()
         layout.setContentsMargins(4, 4, 4, 4)
@@ -66,9 +67,12 @@ class RaDec(PlBase.Plugin):
         container.setLayout(layout)
 
         #self.bigfont = QtGui.QFont("Arial Black", 28)
-        self.bigfont = QtGui.QFont("Helvetica", 28, QtGui.QFont.Bold)
-        self.midfont = QtGui.QFont("Helvetica", 18, QtGui.QFont.Bold)
-        self.smfont = QtGui.QFont("Helvetica", 12, QtGui.QFont.Bold)
+        #fontfamily = "DejaVu Sans Mono"
+        fontfamily = "Monospace"
+        self.biggerfont = QtGui.QFont(fontfamily, 36, QtGui.QFont.Bold)
+        self.bigfont = QtGui.QFont(fontfamily, 28, QtGui.QFont.Bold)
+        self.midfont = QtGui.QFont(fontfamily, 18, QtGui.QFont.Bold)
+        self.smfont = QtGui.QFont(fontfamily, 12, QtGui.QFont.Bold)
 
         self.w = Bunch.Bunch()
 
@@ -84,8 +88,12 @@ class RaDec(PlBase.Plugin):
         for name, alias1, alias2 in self.labels:
             bnch = self._build_cluster()
             bnch.lm.setFont(self.bigfont)
-            bnch.lm.setText(name)
-            bnch.lb.setFont(self.midfont)
+            if name == 'airmass':
+                bnch.lm.setFont(self.biggerfont)
+                bnch.lm.setText(name)
+            else:
+                bnch.lm.setText(name)
+                bnch.lb.setFont(self.midfont)
             bnch.lt.setFont(self.smfont)
             layout.addWidget(bnch.box, stretch=0)
             layout.addStretch(stretch=1)
@@ -96,6 +104,7 @@ class RaDec(PlBase.Plugin):
         self.w.az.lt.setText("Az (deg:S=0,W=90)")
         self.w.el.lt.setText("El (deg)")
         self.w.rot.lt.setText("Rot (deg)")
+        self.w.airmass.lt.setText('AirMass')
 
     def start(self):
         aliases = []
@@ -108,6 +117,23 @@ class RaDec(PlBase.Plugin):
         self.w.dec.lm.setText(statusDict[al_dec])
         self.w.ra.lb.setText(statusDict[al_ra_cmd])
         self.w.dec.lb.setText(statusDict[al_dec_cmd])
+
+        # Airmass calculation
+        try:
+            el = float(statusDict[al_el])
+            assert 1.0 <= el <=179.0
+        except Exception as e:
+            self.logger.error("Error displaying airmass: %s" % (str(e)))
+            airmass_str = "ERROR"
+        else:
+            zd = 90.0 - el
+            rad = math.radians(zd)
+            sz = 1.0 / math.cos(rad)
+            sz1 = sz - 1.0
+            am = sz - 0.0018167 * sz1 - 0.002875 * sz1**2 - 0.0008083 * sz1**3 
+            airmass_str = '{0:.3f}'.format(am)
+        finally:
+            self.w.airmass.lm.setText(airmass_str)
 
         # Azimuth, actual
         try:
@@ -179,7 +205,8 @@ class Times(PlBase.Plugin):
         layout.setSpacing(0)
         container.setLayout(layout)
         
-        self.bigfont = QtGui.QFont("Arial Black", 24)
+        fontfamily = "Monospace"
+        self.bigfont = QtGui.QFont(fontfamily, 24)
 
         self.w = Bunch.Bunch()
 

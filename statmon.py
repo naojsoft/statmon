@@ -40,25 +40,117 @@ version = "20120405.0"
 
 default_layout = ['vpanel', {},
                   ['ws', dict(name='top', height=120, show_tabs=False), ],
-                  ['hpanel', dict(height=900),
+                  ['hpanel', dict(height=1100),
                    #['ws', dict(name='left', width=400), ],
-                   ['vpanel', dict(width=400),
-                    ['ws', dict(name='uleft', height=500), ],
-                    ['ws', dict(name='lleft', height=400), ],
-                    ],
-                   ['ws', dict(name='middle', width=400), ],
-                   ['ws', dict(name='right', width=400), ],
+                   ['vpanel', dict(width=250),
+                    ['ws', dict(name='left1', height=75, show_tabs=False), ],
+                    ['ws', dict(name='left2', height=350, show_tabs=False), ],
+                    ['ws', dict(name='left3', height=80, show_tabs=False),],
+                    ['ws', dict(name='left4', height=80, show_tabs=False),],
+                    ['ws', dict(name='left5', height=80, show_tabs=False),],
+                    ['ws', dict(name='left6', height=80, show_tabs=False),], 
                    ],
-                  ['ws', dict(name='bottom', height=50, show_tabs=False), ],
-                  ]
+                   ['vpanel', dict(width=350),
+                    ['ws', dict(name='middle11', height=500, show_tabs=False), ],
+                    ['ws', dict(name='middle12', height=80, show_tabs=False), ],
+                    ['ws', dict(name='middle13', height=80, show_tabs=False), ],
+                    ['ws', dict(name='middle14', height=80, show_tabs=False), ],
+                    ['ws', dict(name='middle15', height=80, show_tabs=False), ],
+                   ],
+                   ['vpanel', dict(width=230),
+                    ['ws', dict(name='middle21', height=25, show_tabs=False), ],
+                    ['ws', dict(name='middle22', height=150, show_tabs=False), ],
+                    ['ws', dict(name='middle23', height=50, show_tabs=False), ],
+                    ['ws', dict(name='middle24', height=25, show_tabs=False), ],
+                    ['ws', dict(name='middle25', height=500, show_tabs=False), ],
+                   ],
+
+                   ['vpanel', dict(width=500),
+                    ['ws', dict(name='right', width=400), ],
+                     
+                   ]
+                  ],
+                 ['ws', dict(name='bottom', height=50, show_tabs=False), ],
+                 ]
+                 
+
+focus_plugin={'HDS': [('nsoptstate', 'StatePlugin', 'NsOptStatePlugin', 'left1', ''), 
+                      ('nsoptplot', 'PlotPlugin', 'NsOptPlotPlugin', 'left2', ''),
+                      ('nsopt', 'LimitPlugin', 'NsOptImgRotLimitPlugin', 'middle14','' ),
+                      ('nsoptagr', 'LimitPlugin', 'NsOptAgProbeRLimitPlugin', 'left5','' ),
+                      ('nsoptagtheta', 'LimitPlugin', 'NsOptAgProbeThetaLimitPlugin', 'left6','' ),
+                      
+                     ],
+             'MOIRCS': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''),
+                        ('agplot', 'PlotPlugin', 'AgPlotPlugin', 'left2', ''), 
+                        ('cslimit', 'LimitPlugin', 'CsInsRotLimitPlugin', 'middle14','' ),
+                        ('csagr', 'LimitPlugin', 'CsAgProbeRLimitPlugin', 'left5','' ),
+                        ('csagtheta', 'LimitPlugin', 'CsAgProbeThetaLimitPlugin', 'left6','' ),  
+                       ],
+             'COMICS': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''),
+                        ('agplot', 'PlotPlugin', 'AgPlotPlugin', 'left2', ''), 
+                        ('cslimit', 'LimitPlugin', 'CsInsRotLimitPlugin', 'middle14','' ),
+                        ('csagr', 'LimitPlugin', 'CsAgProbeRLimitPlugin', 'left5','' ),
+                        ('csagtheta', 'LimitPlugin', 'CsAgProbeThetaLimitPlugin', 'left6','' ), 
+                       ],
+             'FOCAS': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''),
+                       ('agplot', 'PlotPlugin', 'AgPlotPlugin', 'left2', ''), 
+                       ('cslimit', 'LimitPlugin', 'CsInsRotLimitPlugin', 'middle14','' ),
+                       ('csagr', 'LimitPlugin', 'CsAgProbeRLimitPlugin', 'left5','' ),
+                       ('csagtheta', 'LimitPlugin', 'CsAgProbeThetaLimitPlugin', 'left6','' ), 
+                      ],
+             'SPCAM': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''), 
+                       ('agplot', 'PlotPlugin', 'AgPlotPlugin', 'left2', ''),
+                       #('brightness', 'Brightness', 'Brightness', 'left3', ''), 
+                       ('poptlimit', 'LimitPlugin', 'PoptInsRotLimitPlugin', 'middle14','' ),
+                       ('poptagx', 'LimitPlugin', 'PoptAgProbeXLimitPlugin', 'left5','' ),
+                       ('poptagy', 'LimitPlugin', 'PoptAgProbeYLimitPlugin', 'left6','' ), 
+                      ],
+             'HSC': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''), 
+                     ('agplot', 'PlotPlugin', 'AgPlotPlugin', 'left2', ''),
+                     ('poptlimit', 'LimitPlugin', 'PoptInsRotLimitPlugin', 'middle14','' ),
+                    ],
+             'HICIAO': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''), 
+                        ('agplot', 'PlotPlugin', 'NsIrPlotPlugin', 'left2', ''),
+                        ('nsirlimit', 'LimitPlugin', 'NsIrImgRotLimitPlugin', 'middle14','' ),
+                     ],
+             'IRCS': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''), 
+                      ('agplot', 'PlotPlugin', 'NsIrPlotPlugin', 'left2', ''),
+                      ('nsirlimit', 'LimitPlugin', 'NsIrImgRotLimitPlugin', 'middle14','' ),
+                     ],
+             'K3D': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''), 
+                     ('agplot', 'PlotPlugin', 'NsIrPlotPlugin', 'left2', ''),
+                     ('nsirlimit', 'LimitPlugin', 'NsIrImgRotLimitPlugin', 'middle14','' ),
+                    ],
+
+             'IRCS': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''), 
+                      ('agplot', 'PlotPlugin', 'NsIrPlotPlugin', 'left2', ''),
+                      ('nsirlimit', 'LimitPlugin', 'NsIrImgRotLimitPlugin', 'middle14','' ),
+                     ],
+             'FMOS': [('fmosstate', 'StatePlugin', 'FmosStatePlugin', 'left1', ''), 
+                      ('fmosplot', 'PlotPlugin', 'FmosPlotPlugin', 'left2', ''),
+                      ('pirlimit', 'LimitPlugin', 'PirInsRotLimitPlugin', 'middle14','' ),
+                      ('piragx', 'LimitPlugin', 'PirAgProbeXLimitPlugin', 'left5','' ),
+                      ('piragy', 'LimitPlugin', 'PirAgProbeYLimitPlugin', 'left6','' ), 
+
+                     ],
+            }
 
 plugins = [
     # pluginName, moduleName, className, workspaceName, tabName
     ('debug', 'Debug', 'Debug', 'right', "Debug"),
     ('radec', 'RaDec', 'RaDec', 'top', ''),
     ('times', 'RaDec', 'Times', 'bottom', ''),
-    ('envmon', 'EnvMon', 'EnvMon', 'right', "EnvMon"),
+    #('envmon', 'EnvMon', 'EnvMon', 'right', "EnvMon"),
     ('alarm', 'Alarm', 'Alarm', 'right', 'Alarm'),
+    ('telescope', 'TelescopePlugin', 'TelescopePlugin', 'middle11',''), 
+    ('azlimit', 'LimitPlugin', 'AzLimitPlugin', 'middle12', ''), 
+    ('ellimit', 'LimitPlugin', 'ElLimitPlugin', 'middle13', ''),
+    ('domeff', 'DomeffPlugin', 'DomeffPlugin', 'middle21', ''),
+    ('cal', 'CalPlugin', 'CalPlugin', 'middle23', ''),
+    ('calprobe', 'CalprobePlugin', 'CalprobePlugin', 'middle24', ''),
+    ('target', 'TargetPlugin', 'TargetPlugin', 'middle22', ''),
+    ('envmon', 'EnvMon', 'EnvMon', 'middle25', ''),
     ]
 
 class StatMon(Controller, Viewer):
@@ -155,11 +247,10 @@ def main(options, args):
     root = statmon.build_toplevel(layout=default_layout)
     root.show()
 
-    # Add any custom plugins
-    ## if options.plugins:
-    ##     plugins = options.plugins.split(',')
-    ##     for plname in plugins:
-    ##         statmon.load_plugin(plname)
+    obcp=statmon.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
+    focus = focus_plugin[obcp]
+    plugins.extend(focus)
+
     for pluginName, moduleName, className, wsName, tabName in plugins:
         statmon.load_plugin(pluginName, moduleName, className,
                             wsName, tabName)
@@ -194,8 +285,6 @@ def main(options, args):
         # Create our remote service object
         ctrlsvc = ro.remoteObjectServer(svcname=options.svcname,
                                         obj=statmon,
-                                        method_list=['close_plugin',
-                                                     'close_all_plugins'],
                                         logger=logger, ev_quit=ev_quit,
                                         port=options.port,
                                         usethread=True,
@@ -214,7 +303,6 @@ def main(options, args):
     finally:
         logger.info("Shutting down...")
 
-        statmon.close_all_plugins()
         statmon.stop()
         ctrlsvc.ro_stop(wait=True)
         mymon.stop_server(wait=True)

@@ -40,11 +40,7 @@ class Debug(PlBase.Plugin):
 
     def start(self):
         pass
-
-    def closePlugin(self, plname):
-        self.view.close_plugin(plname)
-        return True    
-
+    
     def reloadPlugin(self, plname):
         #self.view.close_plugin(plname)
         self.view.reload_plugin(plname)

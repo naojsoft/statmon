@@ -30,8 +30,8 @@ class Plugin(object):
         raise PluginError("Subclass should override this method!")
         
     def stop(self):
-        # Subclass can override this method, but doesn't have to
-        pass
+        raise FvPluginError("Subclass should override this method!")
+
 
 #END
 
