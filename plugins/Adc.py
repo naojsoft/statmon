@@ -17,6 +17,7 @@ class Adc(Canvas):
     ''' Cs/Ns ADC  '''
     def __init__(self, parent=None, logger=None):
         super(Adc, self).__init__(parent=parent, fs=11.5, width=125, height=35, logger=logger )
+
         self.adc_out = 16 # hex 0x10
         self.adc_in = 8 # hex 0x08
         self.mode_free = 8 # hex 0x08
@@ -78,6 +79,8 @@ class Adc(Canvas):
             in_out = TSCV.ADCInOut
         '''
         self.logger.debug('on_off=%s mode=%s in_out=%s' %(str(on_off), str(mode), str(in_out)))
+
+
         text, color = self.adc(on_off=on_off, mode=mode, in_out=in_out)
         self.setText(QtCore.QString(text))
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" %(color, self.bg))

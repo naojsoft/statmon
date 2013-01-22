@@ -377,11 +377,11 @@ class Plot(PlotCanvas):
 
     def update_plot(self, x , y):
         ''' update plotting '''
+        self.logger.debug('x=%s y=%s' %(x,y)) 
         
         try:
             x *= 0.001
             y *= 0.001
-            self.logger.debug('x=%s y=%s' %(x,y)) 
         except Exception as e:
             self.logger.warn('warn: x, y are not digits. %s' %e)
             return 

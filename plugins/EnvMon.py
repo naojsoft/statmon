@@ -174,10 +174,6 @@ class EnvMon(PlBase.Plugin):
         # rs = rmon.ResourceMonitor(statusKeys=(al_h2o, al_oil),
         #                           logger=self.logger)
         # coordinator.graphs.append(rs)
-    
-        # wind direction 
-        # wind_dir = dr.Directions(statusKeys=(al_az, al_windd, al_windsO),
-        #                          size=(150,100), logger=self.logger)
         # coordinator.graphs.append(wind_dir)
 
         # hbox.addWidget(rs, stretch=0, alignment=QtCore.Qt.AlignLeft)
