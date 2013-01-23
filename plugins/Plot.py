@@ -377,12 +377,11 @@ class Plot(PlotCanvas):
 
     def update_plot(self, x , y):
         ''' update plotting '''
-
-        self.logger.debug('x=%s y=%s' %(x,y)) 
         
         try:
             x *= 0.001
             y *= 0.001
+            self.logger.debug('x=%s y=%s' %(x,y)) 
         except Exception as e:
             self.logger.warn('warn: x, y are not digits. %s' %e)
             return 
@@ -641,7 +640,7 @@ class FmosPlot(QtGui.QWidget):
 
         x = random.random()*random.randrange(-2, 2)
         y = random.random()*random.randrange(-2,2)
-        el = 89.9   #random.randrange(15,90) 
+        el = random.randrange(15,90) 
 
         state = ["Guiding(AGFMOS)", "Guiding(AGFMOS)", "Slewing", "Guiding(AGFMOS)",]
  
@@ -666,7 +665,7 @@ class FmosPlot(QtGui.QWidget):
         fmos_guiding="Guiding(AGFMOS)"
 
         try:
-            x = 1000.0 *  math.cos(el) * x 
+            x = 1000.0 *  math.cos(math.radians(el)) * x 
             y *= 1000.0 
         except Exception as e:
             self.logger.error('error: x,y,el %s' %e)

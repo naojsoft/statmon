@@ -177,7 +177,7 @@ class Cal(CalCanvas):
         mask = {'CS': 0x03, 'NSIR': 0x30, 'NSOPT': 0x0c, \
                 'PF1': 0x30, 'PF2': 0xc0}
         try:
-            val = int('%s' %val, 16)
+            #val = int('%s' %val, 16)
             val = val & mask[focus]
         except Exception:
             val = None
@@ -253,13 +253,13 @@ class Cal(CalCanvas):
         # hct1 = (hct1_cs, hct1_nsopt, hct1_pf1, hct1_pf2)
         # hct2 = (hct2_cs, hct2_nsopt)
         # hal1 = (hal1_cs, hal1_nsopt, hal1_nsir)
-        # hal2 = (hal2_cs, hal2_nsopt, hal2_nsir)
+        # hal2 = (hal2_cs, hal2_nsopt, hal2_qnsir)
         # rgl1 = (rgl1_cs, rgl1_nsir)
         # rgl2 = (rgl2_cs, rgl2_nsir)
 
         on = 1; off = 2;
 
-        self.logger.debug('updating hct1=%s' %(str(hct1))) 
+        self.logger.debug('updating hct1=%s hct2=%s hal1=%s hal2=%s rgl1=%s rgl2=%s' %(hct1, hct2, hal1, hal2, rgl1, rgl2)) 
 
         hct1_cs = self.__shift_value(hct1, focus='CS')
         hct1_nsopt = self.__shift_value(hct1, focus='NSOPT')

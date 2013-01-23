@@ -17,55 +17,60 @@ class Adc(Canvas):
     ''' Cs/Ns ADC  '''
     def __init__(self, parent=None, logger=None):
         super(Adc, self).__init__(parent=parent, fs=11.5, width=125, height=35, logger=logger )
-       
-        self.mode_free=0x08
-        self.mode_link=0x04
+        self.adc_out = 16 # hex 0x10
+        self.adc_in = 8 # hex 0x08
+        self.mode_free = 8 # hex 0x08
+        self.mode_link = 4 # hex 0x04
+        self.adc_off = 2 # hex 0x02
+        self.adc_on = 1 # hex 0x01
 
     def __adc_power(self, on_off, mode):
          
-        adc_off = 0x02
-        adc_on = 0x01
+        #adc_off = 0x02
+        #adc_on = 0x01
 
-        power = {adc_off: ('ADC Free', self.alarm), \
-                 adc_on: self.__adc_mode(mode)}
+        power = {self.adc_off: ('ADC Free', self.alarm), \
+                 self.adc_on: self.__adc_mode(mode)}
 
         try:
-            adc, color = power[on_off]
+            #on_off = int('%s' %on_off, 16)
+            text, color = power[on_off]
         except KeyError:
-            adc = 'ADC On/Off Undef'
+            text = 'ADC On/Off Undef'
             color = self.alarm
         finally:
-            return (adc, color)
+            return (text, color)
 
     def __adc_mode(self, mode):
-        link = self.mode_link
-        free = self.mode_free
+        #link = self.mode_link
+        #free = self.mode_free
         
-        adc = {link: ('ADC Link', self.normal), \
-               free: ('ADC Free', self.alarm)}
+        adc = {self.mode_link: ('ADC Link', self.normal), \
+               self.mode_free: ('ADC Free', self.alarm)}
       
         try:
-            adc, color = adc[mode]
+            #mode = int('%s' %mode, 16)
+            text, color = adc[mode]
         except KeyError:
-            adc = 'ADC Mode Undef' 
+            text = 'ADC Mode Undef' 
             color = self.alarm
         finally:
-            return (adc, color) 
+            return (text, color) 
 
     def adc(self, on_off, mode, in_out):
-        adc_out = 0x10
-        adc_in = 0x08
 
-        adc = {adc_out: ('ADC Out', self.normal), \
-               adc_in: self.__adc_power(on_off, mode)}
+        adc = {self.adc_out: ('ADC Out', self.normal), \
+               self.adc_in: self.__adc_power(on_off, mode)}
 
         try:
-            adc, color = adc[in_out]
+            #in_out = int('%s' %in_out, 16)
+            self.logger.debug('ADC IN OUT=%s' %str(in_out))
+            text, color = adc[in_out]
         except KeyError:
-            adc = 'ADC In/Out Undef'
+            text = 'ADC In/Out Undef'
             color = self.alarm
         finally:
-            return (adc, color)  
+            return (text, color)  
 
     def update_adc(self, on_off, mode, in_out):
         ''' on_off = TSCV.ADCOnOff
@@ -73,12 +78,9 @@ class Adc(Canvas):
             in_out = TSCV.ADCInOut
         '''
         self.logger.debug('on_off=%s mode=%s in_out=%s' %(str(on_off), str(mode), str(in_out)))
-
         text, color = self.adc(on_off=on_off, mode=mode, in_out=in_out)
-
         self.setText(QtCore.QString(text))
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" %(color, self.bg))
-
 
     def tick(self):
         ''' testing solo mode '''
@@ -112,8 +114,10 @@ class AdcPf(Adc):
     ''' Prime ADC '''
     def __init__(self, parent=None, logger=None):
         super(AdcPf, self).__init__(parent, logger)
-        self.mode_free = 0x80
-        self.mode_link = 0x40
+        self.mode_free = 128 # hex 0x80 
+        self.mode_link = 64 # hex 0x40
+        self.adc_off = 0 # hex 0x00
+        self.adc_on = 1 # hex 0x01 # need to check the value
 
     def update_adc(self, on_off, mode, in_out):
         ''' on_off = TSCV.ADCONOFF_PF

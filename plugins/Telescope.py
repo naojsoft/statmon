@@ -269,7 +269,9 @@ class TelescopeGui(QtGui.QWidget):
                  'FMOS': self.pir_layout, 'HSC': self.popt_layout, \
                  'K3D': self.nsir_layout, 'MOIRCS': self.cs_layout, \
                  'FOCAS': self.csopt_layout, 'COMICS': self.csir_layout}
- 
+
+        self.logger.debug('telescope focuslayout ins=%s' %self.obcp) 
+
         try:
             focus[self.obcp](rlayout)
         except Exception as e:

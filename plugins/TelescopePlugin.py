@@ -10,7 +10,7 @@ class TelescopePlugin(PlBase.Plugin):
              'TSCV.FOCUSINFO', 'TSCV.FOCUSINFO2', 'TSCV.FOCUSALARM', \
              'TSCS.AZ', 'STATL.TELDRIVE', 'TSCS.EL', \
              'TSCV.M1Cover', 'TSCV.M1CoverOnway', 'TSCV.CellCover', \
-             'TSCV.ADCONOFF_PF', 'TSCV.ADCMODE_PF', 'TSCV.ADCInOut',  \
+             'TSCV.ADCONOFF_PF', 'TSCV.ADCMODE_PF', \
              'TSCV.ADCOnOff', 'TSCV.ADCMode', 'TSCV.ADCInOut', \
              'TSCV.ImgRotRotation', 'TSCV.ImgRotMode', 'TSCV.ImgRotType', \
              'TSCV.INSROTROTATION_PF', 'TSCV.INSROTMODE_PF', \

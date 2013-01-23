@@ -25,8 +25,11 @@ class WindscreenCanvas(FigureCanvas):
     """ Windscreen """
     def __init__(self, parent=None, width=1, height=1,  dpi=None, logger=None):
       
-        sub  =SubplotParams(left=0, bottom=0.234, right=1, \
+#        sub  =SubplotParams(left=0, bottom=0.234, right=1, \
+#                            top=0.998, wspace=0, hspace=0)
+        sub = SubplotParams(left=0, bottom=0.51, right=1, \
                             top=0.998, wspace=0, hspace=0)
+
         self.fig = Figure(figsize=(width, height), facecolor='white', \
                           subplotpars=sub)
  
@@ -37,18 +40,18 @@ class WindscreenCanvas(FigureCanvas):
         #self.axes.hold(False)
         #self.axes.grid(True)
 
-        self.limit=[0.0, 15.0]
-        self.limit_low=30; self.limit_high=0;
+        self.limit = [0.0, 15.0]
+        self.limit_low = 30; self.limit_high = 0;
         
-        self.wind='blue'
-        self.normal='green'
-        self.warn='orange'
-        self.alarm='red'
+        self.wind = 'blue'
+        self.normal = 'green'
+        self.warn = 'orange'
+        self.alarm = 'red'
 
         # y axis values. these are fixed values. 
-        self.x_axis=[0, 1]
-        self.center_x=0.5
-        self.init_x=0.0  # initial value of x
+        self.x_axis = [0, 1]
+        self.center_x = 0.5
+        self.init_x = 0.0  # initial value of x
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
@@ -57,13 +60,13 @@ class WindscreenCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
-        self.w=125
-        self.h=450
+        self.w = 125
+        self.h = 450
         #FigureCanvas.resize(self, self.w, self.h)
         
         # top screen lenght/width
-        self.len=6
-        self.width=0.1
+        self.len = 6
+        self.width = 0.1
 
         self.logger=logger
    
@@ -73,8 +76,8 @@ class WindscreenCanvas(FigureCanvas):
         ''' initial drawing '''
 
         # position of current/cmd display
-        self.y_curoffset=0.35
-        self.y_cmdoffset=-0.65
+        self.y_curoffset = 0.35
+        self.y_cmdoffset = -0.65
 
         
         #self.axes.add_patch(self.rear)
@@ -90,7 +93,6 @@ class WindscreenCanvas(FigureCanvas):
         line=Line2D([self.center_x]*len(middle), middle,  **line_kwargs)
         #line=Line2D(middle, [0.1]*len(middle), **line_kwargs)  
 
-
         self.axes.add_line(line)
 
         ts_kwargs=dict(alpha=0.7, fc=self.wind, ec=self.wind, lw=1.5) 
@@ -101,7 +103,7 @@ class WindscreenCanvas(FigureCanvas):
 
         #self.bbox=dict(alpha=0.4, fc='white', ec='black', lw=3, )
         # draw text
-        self.msg=self.axes.text(self.center_x, -0.05, 'Init', \
+        self.msg=self.axes.text(self.center_x, -0.1, 'Init', \
                                 color=self.normal,  va='baseline', ha='center', \
                                 #bbox=self.bbox, \
                                 transform=self.axes.transAxes, fontsize=13)
@@ -175,7 +177,8 @@ class Windscreen(WindscreenCanvas):
             color = self.alarm
             msg += '\nWS OBSTRUCT'
         else:
-            color=self.warn
+            #color=self.warn
+            pass
             #msg+='\n'
         return (msg, color)
 
@@ -194,6 +197,8 @@ class Windscreen(WindscreenCanvas):
         self.msg.set_text(msg)
         #self.msg.set_backgroundcolor(color)
         self.msg.set_color(color)  
+
+        self.windscreen.set_color(color)
 
         if not pos in ERROR: 
             self.windscreen.set_height(pos)
