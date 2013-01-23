@@ -41,8 +41,9 @@ al_rain = "TSCL.RAIN"
 al_seen = "TSCL.SEEN"
 al_fwhm = "VGWD.FWHM.AG"
 al_az = "TSCS.AZ"
-al_h2o = "TSCV.WATER"
-al_oil = "TSCV.OIL"
+
+#al_h2o = "TSCV.WATER"
+#al_oil = "TSCV.OIL"
 
 
 class EnvMon(PlBase.Plugin):
@@ -54,8 +55,8 @@ class EnvMon(PlBase.Plugin):
         self.statusDict = {}
 
         layout = QtGui.QVBoxLayout()
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(4)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         container.setLayout(layout)
 
         split = QtGui.QSplitter()
@@ -168,31 +169,31 @@ class EnvMon(PlBase.Plugin):
         vbox.addWidget(widget, stretch=1)
         split.addWidget(vbox)
 
-        hbox = QtHelp.HBox()
+        # hbox = QtHelp.HBox()
 
-        # resource monitor
-        rs = rmon.ResourceMonitor(statusKeys=(al_h2o, al_oil),
-                                  logger=self.logger)
-        coordinator.graphs.append(rs)
+        # # resource monitor
+        # rs = rmon.ResourceMonitor(statusKeys=(al_h2o, al_oil),
+        #                           logger=self.logger)
+        # coordinator.graphs.append(rs)
     
-        # wind direction 
-        wind_dir = dr.Directions(statusKeys=(al_az, al_windd, al_windsO),
-                                 logger=self.logger)
-        wind_dir.resize(180, 180)
-        coordinator.graphs.append(wind_dir)
+        # # wind direction 
+        # wind_dir = dr.Directions(statusKeys=(al_az, al_windd, al_windsO),
+        #                          logger=self.logger)
+        # wind_dir.resize(180, 180)
+        # coordinator.graphs.append(wind_dir)
 
-        hbox.addWidget(rs, stretch=0, alignment=QtCore.Qt.AlignLeft)
-        hbox.addWidget(wind_dir, stretch=0, alignment=QtCore.Qt.AlignLeft)
+        # hbox.addWidget(rs, stretch=0, alignment=QtCore.Qt.AlignLeft)
+        # hbox.addWidget(wind_dir, stretch=0, alignment=QtCore.Qt.AlignLeft)
 
-        split.addWidget(hbox)
-        #layout.addWidget(split, stretch=1, alignment=QtCore.Qt.AlignTop)
+        # split.addWidget(hbox)
+        # #layout.addWidget(split, stretch=1, alignment=QtCore.Qt.AlignTop)
         layout.addWidget(split, stretch=1)
         
 
     def start(self):
         aliases = [ al_windd, al_windsO, al_windsI, al_tempO,
                     al_tempI, al_humiO, al_humiI, al_atom, al_rain,
-                    al_seen, al_fwhm, al_az, al_telaz, al_h2o, al_oil ]
+                    al_seen, al_fwhm, al_az, al_telaz]
         self.controller.register_select('envmon', self.update, aliases)
         now = time.time()
         self.sc.setTimeRange(now - (3600*4), now, calcTimeRange=True)

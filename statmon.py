@@ -62,11 +62,12 @@ default_layout = ['vpanel', {},
                     ['ws', dict(name='middle22', height=150, show_tabs=False), ],
                     ['ws', dict(name='middle23', height=50, show_tabs=False), ],
                     ['ws', dict(name='middle24', height=25, show_tabs=False), ],
-                    ['ws', dict(name='middle25', height=500, show_tabs=False), ],
+                    ['ws', dict(name='middle25', height=550, show_tabs=False), ],
+                    #['ws', dict(name='middle26', height=50, show_tabs=False), ],
                    ],
 
-                   ['vpanel', dict(width=500),
-                    ['ws', dict(name='right', width=400), ],
+                   ['vpanel', dict(width=800),
+                    ['ws', dict(name='right', width=800), ],
                      
                    ]
                   ],
@@ -138,11 +139,11 @@ focus_plugin={'HDS': [('nsoptstate', 'StatePlugin', 'NsOptStatePlugin', 'left1',
 
 plugins = [
     # pluginName, moduleName, className, workspaceName, tabName
-    ('debug', 'Debug', 'Debug', 'right', "Debug"),
     ('radec', 'RaDec', 'RaDec', 'top', ''),
     ('times', 'RaDec', 'Times', 'bottom', ''),
     #('envmon', 'EnvMon', 'EnvMon', 'right', "EnvMon"),
     ('alarm', 'Alarm', 'Alarm', 'right', 'Alarm'),
+    ('debug', 'Debug', 'Debug', 'right', "Debug"), 
     ('telescope', 'TelescopePlugin', 'TelescopePlugin', 'middle11',''), 
     ('azlimit', 'LimitPlugin', 'AzLimitPlugin', 'middle12', ''), 
     ('ellimit', 'LimitPlugin', 'ElLimitPlugin', 'middle13', ''),
@@ -151,6 +152,7 @@ plugins = [
     ('calprobe', 'CalprobePlugin', 'CalprobePlugin', 'middle24', ''),
     ('target', 'TargetPlugin', 'TargetPlugin', 'middle22', ''),
     ('envmon', 'EnvMon', 'EnvMon', 'middle25', ''),
+    #('resource', 'ResourcePlugin', 'ResourcePlugin', 'middle26', ''),
     ]
 
 class StatMon(Controller, Viewer):
