@@ -14,7 +14,7 @@ progname = os.path.basename(sys.argv[0])
 class Pa(Canvas):
     ''' Position Angle   '''
     def __init__(self, parent=None, logger=None):
-        super(Pa, self).__init__(parent=parent, fs=10, width=275,\
+        super(Pa, self).__init__(parent=parent, fs=10, width=200,\
                                      height=25, align='vcenter', \
                                      weight='bold', logger=logger)
  

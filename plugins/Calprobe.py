@@ -12,7 +12,7 @@ progname = os.path.basename(sys.argv[0])
 class CalProbe(Canvas):
     ''' Cal Source Probe  '''
     def __init__(self, parent=None, logger=None):
-        super(CalProbe, self).__init__(parent=parent, fs=10, width=275,\
+        super(CalProbe, self).__init__(parent=parent, fs=10, width=200,\
                                        height=25, align='vcenter', \
                                        weight='bold', logger=logger)
 

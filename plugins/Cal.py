@@ -63,7 +63,7 @@ class CalCanvas(FigureCanvas):
         #FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
-        self.w=275
+        self.w=200
         self.h=40
         #FigureCanvas.resize(self, self.w, self.h)
 

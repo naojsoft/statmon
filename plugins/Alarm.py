@@ -123,7 +123,13 @@ class Alarm(PlBase.Plugin):
             AlarmGui.initializeAlarmWindow(self.mw, self.svConfig, self.statusValHistory, statusDict)
             self.firstTime = False
         else:
-            changedStatusDict = self.changedStatus(statusDict)
+            try:
+                changedStatusDict = self.changedStatus(statusDict)
+            except TypeError as e:
+                self.logger.error('Exception %s' % e)
+                self.logger.debug('previousStatusDict %s' % self.previousStatusDict)
+                self.logger.debug('current statusDict %s' % statusDict)
+                changedStatusDict = {}
             self.logger.debug(changedStatusDict)
             AlarmGui.updateAlarmWindow(self.mw, self.svConfig, changedStatusDict)
 

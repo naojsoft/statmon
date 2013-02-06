@@ -744,12 +744,12 @@ class AgPlot(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(AgPlot, self).__init__(parent)
         
-        self.plot=Plot(parent=parent, logger=logger) 
+        self.plot = Plot(parent=parent, logger=logger) 
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)  
         self.exptime = Exptime(parent=parent, logger=logger) 
         self.threshold = Threshold(parent=parent, logger=logger) 
-        self.empty = Dummy(width=60, height=25,  logger=logger)
-        self.empty1 = Dummy(width=1, height=25,  logger=logger)
+        #self.empty = Dummy(width=60, height=25,  logger=logger)
+        #self.empty1 = Dummy(width=1, height=25,  logger=logger)
         self.logger = logger
         self.set_gui()
 
@@ -785,7 +785,8 @@ class AgPlot(QtGui.QWidget):
 
     def update_plot(self, state, x, y, exptime, bottom, ceil):
         self.logger.debug('state=%s x=%s y=%s' %(state, x, y))
-        ag_guiding=("Guiding(AG)",  "Guiding(AG1)", "Guiding(AG2)")
+        ag_guiding=("Guiding(AG)",  "Guiding(AG1)", "Guiding(AG2)", "Guiding(HSCSHAG)",
+                    "Guiding(HSCSCAG)")
 
         if state in ag_guiding:
             self.logger.debug('ag guiding...')
@@ -797,12 +798,12 @@ class AgPlot(QtGui.QWidget):
             self.plot.clear()  
             self.exptime.clear() 
             self.threshold.clear()           
- 
 
-class NsOptPlot(QtGui.QWidget):
-    ''' Ns Opt AG/SV Guiding  '''
+
+class TwoGuidingPlot(QtGui.QWidget):
+    ''' Ns-Opt AG/SV, HSCSC/SHAG Guiding  '''
     def __init__(self, parent=None, logger=None):
-        super(NsOptPlot, self).__init__(parent)
+        super(TwoGuidingPlot, self).__init__(parent)
         
         self.plot = Plot(parent=parent, logger=logger)
         self.exptime = Exptime(parent=parent, logger=logger) 
@@ -810,25 +811,6 @@ class NsOptPlot(QtGui.QWidget):
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)  
         self.logger = logger
         self.set_gui()
-
-    def tick(self):
-
-        import random  
-        random.seed()
-
-        state = ["Guiding(AG)", "Guiding(AG1)", "Guiding(AG2)",  
-                 "Guiding(SV)", "Guiding(SV1)","Guiding(SV2)",  "Slewing"]
- 
-        sindx = random.randrange(0,7)
-        state = state[sindx]
-        x = random.random()*random.randrange(-800,800)
-        y = random.random()*random.randrange(-800,800)
-        exp = random.random()*random.randrange(0, 40000)
-        bottom = random.randrange(0, 30000)
-        ceil = random.randrange(30000, 70000)
-        self.update_plot(state=state, ag_x=x, ag_y=y, sv_x=x, sv_y=y, \
-                         ag_exp=exp, sv_exp=exp, ag_bottom=bottom, \
-                         ag_ceil=ceil, sv_bottom=bottom, sv_ceil=ceil)
 
     def set_gui(self):
 
@@ -846,28 +828,129 @@ class NsOptPlot(QtGui.QWidget):
         layout.addLayout(self.buttons.layout)
         self.setLayout(layout)
 
-    def update_plot(self, state, ag_x, ag_y, sv_x, sv_y, \
-                    ag_exp, sv_exp, ag_bottom, ag_ceil, sv_bottom, sv_ceil):
-        self.logger.debug('state=%s x=%s y=%s bottom=%s ceil=%s ' \
-                          %(state, ag_x, ag_y, ag_bottom, ag_ceil))
-        ag_guiding = ("Guiding(AG)",  "Guiding(AG1)", "Guiding(AG2)")
-        sv_guiding = ("Guiding(SV)", "Guiding(SV1)","Guiding(SV2)")  
+    def update_plot(self, state, \
+                    guiding1_x, guiding1_y, \
+                    guiding2_x, guiding2_y, \
+                    guiding1_exp, guiding2_exp, \
+                    guiding1_bottom, guiding1_ceil, \
+                    guiding2_bottom, guiding2_ceil):
+        
+        self.logger.debug("state=%s g1x=%s g1y=%s g2x=%s g2y=%s g1exp=%s g2exp=%s g1bottom=%s  g1ceil=%s g2bottom=%s g2ceil=%s" %(state, guiding1_x, guiding1_y, guiding2_x, guiding2_y, guiding1_exp, guiding2_exp, guiding1_bottom, guiding1_ceil, guiding2_bottom, guiding2_ceil))
 
-        if state in ag_guiding:
-            self.logger.debug('ag guiding...')
-            self.plot.update_plot(ag_x, ag_y)
-            self.exptime.update_exptime(exptime=ag_exp)
-            self.threshold.update_threshold(bottom=ag_bottom, ceil=ag_ceil)
-        elif state in sv_guiding:
-            self.logger.debug('sv guiding...')
-            self.plot.update_plot(sv_x, sv_y)
-            self.exptime.update_exptime(exptime=sv_exp)
-            self.threshold.update_threshold(bottom=sv_bottom, ceil=sv_ceil)
+        guiding1 = ("Guiding(AG1)", "Guiding(AG2)", "Guiding(HSCSCAG)")
+        guiding2 = ("Guiding(SV1)", "Guiding(SV2)", "Guiding(HSCSHAG)")  
+
+        if state in guiding1:
+            self.logger.debug('state=%s guiding1...' %state)
+            self.plot.update_plot(guiding1_x, guiding1_y)
+            self.exptime.update_exptime(exptime=guiding1_exp)
+            self.threshold.update_threshold(bottom=guiding1_bottom, ceil=guiding1_ceil)
+        elif state in guiding2:
+            self.logger.debug('state=%s guiding2...' %state)
+            self.plot.update_plot(guiding2_x, guiding2_y)
+            self.exptime.update_exptime(exptime=guiding2_exp)
+            self.threshold.update_threshold(bottom=guiding2_bottom, ceil=guiding2_ceil)
         else:
-            self.logger.debug('no guiding...')
+            self.logger.debug('state=%s no guiding...' %state)
             self.plot.clear()              
             self.exptime.clear()
             self.threshold.clear()
+
+    def tick(self):
+
+        import random  
+        random.seed()
+
+        state = ["Guiding(AG1)", "Guiding(AG2)", \
+                 "Guiding(SV1)","Guiding(SV2)",  \
+                 "Guiding(HSCSCAG)", "Guiding(HSCSHAG)", \
+                 "Slewing"]
+ 
+        sindx = random.randrange(0,7)
+        state = state[sindx]
+        guiding1_x = guiding2_x = random.random()*random.randrange(-800,800)
+        guiding1_y = guiding2_y = random.random()*random.randrange(-800,800)
+        guiding1_exp = guiding2_exp = random.random()*random.randrange(0, 40000)
+        guiding1_bottom = guiding2_bottom = random.randrange(0, 30000)
+        guiding1_ceil = guiding2_ceil = random.randrange(30000, 70000)
+
+        self.update_plot(state, \
+                    guiding1_x, guiding1_y, \
+                    guiding2_x, guiding2_y, \
+                    guiding1_exp, guiding2_exp, \
+                    guiding1_bottom, guiding1_ceil, \
+                    guiding2_bottom, guiding2_ceil)
+
+
+# class NsOptPlot(QtGui.QWidget):
+#     ''' Ns Opt AG/SV Guiding  '''
+#     def __init__(self, parent=None, logger=None):
+#         super(NsOptPlot, self).__init__(parent)
+        
+#         self.plot = Plot(parent=parent, logger=logger)
+#         self.exptime = Exptime(parent=parent, logger=logger) 
+#         self.threshold = Threshold(parent=parent, logger=logger) 
+#         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)  
+#         self.logger = logger
+#         self.set_gui()
+
+#     def tick(self):
+
+#         import random  
+#         random.seed()
+
+#         state = ["Guiding(AG)", "Guiding(AG1)", "Guiding(AG2)",  
+#                  "Guiding(SV)", "Guiding(SV1)","Guiding(SV2)",  "Slewing"]
+ 
+#         sindx = random.randrange(0,7)
+#         state = state[sindx]
+#         x = random.random()*random.randrange(-800,800)
+#         y = random.random()*random.randrange(-800,800)
+#         exp = random.random()*random.randrange(0, 40000)
+#         bottom = random.randrange(0, 30000)
+#         ceil = random.randrange(30000, 70000)
+#         self.update_plot(state=state, ag_x=x, ag_y=y, sv_x=x, sv_y=y, \
+#                          ag_exp=exp, sv_exp=exp, ag_bottom=bottom, \
+#                          ag_ceil=ceil, sv_bottom=bottom, sv_ceil=ceil)
+
+#     def set_gui(self):
+
+#         layout = QtGui.QVBoxLayout()        
+#         layout.setSpacing(1) 
+#         layout.setMargin(0)
+#         layout.addWidget(self.plot)
+
+#         hlayout = QtGui.QHBoxLayout()   
+#         hlayout.setSpacing(2)
+#         hlayout.addWidget(self.exptime)
+#         hlayout.addWidget(self.threshold)
+#         layout.addLayout(hlayout)
+
+#         layout.addLayout(self.buttons.layout)
+#         self.setLayout(layout)
+
+#     def update_plot(self, state, ag_x, ag_y, sv_x, sv_y, \
+#                     ag_exp, sv_exp, ag_bottom, ag_ceil, sv_bottom, sv_ceil):
+#         self.logger.debug('state=%s x=%s y=%s bottom=%s ceil=%s ' \
+#                           %(state, ag_x, ag_y, ag_bottom, ag_ceil))
+#         ag_guiding = ("Guiding(AG)",  "Guiding(AG1)", "Guiding(AG2)")
+#         sv_guiding = ("Guiding(SV)", "Guiding(SV1)","Guiding(SV2)")  
+
+#         if state in ag_guiding:
+#             self.logger.debug('ag guiding...')
+#             self.plot.update_plot(ag_x, ag_y)
+#             self.exptime.update_exptime(exptime=ag_exp)
+#             self.threshold.update_threshold(bottom=ag_bottom, ceil=ag_ceil)
+#         elif state in sv_guiding:
+#             self.logger.debug('sv guiding...')
+#             self.plot.update_plot(sv_x, sv_y)
+#             self.exptime.update_exptime(exptime=sv_exp)
+#             self.threshold.update_threshold(bottom=sv_bottom, ceil=sv_ceil)
+#         else:
+#             self.logger.debug('no guiding...')
+#             self.plot.clear()              
+#             self.exptime.clear()
+#             self.threshold.clear()
 
 
 def main(options, args):
@@ -889,15 +972,15 @@ def main(options, args):
             
             #sc = MyStaticMplCanvas(self.main_widget, width=5, height=5, dpi=None)
            
-            if options.mode=='ag':
+            if options.mode == 'ag':
                 plot = AgPlot(self.main_widget, logger=logger)
                 #aplot=AOPlot1(self.main_widget, logger=logger)
-            elif options.mode=='fmos':
+            elif options.mode == 'fmos':
                 plot=FmosPlot(self.main_widget, logger=logger)
-            elif options.mode=='nsopt':   
-                plot=NsOptPlot(self.main_widget, logger=logger)
-            elif options.mode=='nsir':   
-                plot=NsIrPlot(self.main_widget, logger=logger)
+            elif options.mode == 'nsopt' or options.mode == 'hsc':   
+                plot = TwoGuidingPlot(self.main_widget, logger=logger)
+            elif options.mode == 'nsir':   
+                plot = NsIrPlot(self.main_widget, logger=logger)
             else:
                 logger.error('error: mode=%s' %options.mode)
                 sys.exit(1)

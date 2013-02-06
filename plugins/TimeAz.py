@@ -14,7 +14,7 @@ progname = os.path.basename(sys.argv[0])
 class TimeAzLimit(Canvas):
     ''' Time to Azimuth Limit   '''
     def __init__(self, parent=None, logger=None):
-        super(TimeAzLimit, self).__init__(parent=parent, fs=10, width=275,\
+        super(TimeAzLimit, self).__init__(parent=parent, fs=10, width=200,\
                                      height=25, align='vcenter', \
                                      weight='bold', logger=logger)
  

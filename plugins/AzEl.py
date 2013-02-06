@@ -126,7 +126,6 @@ class AzElCanvas(FigureCanvas):
                                                3, subaru_radius, \
                                                orientation=math.pi, \
                                                fc='b', ec='none', alpha=0.5)
-
         self.axes.add_patch(self.subaru)
 
         # subaru text        

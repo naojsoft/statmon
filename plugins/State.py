@@ -23,26 +23,29 @@ class State(Canvas):
     def update_state(self, state, intensity, valerr):
         ''' state=STATL.TELDRIVE, 
             intensity=TSCL.AG1Intensity | TSCL.SV1Intensity 
-                      TSCL.AGPIRIntensity | SCL.AGFMOSIntensity
+                      TSCL.AGPIRIntensity | TSCL.AGFMOSIntensity
+                      TSCL.HSC.SCAG.Intensity | TSCL.HSC.SHAG.Intensity
             valerr = STATL.AGRERR | STATL.SVRERR '''
 
         self.logger.debug('state=%s, intensity=%s valerr=%s' %(state, intensity, valerr))
 
-        guiding=["Guiding(AG1)", "Guiding(AG2)", "Guiding(SV1)","Guiding(SV2)",  "Guiding(AGPIR)", "Guiding(AGFMOS)" ]        
+        guiding = ["Guiding(AG1)", "Guiding(AG2)", \
+                   "Guiding(SV1)","Guiding(SV2)", \
+                   "Guiding(AGPIR)", "Guiding(AGFMOS)", \
+                   "Guiding(HSCSCAG)", "Guiding(HSCSHAG)"]        
 
-        bg=self.normal
+        bg = self.normal
         if state in ERROR:
             self.logger.debug('state=%s in error' %(state))   
-            state="Unknown" 
-            bg=self.alarm
-        elif state=='Slewing':
-            bg=self.warn
+            state = "Unknown" 
+            bg = self.alarm
+        elif state == 'Slewing':
+            bg = self.warn
         elif state in guiding:
             if intensity in ERROR or valerr in ERROR:
-                bg=self.alarm 
+                bg = self.alarm 
             elif intensity < 1.0:
-                bg=self.alarm
-                # to do: update audio here  
+                bg = self.alarm
             elif valerr >= 1000.0:
                 bg = self.alarm
             elif valerr >= 500.0:
@@ -58,14 +61,14 @@ class State(Canvas):
         import random  
         random.seed()
 
-        num_state=random.randrange(0,12)
+        num_state=random.randrange(0,15)
         num_intensity=random.randrange(0,4)
         num_valerr=random.randrange(0,5)        
 
         state=["Guiding(AG1)", "Guiding(AG2)", "Unknown", "##NODATA##",
                "##ERROR##", "Guiding(SV1)","Guiding(SV2)", "Guiding(AGPIR)",
                "Guiding(AGFMOS)", "Tracking", "Tracking(Non-Sidereal)", 
-               "Slewing", "Pointing"]
+               "Slewing", "Pointing", "Guiding(HSCSCAG)", "Guiding(HSCSHAG)"]
       
         intensity=[-1, 1 ,"##NODATA##", 1,  "##ERROR##"]
         valerr=[1000.0, 0, 500.0, "##NODATA##", 100.0, "##ERROR##"]
