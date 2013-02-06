@@ -13,7 +13,7 @@ progname = os.path.basename(sys.argv[0])
 class Object(Canvas):
     ''' Object  '''
     def __init__(self, parent=None, logger=None):
-        super(Object, self).__init__(parent=parent, fs=10, width=275,\
+        super(Object, self).__init__(parent=parent, fs=10, width=200,\
                                      height=25, align='vcenter', \
                                      weight='bold', logger=logger)
 

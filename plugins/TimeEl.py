@@ -26,7 +26,7 @@ def to_hour_min(limit):
 class TimeElLimit(Canvas):
     ''' Time to Elevation Limit   '''
     def __init__(self, parent=None, logger=None):
-        super(TimeElLimit, self).__init__(parent=parent, fs=10, width=275,\
+        super(TimeElLimit, self).__init__(parent=parent, fs=10, width=200,\
                                           height=25, align='vcenter', \
                                           weight='bold', logger=logger)
  

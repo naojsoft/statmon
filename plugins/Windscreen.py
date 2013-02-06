@@ -40,7 +40,7 @@ class WindscreenCanvas(FigureCanvas):
         #self.axes.hold(False)
         #self.axes.grid(True)
 
-        self.limit = [0.0, 15.0]
+        self.limit = [0.0, 14.5]
         self.limit_low = 30; self.limit_high = 0;
         
         self.wind = 'blue'

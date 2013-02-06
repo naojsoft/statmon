@@ -4,12 +4,11 @@ from PyQt4 import QtGui, QtCore
 
 class AgStatePlugin(PlBase.Plugin):
     """ AG State """
-    aliases=['STATL.TELDRIVE', 'TSCL.AG1Intensity', 'STATL.AGRERR']
   
     def build_gui(self, container):
         self.root = container
         qtwidget = QtGui.QWidget()
-        self.state=State.State(parent=qtwidget, logger=self.logger)
+        self.state = State.State(parent=qtwidget, logger=self.logger)
        
         layout = QtGui.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -18,30 +17,33 @@ class AgStatePlugin(PlBase.Plugin):
         container.setLayout(layout)
  
     def start(self):
-#        self.logger.debug('start aliases=%s' %AgPlotPlugin.aliases)
-        self.controller.register_select('agstate', self.update, AgStatePlugin.aliases)
+        self.aliases = ['STATL.TELDRIVE', 'TSCL.AG1Intensity', 'STATL.AGRERR']
+        self.controller.register_select('agstate', self.update, self.aliases)
 
     def update(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
-        try:
-            state=statusDict[AgStatePlugin.aliases[0]]
-            intensity=statusDict[AgStatePlugin.aliases[1]]
-            valerr=statusDict[AgStatePlugin.aliases[2]]
-        except Exception as e:
-            self.logger.error('error: ag state intensity, valerr. %s' %e)
-        else:
-            self.state.update_state(state=state, intensity=intensity, valerr=valerr)
+        state = statusDict.get(self.aliases[0])
+        intensity = statusDict.get(self.aliases[1])
+        valerr = statusDict.get(self.aliases[2])
+        self.state.update_state(state=state, intensity=intensity, valerr=valerr)
+
+
+class FmosStatePlugin(AgStatePlugin):
+    """ FMOS State """
+
+    def start(self):
+        self.aliases = ['STATL.TELDRIVE', 'TSCL.AGFMOSIntensity', 'STATL.AGRERR']
+        self.controller.register_select('fmosstate', self.update, self.aliases)
 
 
 class NsOptStatePlugin(PlBase.Plugin):
     """ NsOpt State """
-    aliases=['STATL.TELDRIVE', 'TSCL.AG1Intensity', 'STATL.AGRERR', 'TSCL.SV1Intensity', 'STATL.SVRERR']
   
     def build_gui(self, container):
         self.root = container
 
         qtwidget = QtGui.QWidget()
-        self.state=State.State(parent=qtwidget, logger=self.logger)
+        self.state = State.State(parent=qtwidget, logger=self.logger)
        
         layout = QtGui.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -50,93 +52,46 @@ class NsOptStatePlugin(PlBase.Plugin):
         container.setLayout(layout)
  
     def start(self):
-#        self.logger.debug('start aliases=%s' %AgPlotPlugin.aliases)
-        self.controller.register_select('nsoptstate', self.update, NsOptStatePlugin.aliases)
+        self.aliases = ['STATL.TELDRIVE', 'TSCL.AG1Intensity', 'STATL.AGRERR', \
+                        'TSCL.SV1Intensity', 'STATL.SVRERR']
+        self.controller.register_select('nsoptstate', self.update, self.aliases)
 
     def update(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
-        try: 
-            state=statusDict[NsOptStatePlugin.aliases[0]]
-            ag_intensity=statusDict[NsOptStatePlugin.aliases[1]]
-            ag_valerr=statusDict[NsOptStatePlugin.aliases[2]]
-            sv_intensity=statusDict[NsOptStatePlugin.aliases[3]]
-            sv_valerr=statusDict[NsOptStatePlugin.aliases[4]]
+        state = statusDict.get(self.aliases[0])
+        intensity1 = statusDict.get(self.aliases[1])
+        valerr1 = statusDict.get(self.aliases[2])
+        intensity2 = statusDict.get(self.aliases[3])
+        valerr2 = statusDict.get(self.aliases[4])
 
-        except Exception as e:
-            self.logger.error('error: nsopt state. %s' %e)
-        else:
-            ag_guiding=("Guiding(AG)", "Guiding(AG1)", "Guiding(AG2)")
-            sv_guiding=("Guiding(SV)", "Guiding(SV1)", "Guiding(SV2)")
-            if state in sv_guiding:
-                intensity, valerr = sv_intensity, sv_valerr
-            elif state in ag_guiding:
-                intensity, valerr = ag_intensity, ag_valerr 
-            else:  # if not guiding, the values of intensity/valerr don't matter, so just pass 0's 
-                intensity, valerr = 0,0              
-            self.state.update_state(state=state, intensity=intensity, valerr=valerr)
+        guiding1 = ("Guiding(AG1)", "Guiding(AG2)", "Guiding(HSCSCAG)")
+        guiding2 = ("Guiding(SV1)", "Guiding(SV2)", "Guiding(HSCSHAG)")
+
+        if state in guiding2:
+            intensity, valerr = intensity2, valerr2
+        elif state in guiding1:
+            intensity, valerr = intensity1, valerr1 
+        else:  # if not guiding, intensity and valerr don't matter. 
+            intensity = valerr = None              
+        self.state.update_state(state=state, intensity=intensity, valerr=valerr)
 
 
-class FmosStatePlugin(PlBase.Plugin):
-    """ FMOS State """
-    aliases=['STATL.TELDRIVE', 'TSCL.AGFMOSIntensity', 'STATL.AGRERR']
-  
-    def build_gui(self, container):
-        self.root = container
-
-        qtwidget = QtGui.QWidget()
-        self.state=State.State(parent=qtwidget, logger=self.logger)
-       
-        layout = QtGui.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(self.state,stretch=1)
-        container.setLayout(layout)
+class HscStatePlugin(NsOptStatePlugin):
+    """ Hsc State """
  
     def start(self):
-#        self.logger.debug('start aliases=%s' %AgPlotPlugin.aliases)
-        self.controller.register_select('fmosstate', self.update, FmosStatePlugin.aliases)
-
-    def update(self, statusDict):
-        self.logger.debug('status=%s' %str(statusDict))
-        try: 
-            state=statusDict[FmosStatePlugin.aliases[0]]
-            intensity=statusDict[FmosStatePlugin.aliases[1]]
-            valerr=statusDict[FmosStatePlugin.aliases[2]]
-        except Exception as e:
-            self.logger.error('error: ag state intensity, valerr. %s' %e)
-        else:
-            self.state.update_state(state=state, intensity=intensity, valerr=valerr)
+        self.aliases = ['STATL.TELDRIVE', 'TSCL.HSC.SCAG.Intensity', 'STATL.AGRERR', \
+                        'TSCL.HSC.SHAG.Intensity', 'STATL.AGRERR']
+        self.controller.register_select('hscstate', self.update, self.aliases)
 
 
-class PirStatePlugin(PlBase.Plugin):
-    """ PIR State """
-    aliases=['STATL.TELDRIVE', 'TSCL.AGPIRIntensity', 'STATL.AGRERR']
-  
-    def build_gui(self, container):
-        self.root = container
-
-        qtwidget = QtGui.QWidget()
-        self.state=State.State(parent=qtwidget, logger=self.logger)
-       
-        layout = QtGui.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(self.state,stretch=1)
-        container.setLayout(layout)
- 
-    def start(self):
-#        self.logger.debug('start aliases=%s' %AgPlotPlugin.aliases)
-        self.controller.register_select('pirstate', self.update, PirStatePlugin.aliases)
-
-    def update(self, statusDict):
-        self.logger.debug('status=%s' %str(statusDict))
-        try: 
-            state=statusDict[PirStatePlugin.aliases[0]]
-            intensity=statusDict[PirStatePlugin.aliases[1]]
-            valerr=statusDict[PirStatePlugin.aliases[2]]
-        except Exception as e:
-            self.logger.error('error: ag state intensity, valerr. %s' %e)
-        else:
-            self.state.update_state(state=state, intensity=intensity, valerr=valerr)
+# not used. commented out
+# class PirStatePlugin(AgStatePlugin):
+#     """ PIR State """
+#     aliases=['STATL.TELDRIVE', 'TSCL.AGPIRIntensity', 'STATL.AGRERR']
+   
+#     def start(self):
+#         self.aliases=['STATL.TELDRIVE', 'TSCL.AGPIRIntensity', 'STATL.AGRERR']
+#         self.controller.register_select('pirstate', self.update, self.aliases)
 
 
