@@ -92,7 +92,6 @@ class WindscreenCanvas(FigureCanvas):
         middle=[min(self.limit),  max(self.limit)] 
         line=Line2D([self.center_x]*len(middle), middle,  **line_kwargs)
         #line=Line2D(middle, [0.1]*len(middle), **line_kwargs)  
-
         self.axes.add_line(line)
 
         ts_kwargs=dict(alpha=0.7, fc=self.wind, ec=self.wind, lw=1.5) 
@@ -199,7 +198,6 @@ class Windscreen(WindscreenCanvas):
         self.msg.set_color(color)  
 
         self.windscreen.set_color(color)
-
         if not pos in ERROR: 
             self.windscreen.set_height(pos)
 

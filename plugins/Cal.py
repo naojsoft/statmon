@@ -253,7 +253,7 @@ class Cal(CalCanvas):
         # hct1 = (hct1_cs, hct1_nsopt, hct1_pf1, hct1_pf2)
         # hct2 = (hct2_cs, hct2_nsopt)
         # hal1 = (hal1_cs, hal1_nsopt, hal1_nsir)
-        # hal2 = (hal2_cs, hal2_nsopt, hal2_qnsir)
+        # hal2 = (hal2_cs, hal2_nsopt, hal2_nsir)
         # rgl1 = (rgl1_cs, rgl1_nsir)
         # rgl2 = (rgl2_cs, rgl2_nsir)
 
