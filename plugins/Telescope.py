@@ -324,9 +324,13 @@ class Telescope(TelescopeGui):
         self.insrot.update_insrot(insrot=kargs.get('TSCV.INSROTROTATION_PF'), \
                                   mode=kargs.get('TSCV.INSROTMODE_PF'))
         
+        # self.adc.update_adc(on_off=kargs.get('TSCV.ADCONOFF_PF'), \
+        #                     mode=kargs.get('TSCV.ADCMODE_PF'), \
+        #                     in_out=kargs.get('TSCV.ADCInOut'))
+
         self.adc.update_adc(on_off=kargs.get('TSCV.ADCONOFF_PF'), \
-                            mode=kargs.get('TSCV.ADCMODE_PF'), \
-                            in_out=kargs.get('TSCV.ADCInOut'))
+                            mode=kargs.get('TSCV.ADCMODE_PF'))
+
 
     def update_nsopt(self, **kargs):
 
