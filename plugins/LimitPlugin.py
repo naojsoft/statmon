@@ -411,9 +411,9 @@ class PoptAgProbeYLimitPlugin(PlBase.Plugin):
         self.root = container
         qtwidget = QtGui.QWidget()
         title = 'Ag-Y Popt'
-        alarm = [0.0, 170.0]
-        warn = [0.0, 170.0]
-        limit = [0.0, 170.0]
+        alarm = [-20.0, 20.0]
+        warn = [-20.0, 20.0]
+        limit = [-20.0, 20.0]
         width=350
         self.limit = Limit.Limit(parent=qtwidget, title=title, \
                                  alarm=alarm, warn=warn, \
