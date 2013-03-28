@@ -20,26 +20,29 @@ class State(Canvas):
                                     height=75, fg='white', \
                                     bg='green', logger=logger )
 
-    def update_state(self, state, intensity, valerr):
+    def update_state(self, state, intensity, valerr, calc_mode=None):
         ''' state=STATL.TELDRIVE, 
             intensity=TSCL.AG1Intensity | TSCL.SV1Intensity 
                       TSCL.AGPIRIntensity | TSCL.AGFMOSIntensity
                       TSCL.HSC.SCAG.Intensity | TSCL.HSC.SHAG.Intensity
-            valerr = STATL.AGRERR | STATL.SVRERR '''
+            valerr = STATL.AGRERR | STATL.SVRERR 
+            calc_mode = STATL.SV_CALC_MODE '''
 
-        self.logger.debug('state=%s, intensity=%s valerr=%s' %(state, intensity, valerr))
+        self.logger.debug('state=%s, intensity=%s valerr=%s calc_mode=%s' %(state, intensity, valerr, calc_mode))
 
-        guiding = ["Guiding(AG1)", "Guiding(AG2)", \
+        guiding = ("Guiding(AG1)", "Guiding(AG2)", \
                    "Guiding(SV1)","Guiding(SV2)", \
                    "Guiding(AGPIR)", "Guiding(AGFMOS)", \
-                   "Guiding(HSCSCAG)", "Guiding(HSCSHAG)"]        
+                   "Guiding(HSCSCAG)", "Guiding(HSCSHAG)")       
+        slewing = 'Slewing'
+        sv_guiding = ("Guiding(SV1)", "Guiding(SV2)")
 
         bg = self.normal
         if state in ERROR:
             self.logger.debug('state=%s in error' %(state))   
             state = "Unknown" 
             bg = self.alarm
-        elif state == 'Slewing':
+        elif state == slewing:
             bg = self.warn
         elif state in guiding:
             if intensity in ERROR or valerr in ERROR:
@@ -50,9 +53,14 @@ class State(Canvas):
                 bg = self.alarm
             elif valerr >= 500.0:
                 bg = self.warn
+            
+            # if sv guiding, add calculation mode to state 
+            if state in sv_guiding:
+                state = '%s(%s)' %(state, calc_mode)
+                self.logger.debug('sv state=%s' %(state))
         # else is pointing, tracking with green color
 
-        self.logger.debug('bg=%s' %(bg))
+        self.logger.debug('state=%s bg=%s' %(state, bg))
         self.setStyleSheet("QLabel {color :%s; background-color:%s}" %(self.fg, bg) )
         self.setText(QtCore.QString(state))
 
@@ -61,24 +69,25 @@ class State(Canvas):
         import random  
         random.seed()
 
-        num_state=random.randrange(0,15)
-        num_intensity=random.randrange(0,4)
-        num_valerr=random.randrange(0,5)        
+        num_state = random.randrange(0,15)
+        num_intensity = random.randrange(0,4)
+        num_valerr = random.randrange(0,5)        
 
-        state=["Guiding(AG1)", "Guiding(AG2)", "Unknown", "##NODATA##",
+        state = ["Guiding(AG1)", "Guiding(AG2)", "Unknown", "##NODATA##",
                "##ERROR##", "Guiding(SV1)","Guiding(SV2)", "Guiding(AGPIR)",
                "Guiding(AGFMOS)", "Tracking", "Tracking(Non-Sidereal)", 
                "Slewing", "Pointing", "Guiding(HSCSCAG)", "Guiding(HSCSHAG)"]
       
-        intensity=[-1, 1 ,"##NODATA##", 1,  "##ERROR##"]
-        valerr=[1000.0, 0, 500.0, "##NODATA##", 100.0, "##ERROR##"]
-
+        intensity = [-1, 1 ,"##NODATA##", 1,  "##ERROR##"]
+        valerr = [1000.0, 0, 500.0, "##NODATA##", 100.0, "##ERROR##"]
+        calc_mode = ['CTR', 'SLIT', 'PK', 'BSECT', "##NODATA##"]
         try:
-            state=state[num_state]
-            intensity=intensity[num_intensity]
-            valerr=valerr[num_valerr]
-            self.logger.debug('state=%s, intensity=%s valerr=%s' %(state, intensity, valerr)) 
-            self.update_state( state, intensity, valerr)
+            state = state[num_state]
+            intensity = intensity[num_intensity]
+            valerr = valerr[num_valerr]
+            calc_mode = calc_mode[num_valerr]
+            self.logger.debug('state=%s, intensity=%s valerr=%s calc_mode=%s' %(state, intensity, valerr, calc_mode)) 
+            self.update_state( state, intensity, valerr, calc_mode)
         except Exception as e:
             pass
 

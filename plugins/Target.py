@@ -60,13 +60,14 @@ class Target(TargetGui):
             pa, cmd_diff = {'SUP': ('TSCL.INSROTPA_PF', 'STATS.ROTDIF_PF'), \
                 'FMS': ('TSCL.INSROTPA_PF', 'STATS.ROTDIF_PF'), \
                 'HSC': ('TSCL.INSROTPA_PF', 'STATS.ROTDIF_PF'), \
-                'HDS': ('TSCL.ImgRotPA', 'STATS.ROTDIF_PF'), \
-                'HIC': ('TSCL.ImgRotPA', 'STATS.ROTDIF_PF'), \
-                'IRC': ('TSCL.ImgRotPA', 'STATS.ROTDIF_PF'), \
-                'K3D': ('TSCL.ImgRotPA', 'STATS.ROTDIF_PF'), \
-                'MCS': ('TSCL.InsRotPA', 'STATS.ROTDIF_PF'), \
-                'FCS': ('TSCL.InsRotPA', 'STATS.ROTDIF_PF'), \
-                'COM': ('TSCL.InsRotPA', 'STATS.ROTDIF_PF')}[self.obcp]
+                'HDS': ('TSCL.ImgRotPA', 'STATS.ROTDIF'), \
+                'HIC': ('TSCL.ImgRotPA', 'STATS.ROTDIF'), \
+                'IRC': ('TSCL.ImgRotPA', 'STATS.ROTDIF'), \
+                'K3D': ('TSCL.ImgRotPA', 'STATS.ROTDIF'), \
+                'MCS': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
+                'FCS': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
+                'SUK': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
+                'COM': ('TSCL.InsRotPA', 'STATS.ROTDIF')}[self.obcp]
         except Exception:
             pa = cmd_diff = None 
         finally:   

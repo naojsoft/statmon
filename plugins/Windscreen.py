@@ -27,8 +27,9 @@ class WindscreenCanvas(FigureCanvas):
       
 #        sub  =SubplotParams(left=0, bottom=0.234, right=1, \
 #                            top=0.998, wspace=0, hspace=0)
-        sub = SubplotParams(left=0, bottom=0.51, right=1, \
-                            top=0.998, wspace=0, hspace=0)
+
+        sub = SubplotParams(left=0, bottom=0.03, right=1, \
+                            top=1, wspace=0, hspace=0)
 
         self.fig = Figure(figsize=(width, height), facecolor='white', \
                           subplotpars=sub)
@@ -40,8 +41,7 @@ class WindscreenCanvas(FigureCanvas):
         #self.axes.hold(False)
         #self.axes.grid(True)
 
-        self.limit = [0.0, 14.5]
-        self.limit_low = 30; self.limit_high = 0;
+        self.limit = [-14.5, 14.5]
         
         self.wind = 'blue'
         self.normal = 'green'
@@ -50,6 +50,7 @@ class WindscreenCanvas(FigureCanvas):
 
         # y axis values. these are fixed values. 
         self.x_axis = [0, 1]
+        self.y_axis = [-14.5, 14.5]
         self.center_x = 0.5
         self.init_x = 0.0  # initial value of x
 
@@ -82,34 +83,47 @@ class WindscreenCanvas(FigureCanvas):
         
         #self.axes.add_patch(self.rear)
         # draw x-axis
-        line_kwargs=dict(alpha=0.7, ls='-', lw=1 , color=self.normal, 
-                         marker='s', ms=7.0, mew=1.0, markevery=(1,2)) 
+        line_kwargs = dict(alpha=0.7, ls='-', lw=1 , color=self.normal, 
+                         marker='_', ms=15.0, mew=1.0, markevery=(0,1)) 
 #        line_kwargs=dict(alpha=0.7, ls='-', lw=1 , color=self.normal, 
 #
 #                         marker='v', ms=17.0, mew=0.5, markevery=(1,2)) 
 
 
-        middle=[min(self.limit),  max(self.limit)] 
-        line=Line2D([self.center_x]*len(middle), middle,  **line_kwargs)
-        #line=Line2D(middle, [0.1]*len(middle), **line_kwargs)  
+        middle = [min(self.limit),  max(self.limit)] 
+        line = Line2D([0.87]*len(middle), [0, 14.5],  \
+                      #transform=self.axes.transAxes, \
+                      **line_kwargs)
         self.axes.add_line(line)
+
+
+        
+        line_kwargs = dict(alpha=0.7, ls=':', lw=5, color=self.normal, 
+                         marker='', ms=7.0, mew=1.0, markevery=(1,2)) 
+
+
+  
+        y = math.tan(math.radians(90)) * 14.5
+        self.light = Line2D([2.0, 0], [0, y],  \
+                      #transform=self.axes.transAxes, \
+                      **line_kwargs)
+        self.axes.add_line(self.light)
+
+
+
 
         ts_kwargs=dict(alpha=0.7, fc=self.wind, ec=self.wind, lw=1.5) 
 
-        self.windscreen=mpatches.Rectangle((self.center_x-(self.width/2.0)+0.05, 0), \
-                                           self.width, 0, **ts_kwargs)
+        self.windscreen = mpatches.Rectangle((self.center_x-(self.width/2.0)+0.425, 0.0), \
+                                           self.width, 0, \
+                                           **ts_kwargs)
+
         self.axes.add_patch(self.windscreen)
 
-        #self.bbox=dict(alpha=0.4, fc='white', ec='black', lw=3, )
         # draw text
-        self.msg=self.axes.text(self.center_x, -0.1, 'Init', \
-                                color=self.normal,  va='baseline', ha='center', \
-                                #bbox=self.bbox, \
+        self.msg=self.axes.text(0.9, 0.45, 'Init', \
+                                color=self.normal,  va='baseline', ha='right', \
                                 transform=self.axes.transAxes, fontsize=13)
-
-        # draw text
-        #self.text=self.axes.text(0.5, 0.35, 'Initializing...',  va='top', ha='center', 
-        #               transform=self.axes.transAxes, fontsize=15)
 
         # set x,y limit values  
         self.axes.set_ylim(min(self.limit),  max(self.limit))
@@ -181,11 +195,32 @@ class Windscreen(WindscreenCanvas):
             #msg+='\n'
         return (msg, color)
 
-    def update_windscreen(self, drv, windscreen, cmd, pos):
+    def __update_lightpath(self, el):
+    
+        try:
+            y = math.tan(math.radians(el)) * 14.5
+        except Exception:
+            pass
+        else:
+            if 0 < el < 35:
+                offset = 0.055 + (el-10) * 0.04
+            elif 35 <= el < 50:
+                offset = 1.1 + (el-35) * 0.06
+            elif 50 <= el:
+                offset = 2.15 + (el-50) * 0.12
+            else:
+                offset = 0
+
+            # 10 0.1, 15 0.3, 20 0.5, 25 0.7, 30 0.9, 
+            # 35 1.1, 40 1.4, 45 1.7, 50 2.0,   55 2.6, 60 3.2
+            self.light.set_ydata([0, y+offset])
+
+    def update_windscreen(self, drv, windscreen, cmd, pos, el):
         ''' drv = TSCV.WINDSDRV
             windscreen = TSCV.WindScreen
             pos = TSCL.WINDSPOS
             cmd = TSCL.WINDSCMD
+            el = TSCS.EL 
         '''
 
         self.logger.debug('updating drv=%s ws=%s cmd=%s  pos=%s' \
@@ -201,9 +236,11 @@ class Windscreen(WindscreenCanvas):
         if not pos in ERROR: 
             self.windscreen.set_height(pos)
 
+        self.__update_lightpath(el)
+
         self.draw()
 
-    def tick(self):
+    def tick(self, el=None):
         ''' testing  mode solo '''
         import random  
         random.seed()
@@ -217,11 +254,13 @@ class Windscreen(WindscreenCanvas):
         pos=random.random()*random.randrange(0, 16)
         cmd=random.random()*random.randrange(0, 16)
   
+        if el is None:
+            el = random.random()*random.randrange(0,100)
              
         drv=drv[indx]
         windscreen=windscreen[indx]
 
-        self.update_windscreen(drv, windscreen, cmd, pos)
+        self.update_windscreen(drv, windscreen, cmd, pos, el)
 
 
 def main(options, args):

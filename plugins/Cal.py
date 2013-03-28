@@ -160,12 +160,13 @@ class Cal(CalCanvas):
 
         self.ma.setText('')
         self.ma.setIndent(15)
-
+        self.on = 1
+        self.off =2
 
     def __num_of_undef_vals(self, val_set):
         ''' find out the number of undefined values'''
-        on = 1; off = 2;
-        for val in [on, off]:
+
+        for val in [self.on, self.off]:
             try:
                 val_set.remove(val)
             except KeyError:
@@ -200,7 +201,6 @@ class Cal(CalCanvas):
 
     def __update(self, lamps, num_on):
    
-        on =1; off=2;
         for lamp, val in  lamps.items():  
             vals = set(val.lamp)
             num_undef = self.__num_of_undef_vals(val_set=vals)       
@@ -212,26 +212,28 @@ class Cal(CalCanvas):
                 lamp.set_fc(self.alarm)
                 lamp.set_alpha(1)
             else:
-                if on in val.lamp:
+                self.logger.debug('val lamp %s' %str(val.lamp))
+                self.logger.debug('val amp %s' %str(val.amp)) 
+                ma = ''
+                if self.on in val.lamp:
                     lamp.set_fc(self.normal)
-                    lamp.set_alpha(0.3)
+                    lamp.set_alpha(0.5)
                     self.logger.debug('on')
 
-
-                    if num_on > 1:
+                    self.logger.debug('val amp=%s' %val.amp) 
+                    
+                    if num_on > self.on: # at least 2 lamps are on
                         lamp.set_fc(self.warn)
                         lamp.set_alpha(1)
-                    else:
-                        if val.amp:
+                    else: # 1 lamp is on
+                        if not val.amp in ERROR:
                             ma = '%+5.3fmA' %val.amp
-                        else:
-                            ma = ''
                         self.ma.setText(ma)
-
                         self.logger.debug('amp=%s' %str(ma))
-
                 else:
                     self.logger.debug('off')
+                    #if not ma:
+                    #    self.ma.setText(ma) 
                     lamp.set_fc(self.bg)
                     lamp.set_alpha(1)
 
@@ -256,8 +258,6 @@ class Cal(CalCanvas):
         # hal2 = (hal2_cs, hal2_nsopt, hal2_nsir)
         # rgl1 = (rgl1_cs, rgl1_nsir)
         # rgl2 = (rgl2_cs, rgl2_nsir)
-
-        on = 1; off = 2;
 
         self.logger.debug('updating hct1=%s hct2=%s hal1=%s hal2=%s rgl1=%s rgl2=%s' %(hct1, hct2, hal1, hal2, rgl1, rgl2)) 
 
@@ -286,8 +286,8 @@ class Cal(CalCanvas):
 
         bhct1 = Bunch(lamp=(hct1_cs, hct1_nsopt, hct1_pf1, hct1_pf2), amp=hct1_amp)
         bhct2 = Bunch(lamp=(hct2_cs, hct2_nsopt), amp=hct2_amp)
-        bhal1 = Bunch(lamp= (hal1_cs, hal1_nsopt, hal1_nsir), amp=hct2_amp)
-        bhal2 = Bunch(lamp=(hal2_cs, hal2_nsopt, hal2_nsir), amp=hct2_amp)
+        bhal1 = Bunch(lamp= (hal1_cs, hal1_nsopt, hal1_nsir), amp=hal1_amp)
+        bhal2 = Bunch(lamp=(hal2_cs, hal2_nsopt, hal2_nsir), amp=hal2_amp)
         brgl1 = Bunch(lamp=(rgl1_cs, rgl1_nsir), amp=rgl1_amp)
         brgl2 = Bunch(lamp=(rgl2_cs, rgl2_nsir), amp=rgl2_amp)
         blamps = {self.th_ar1: bhct1, self.th_ar2: bhct2, \
@@ -300,7 +300,7 @@ class Cal(CalCanvas):
                  hal1_cs, hal1_nsopt, hal1_nsir, hal2_cs, hal2_nsopt, hal2_nsir, \
                  rgl1_cs, rgl1_nsir, rgl2_cs, rgl2_nsir]
 
-        num_on = lamps.count(on)   
+        num_on = lamps.count(self.on)   
 
         self.__update(blamps, num_on)
 

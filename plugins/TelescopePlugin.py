@@ -17,7 +17,7 @@ class TelescopePlugin(PlBase.Plugin):
              'TSCV.InsRotRotation', 'TSCV.InsRotMode', \
              'WAV.STG1_PS', 'WAV.STG2_PS', 'WAV.STG3_PS', \
              'TSCV.TT_Mode', 'TSCV.TT_Drive', 'TSCV.TT_DataAvail', \
-             'TSCV.TT_ChopStat',]
+             'TSCV.TT_ChopStat', 'TSCL.WINDS_O']
   
     def build_gui(self, container):
         self.root = container

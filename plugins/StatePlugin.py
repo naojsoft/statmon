@@ -53,7 +53,7 @@ class NsOptStatePlugin(PlBase.Plugin):
  
     def start(self):
         self.aliases = ['STATL.TELDRIVE', 'TSCL.AG1Intensity', 'STATL.AGRERR', \
-                        'TSCL.SV1Intensity', 'STATL.SVRERR']
+                        'TSCL.SV1Intensity', 'STATL.SVRERR', 'STATL.SV_CALC_MODE']
         self.controller.register_select('nsoptstate', self.update, self.aliases)
 
     def update(self, statusDict):
@@ -63,6 +63,7 @@ class NsOptStatePlugin(PlBase.Plugin):
         valerr1 = statusDict.get(self.aliases[2])
         intensity2 = statusDict.get(self.aliases[3])
         valerr2 = statusDict.get(self.aliases[4])
+        calc_mode = statusDict.get(self.aliases[5])
 
         guiding1 = ("Guiding(AG1)", "Guiding(AG2)", "Guiding(HSCSCAG)")
         guiding2 = ("Guiding(SV1)", "Guiding(SV2)", "Guiding(HSCSHAG)")
@@ -73,7 +74,8 @@ class NsOptStatePlugin(PlBase.Plugin):
             intensity, valerr = intensity1, valerr1 
         else:  # if not guiding, intensity and valerr don't matter. 
             intensity = valerr = None              
-        self.state.update_state(state=state, intensity=intensity, valerr=valerr)
+        self.state.update_state(state=state, intensity=intensity, \
+                                valerr=valerr, calc_mode=calc_mode)
 
 
 class HscStatePlugin(NsOptStatePlugin):

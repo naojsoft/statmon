@@ -32,18 +32,18 @@ class TelescopeGui(QtGui.QWidget):
     def __init__(self, parent=None, obcp=None, logger=None):
         super(TelescopeGui, self).__init__(parent) 
         
-        self.obcp=obcp
-        self.logger=logger
-        self.dome_shutter=DomeShutter(logger=logger)
-        self.topscreen=Topscreen(logger=logger)
-        self.windscreen=Windscreen(logger=logger)
-        self.z=FocusZ(logger=logger) 
-        self.focus=Focus(logger=logger)  
+        self.obcp = obcp
+        self.logger = logger
+        self.dome_shutter = DomeShutter(logger=logger)
+        self.topscreen = Topscreen(logger=logger)
+        self.windscreen = Windscreen(logger=logger)
+        self.z = FocusZ(logger=logger) 
+        self.focus = Focus(logger=logger)  
         #self.el=El(logger=logger)
-        self.azel=AzEl(logger=logger) 
-        self.m2=M2(logger=logger)   
-        self.m1=M1Cover(logger=logger) 
-        self.cell=CellCover(logger=logger)   
+        self.azel = AzEl(logger=logger) 
+        self.m2 = M2(logger=logger)   
+        self.m1 = M1Cover(logger=logger) 
+        self.cell = CellCover(logger=logger)   
         self.resize(500, 500)
         self.set_layout()
 
@@ -183,20 +183,20 @@ class TelescopeGui(QtGui.QWidget):
 
     def cs_layout(self, rlayout):
         ''' cassegrain focus ''' 
-        r1layout=QtGui.QVBoxLayout()
+        r1layout = QtGui.QVBoxLayout()
         #r1layout.addWidget(self.d1)
-        empty_shell=Dummy(height=95, logger=self.logger) 
+        empty_shell = Dummy(height=95, logger=self.logger) 
         r1layout.addWidget(empty_shell)
 
-        r2layout=QtGui.QVBoxLayout()
+        r2layout = QtGui.QVBoxLayout()
         r2layout.setSpacing(1)
-        empty_shell=Dummy(height=1, logger=self.logger)    
+        empty_shell = Dummy(height=1, logger=self.logger)    
         r2layout.addWidget(empty_shell)
 
-        self.insrot=InsRot.InsRotCs(logger=self.logger)   
+        self.insrot = InsRot.InsRotCs(logger=self.logger)   
         r2layout.addWidget(self.insrot)
  
-        empty_shell=Dummy(height=320, logger=self.logger)
+        empty_shell = Dummy(height=320, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
         rlayout.addLayout(r1layout)
@@ -236,15 +236,15 @@ class TelescopeGui(QtGui.QWidget):
 
         r1layout=QtGui.QVBoxLayout()
         #r1layout.addWidget(self.d1)
-        empty_shell=Dummy(height=95, logger=self.logger) 
+        empty_shell = Dummy(height=95, logger=self.logger) 
         r1layout.addWidget(empty_shell)
 
-        r2layout=QtGui.QVBoxLayout()
+        r2layout = QtGui.QVBoxLayout()
         r2layout.setSpacing(1)
-        empty_shell=Dummy(height=1, logger=self.logger)    
+        empty_shell = Dummy(height=1, logger=self.logger)    
         r2layout.addWidget(empty_shell)
 
-        self.insrot=InsRot.InsRotCs(logger=self.logger)   
+        self.insrot = InsRot.InsRotCs(logger=self.logger)   
         r2layout.addWidget(self.insrot)
  
         self.adc = Adc.Adc(logger=self.logger) 
@@ -268,7 +268,8 @@ class TelescopeGui(QtGui.QWidget):
                  'HICIAO': self.nsir_layout, 'IRCS': self.nsir_layout, \
                  'FMOS': self.pir_layout, 'HSC': self.popt_layout, \
                  'K3D': self.nsir_layout, 'MOIRCS': self.cs_layout, \
-                 'FOCAS': self.csopt_layout, 'COMICS': self.csir_layout}
+                 'FOCAS': self.csopt_layout, 'COMICS': self.csir_layout, \
+                 'SUKA': self.cs_layout}
 
         self.logger.debug('telescope focuslayout ins=%s' %self.obcp) 
 
@@ -349,7 +350,8 @@ class Telescope(TelescopeGui):
                  'HICIAO': self.update_nsir, 'IRCS': self.update_nsir, \
                  'FMOS': self.update_pir, 'HSC': self.update_popt, \
                  'K3D': self.update_nsir, 'MOIRCS': self.update_cs, \
-                 'FOCAS': self.update_csopt, 'COMICS': self.update_csir}
+                 'FOCAS': self.update_csopt, 'COMICS': self.update_csir, \
+                 'SUKA': self.update_cs}
 
         try:
             focus[self.obcp](**kargs) 
@@ -368,7 +370,8 @@ class Telescope(TelescopeGui):
         self.windscreen.update_windscreen(drv=kargs.get('TSCV.WINDSDRV'), \
                                           windscreen=kargs.get('TSCV.WindScreen'), \
                                           cmd=kargs.get('TSCL.WINDSCMD'), \
-                                          pos=kargs.get('TSCL.WINDSPOS'))
+                                          pos=kargs.get('TSCL.WINDSPOS'), \
+                                          el=kargs.get('TSCS.EL'))
 
         self.z.update_z(z=kargs.get('TSCL.Z'))
 
@@ -382,10 +385,17 @@ class Telescope(TelescopeGui):
         #self.el.update_el(el=kargs.get('TSCS.EL'), \
         #                  state=kargs.get('STATL.TELDRIVE'))
 
+        # self.azel.update_azel(az=kargs.get('TSCS.AZ'),\
+        #                       el=kargs.get('TSCS.EL'), \
+        #                       wind=kargs.get('TSCL.WINDD'), \
+        #                       state=kargs.get('STATL.TELDRIVE'))
+
         self.azel.update_azel(az=kargs.get('TSCS.AZ'),\
                               el=kargs.get('TSCS.EL'), \
-                              wind=kargs.get('TSCL.WINDD'), \
+                              winddir=kargs.get('TSCL.WINDD'), \
+                              windspeed=kargs.get('TSCL.WINDS_O'), \
                               state=kargs.get('STATL.TELDRIVE'))
+
 
         self.m1.update_m1cover(m1cover=kargs.get('TSCV.M1Cover'), \
                                m1cover_onway=kargs.get('TSCV.M1CoverOnway'))
@@ -396,18 +406,26 @@ class Telescope(TelescopeGui):
 
     def tick(self):
 
+        import random
         self.dome_shutter.tick()
         self.topscreen.tick()
         self.z.tick()
         self.focus.tick()
         #self.el.tick()
-        self.azel.tick()
-        self.windscreen.tick()
+
+        el = random.random()*random.randrange(0,100)
+        #el=27.1
+        self.azel.tick(el=el)
+        self.windscreen.tick(el=el)
+        
+        #self.azel.tick()
+        #self.windscreen.tick()
+  
         self.m2.tick()
         self.m1.tick()
         self.cell.tick()
 
-        if self.obcp in ('MOIRCS', 'FOCAS', 'SPCAM', 'HSC', 'COMICS', 'FMOS'):
+        if self.obcp in ('MOIRCS', 'FOCAS', 'SPCAM', 'HSC', 'COMICS', 'FMOS', 'SUKA'):
             self.insrot.tick()
         if self.obcp in ('HDS', 'HICIAO', 'IRCS', 'K3D'):
             self.imgrot.tick()

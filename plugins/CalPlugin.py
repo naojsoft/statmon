@@ -8,8 +8,8 @@ class CalPlugin(PlBase.Plugin):
     aliases=['TSCV.CAL_HCT_LAMP1', 'TSCV.CAL_HCT_LAMP2', \
              'TSCV.CAL_HAL_LAMP1', 'TSCV.CAL_HAL_LAMP2', \
              'TSCV.CAL_RGL_LAMP1', 'TSCV.CAL_RGL_LAMP2', \
-             'TSCL.CAL_HAL1_AMP', 'TSCL.CAL_HAL2_AMP', \
-             'TSCL.CAL_HCT1_AMP', 'TSCL.CAL_HCT2_AMP']
+             'TSCL.CAL_HCT1_AMP', 'TSCL.CAL_HCT2_AMP', \
+             'TSCL.CAL_HAL1_AMP', 'TSCL.CAL_HAL2_AMP' ]
 
     def build_gui(self, container):
         self.root = container

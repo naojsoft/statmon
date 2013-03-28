@@ -41,7 +41,7 @@ class Pa(Canvas):
     def update_pa(self, pa, cmd_diff):
         ''' pa = TSCL.INSROTPA_PF # POPT
             pa = TSCL.InsRotPA  # CS
-            ps = TSCL.ImgRotPA  # NS
+            pa = TSCL.ImgRotPA  # NS
             cmd_diff = STATS.ROTDIF_PF # POPT
             cmd_diff = STATS.ROTDIF # CS/NS
         '''
