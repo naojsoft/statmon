@@ -65,7 +65,7 @@ class InsRot(Canvas):
             text='InsRot Undefined'
             color=self.alarm
 
-        self.setText(QtCore.QString(text))
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
 

@@ -45,7 +45,7 @@ class DomeShutter(Canvas):
         self.logger.debug('text=%s fg=%s bg=%s' %(text, fg, bg))      
 
         self.setStyleSheet("QLabel {color: %s; background-color: %s}" %(fg, bg))
-        self.setText(QtCore.QString(text))
+        self.setText(text)
 
 
     def tick(self):

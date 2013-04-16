@@ -29,8 +29,8 @@ class CalProbe(Canvas):
             color = self.alarm
             self.logger.error('error: calprobe undef. probe=%s' %(str(probe)))
 
-        #self.setText(QtCore.QString('CalProbe: '))
-        self.setText(QtCore.QString(text))
+        #self.setText('CalProbe: ')
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
 

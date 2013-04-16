@@ -75,7 +75,7 @@ class Focus(Canvas):
 
         self.setStyleSheet("QLabel {color :%s; background-color:%s}" \
                            %(color, self.bg) )
-        self.setText(QtCore.QString(text))
+        self.setText(text)
 
     def tick(self):
         ''' testing solo mode '''

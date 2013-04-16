@@ -187,7 +187,7 @@ class ImgRotNsOpt(ImgRot):
             #     text+='\n(type undef)'
             #     color=self.warn 
 
-        self.setText(QtCore.QString(text))
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" %(color, self.bg))
 
 
@@ -209,7 +209,7 @@ class ImgRotNsIr(ImgRot):
                 text+='\n(AO In)'
             else:
                 text+='\n(AO Out)'  
-        self.setText(QtCore.QString(text))
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" %(color, self.bg))
 
 

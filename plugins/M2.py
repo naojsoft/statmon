@@ -86,7 +86,7 @@ class M2(Canvas):
                 color = self.alarm
                 self.logger.error('error: m2 undef. focus=%s focus2=%s' %(str(focus), str(focus2)))
 
-        self.setText(QtCore.QString(text))
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
 

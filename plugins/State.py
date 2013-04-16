@@ -62,7 +62,7 @@ class State(Canvas):
 
         self.logger.debug('state=%s bg=%s' %(state, bg))
         self.setStyleSheet("QLabel {color :%s; background-color:%s}" %(self.fg, bg) )
-        self.setText(QtCore.QString(state))
+        self.setText(state)
 
     def tick(self):
         ''' testing solo mode '''

@@ -53,7 +53,7 @@ class TimeAzLimit(Canvas):
                 hm = to_hour_min(limit)
                 text = '%s <= 30m' %(hm)
 
-        self.setText(QtCore.QString(text))
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                             %(color, self.bg))
 

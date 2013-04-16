@@ -33,7 +33,7 @@ class Threshold(Canvas):
             text = 'Threshold: {0}'.format('Undefiend') 
             color = self.alarm
 
-        self.setText(QtCore.QString(text))
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
 
