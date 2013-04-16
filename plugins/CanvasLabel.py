@@ -22,8 +22,9 @@ class Canvas(QtGui.QLabel):
         fontweight={'normal': QtGui.QFont.Normal, 'bold':QtGui.QFont.Bold}
         self.font.setWeight(fontweight[weight])
         self.setText('Initializing')
-        align = {'center': QtCore.Qt.AlignCenter, 'left': QtCore.Qt.AlignLeft, \
-                 'right': QtCore.Qt.AlignRight, 
+        align = {'center': QtCore.Qt.AlignCenter, \
+                 'left': QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, \
+                 'right': QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter, 
                  'vcenter': QtCore.Qt.AlignVCenter}[align]
         self.setAlignment(align)
         self.setFont(self.font)

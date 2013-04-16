@@ -73,98 +73,26 @@ default_layout = ['vpanel', {},
                  ['ws', dict(name='bottom', height=50, show_tabs=False), ],
                  ]
                  
-
-focus_plugin={'HDS': [('nsoptstate', 'StatePlugin', 'NsOptStatePlugin', 'left1', ''), 
-                      ('nsoptplot', 'PlotPlugin', 'NsOptPlotPlugin', 'left2', ''),
-                      ('nsopt', 'LimitPlugin', 'NsOptImgRotLimitPlugin', 'middle14','' ),
-                      ('guidingimage', 'GuidingImagePlugin', 'GuidingImagePlugin', 'left3','' ),
-                      ('nsoptagr', 'LimitPlugin', 'NsOptAgProbeRLimitPlugin', 'left4','' ),
-                      ('nsoptagtheta', 'LimitPlugin', 'NsOptAgProbeThetaLimitPlugin', 'left5','' ),
-                      
-                     ],
-             'MOIRCS': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''),
-                        ('agplot', 'PlotPlugin', 'AgPlotPlugin', 'left2', ''), 
-                        ('cslimit', 'LimitPlugin', 'CsInsRotLimitPlugin', 'middle14','' ),
-                        ('guidingimage', 'GuidingImagePlugin', 'GuidingImagePlugin', 'left3','' ),
-                        ('csagr', 'LimitPlugin', 'CsAgProbeRLimitPlugin', 'left4','' ),
-                        ('csagtheta', 'LimitPlugin', 'CsAgProbeThetaLimitPlugin', 'left5','' ),  
-                       ],
-             'SUKA': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''),
-                        ('agplot', 'PlotPlugin', 'AgPlotPlugin', 'left2', ''), 
-                        ('guidingimage', 'GuidingImagePlugin', 'GuidingImagePlugin', 'left3','' ),
-                       ],
-             'COMICS': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''),
-                        ('agplot', 'PlotPlugin', 'AgPlotPlugin', 'left2', ''), 
-                        ('cslimit', 'LimitPlugin', 'CsInsRotLimitPlugin', 'middle14','' ),
-                        ('guidingimage', 'GuidingImagePlugin', 'GuidingImagePlugin', 'left3','' ), 
-                        ('csagr', 'LimitPlugin', 'CsAgProbeRLimitPlugin', 'left4','' ),
-                        ('csagtheta', 'LimitPlugin', 'CsAgProbeThetaLimitPlugin', 'left5','' ), 
-                       ],
-             'FOCAS': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''),
-                       ('agplot', 'PlotPlugin', 'AgPlotPlugin', 'left2', ''), 
-                       ('cslimit', 'LimitPlugin', 'CsInsRotLimitPlugin', 'middle14','' ),
-                       ('guidingimage', 'GuidingImagePlugin', 'GuidingImagePlugin', 'left3','' ),
-                       ('csagr', 'LimitPlugin', 'CsAgProbeRLimitPlugin', 'left4','' ),
-                       ('csagtheta', 'LimitPlugin', 'CsAgProbeThetaLimitPlugin', 'left5','' ), 
-                      ],
-             'SPCAM': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''), 
-                       ('agplot', 'PlotPlugin', 'AgPlotPlugin', 'left2', ''),
-                       #('brightness', 'Brightness', 'Brightness', 'left3', ''), 
-                       ('poptlimit', 'LimitPlugin', 'PoptInsRotLimitPlugin', 'middle14','' ),
-                       ('guidingimage', 'GuidingImagePlugin', 'GuidingImagePlugin', 'left3','' ),
-                       ('poptagx', 'LimitPlugin', 'PoptAgProbeXLimitPlugin', 'left4','' ),
-                       ('poptagy', 'LimitPlugin', 'PoptAgProbeYLimitPlugin', 'left5','' ), 
-                      ],
-             'HSC': [('hscstate', 'StatePlugin', 'HscStatePlugin', 'left1', ''), 
-                     ('hscplot', 'PlotPlugin', 'HscPlotPlugin', 'left2', ''),
-                     ('guidingimage', 'GuidingImagePlugin', 'GuidingImagePlugin', 'left3','' ),
-                     ('poptlimit', 'LimitPlugin', 'PoptInsRotLimitPlugin', 'middle14','' ),
-                    ],
-             'HICIAO': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''), 
-                        ('agplot', 'PlotPlugin', 'NsIrPlotPlugin', 'left2', ''),
-                        ('nsirlimit', 'LimitPlugin', 'NsIrImgRotLimitPlugin', 'middle14','' ),
-                     ],
-             'IRCS': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''), 
-                      ('agplot', 'PlotPlugin', 'NsIrPlotPlugin', 'left2', ''),
-                      ('nsirlimit', 'LimitPlugin', 'NsIrImgRotLimitPlugin', 'middle14','' ),
-                     ],
-             'K3D': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''), 
-                     ('agplot', 'PlotPlugin', 'NsIrPlotPlugin', 'left2', ''),
-                     ('nsirlimit', 'LimitPlugin', 'NsIrImgRotLimitPlugin', 'middle14','' ),
-                    ],
-
-             'IRCS': [('agstate', 'StatePlugin', 'AgStatePlugin', 'left1', ''), 
-                      ('agplot', 'PlotPlugin', 'NsIrPlotPlugin', 'left2', ''),
-                      ('nsirlimit', 'LimitPlugin', 'NsIrImgRotLimitPlugin', 'middle14','' ),
-                     ],
-             'FMOS': [('fmosstate', 'StatePlugin', 'FmosStatePlugin', 'left1', ''), 
-                      ('fmosplot', 'PlotPlugin', 'FmosPlotPlugin', 'left2', ''),
-                      ('pirlimit', 'LimitPlugin', 'PirInsRotLimitPlugin', 'middle14','' ),
-                      ('guidingimage', 'GuidingImagePlugin', 'GuidingImagePlugin', 'left3','' ),
-                      ('piragx', 'LimitPlugin', 'PirAgProbeXLimitPlugin', 'left4','' ),
-                      ('piragy', 'LimitPlugin', 'PirAgProbeYLimitPlugin', 'left5','' ), 
-
-                     ],
-            }
-
 plugins = [
     # pluginName, moduleName, className, workspaceName, tabName
     ('radec', 'RaDec', 'RaDec', 'top', ''),
     ('times', 'RaDec', 'Times', 'bottom', ''),
-    #('envmon', 'EnvMon', 'EnvMon', 'right', "EnvMon"),
     ('envmon', 'EnvMonPlugin', 'EnvMonPlugin', 'right', 'EnvMon'),
-    #('alarm', 'Alarm', 'Alarm', 'right', 'Alarm'),
     ('debug', 'Debug', 'Debug', 'right', "Debug"), 
+    ('state', 'StatePlugin', 'StatePlugin', 'left1', ''),
+    ('plot', 'PlotPlugin', 'PlotPlugin', 'left2', ''),
+    ('guidingimage', 'GuidingImagePlugin', 'GuidingImagePlugin', 'left3','' ),
+    ('probe1limit', 'LimitPlugin', 'Probe1LimitPlugin', 'left4','' ),
+    ('probe2limit', 'LimitPlugin', 'Probe2LimitPlugin', 'left5','' ),
     ('telescope', 'TelescopePlugin', 'TelescopePlugin', 'middle11',''), 
     ('azlimit', 'LimitPlugin', 'AzLimitPlugin', 'middle12', ''), 
     ('ellimit', 'LimitPlugin', 'ElLimitPlugin', 'middle13', ''),
+    ('rotlimit', 'LimitPlugin', 'RotLimitPlugin', 'middle14','' ),
     ('domeff', 'DomeffPlugin', 'DomeffPlugin', 'middle21', ''),
     ('cal', 'CalPlugin', 'CalPlugin', 'middle23', ''),
     ('calprobe', 'CalprobePlugin', 'CalprobePlugin', 'middle24', ''),
     ('target', 'TargetPlugin', 'TargetPlugin', 'middle22', ''),
     ('alarm', 'Alarm', 'Alarm', 'middle25', ''),
-    #('envmon', 'EnvMonPlugin', 'EnvMonPlugin', 'middle25', ''),
-    #('resource', 'ResourcePlugin', 'ResourcePlugin', 'middle26', ''),
     ]
 
 class StatMon(Controller, Viewer):
@@ -260,10 +188,6 @@ def main(options, args):
     # Build desired layout
     root = statmon.build_toplevel(layout=default_layout)
     root.show()
-
-    obcp=statmon.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
-    focus = focus_plugin[obcp]
-    plugins.extend(focus)
 
     for pluginName, moduleName, className, wsName, tabName in plugins:
         statmon.load_plugin(pluginName, moduleName, className,

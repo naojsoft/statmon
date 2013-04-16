@@ -36,7 +36,7 @@ class Controller(Callback.Callbacks):
         self.model = model
 
         # For callbacks
-        for name in ['example2', ]:
+        for name in ['change-config', ]:
             self.enable_callback(name)
 
         self.gui_queue = Queue.Queue()
@@ -54,6 +54,10 @@ class Controller(Callback.Callbacks):
         self.model.add_callback('status-arrived', self.update_status)
 
         self.get_status_handle()
+
+        # Holds plugin registrations for configuration changes
+        self.register_select('chg-config', self.change_config,
+                             ['FITS.SBR.MAINOBCP', 'STATL.TSC_F_SELECT'])
 
 
     def get_model(self):
@@ -104,7 +108,6 @@ class Controller(Callback.Callbacks):
         need_aliases = self.model.calc_missing_aliases(aliases)
         self.nongui_do(self.fetch_missing_aliases, aliases)
 
-
     def fetch_missing_aliases(self, aliases):
         # Fetch those aliases and update our model
         statusDict = {}.fromkeys(aliases)
@@ -117,7 +120,13 @@ class Controller(Callback.Callbacks):
             self.logger.error("Error fetching needed status items: %s" % (
                 str(e)))
 
+    def change_config(self, statusDict):
 
+        d = { 'foci': statusDict['STATL.TSC_F_SELECT'],
+              'inst': statusDict['FITS.SBR.MAINOBCP'],
+              }
+        self.make_callback('change-config', d)
+            
 
     def play_soundfile(self, filepath, format=None, priority=20):
         self.logger.debug("Subclass could override this to play sound file '%s'" % (

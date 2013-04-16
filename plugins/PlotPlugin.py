@@ -2,59 +2,75 @@
 # Takeshi Inagaki
 # Eric Jeschke (eric@naoj.org)
 #
+from PyQt4 import QtGui, QtCore
+import sip
+
 import PlBase
 import Plot
-from PyQt4 import QtGui, QtCore
 
-class AgPlotPlugin(PlBase.Plugin):
-    """ AG Plotting """
-  
-    def build_gui(self, container):
-        self.root = container
 
-        qtwidget = QtGui.QWidget()
-        self.ag=Plot.AgPlot(qtwidget, logger=self.logger)
-       
-        layout = QtGui.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(self.ag,stretch=1)
-        container.setLayout(layout)
+class PlotPlugin(PlBase.Plugin):
+
+    def __set_aliases(self, obcp):
+
+        if obcp in self.ag:
+            self.update = self.update_ag
+            self.aliases = ['STATL.TELDRIVE', 'TSCL.AG1dX', 'TSCL.AG1dY', 
+                            'TSCV.AGExpTime', 'TSCV.AG1_I_BOTTOM', 'TSCV.AG1_I_CEIL']
+        elif obcp in self.ao:
+            self.update = self.update_ao
+            self.aliases = ['AON.TT.TTX','AON.TT.TTY', 'AON.TT.WTTC1','AON.TT.WTTC2']   
+        elif obcp ==  self.agsv:
+            self.update = self.update_twoguiding
+            self.aliases = ['STATL.TELDRIVE', \
+                            'TSCL.AG1dX', 'TSCL.AG1dY', \
+                            'TSCL.SV1DX', 'TSCL.SV1DY', \
+                            'TSCV.AGExpTime', 'TSCV.SVExpTime',\
+                            'TSCV.AG1_I_BOTTOM', 'TSCV.AG1_I_CEIL', \
+                            'TSCV.SV1_I_BOTTOM', 'TSCV.SV1_I_CEIL']
+
+        elif obcp == self.fmosag:
+            self.update = self.update_fmosag
+            self.aliases = ['STATL.TELDRIVE', 'TSCL.AGFMOSdAZ', 'TSCL.AGFMOSdEL', 'TSCS.EL']
+        elif obcp == self.hscag:
+            self.update = self.update_twoguiding
+            self.aliases = ['STATL.TELDRIVE', \
+                            'TSCL.HSC.SCAG.DX', 'TSCL.HSC.SCAG.DY', \
+                            'TSCL.HSC.SHAG.DX', 'TSCL.HSC.SHAG.DY', \
+                            'TSCV.HSC.SCAG.ExpTime', 'TSCV.HSC.SHAG.ExpTime', \
+                            'TSCV.HSC.SCAG.I_BOTTOM', 'TSCV.HSC.SCAG.I_CEIL', \
+                            'TSCV.HSC.SHAG.I_BOTTOM', 'TSCV.HSC.SHAG.I_CEIL']
  
-    def start(self):
-        self.aliases=['STATL.TELDRIVE', 'TSCL.AG1dX', 'TSCL.AG1dY', 
-                      'TSCV.AGExpTime', 'TSCV.AG1_I_BOTTOM', 'TSCV.AG1_I_CEIL',
-                      ]
-#        self.logger.debug('start aliases=%s' %self.aliases)
-        self.controller.register_select('agplot', self.update, self.aliases)
-
-    def update(self, statusDict):
+    def update_ao(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
-        #status={'TSCL.AG1dY': 2000, 'TSCL.AG1dX': 3000}
+        ao1x = statusDict.get(self.aliases[0])
+        ao1y = statusDict.get(self.aliases[1])
+        ao2x = statusDict.get(self.aliases[2])
+        ao2y = statusDict.get(self.aliases[3])
+        self.plot.update_plot(ao1x, ao1y, ao2x, ao2y)
+
+
+    def update_fmosag(self, statusDict):
+        self.logger.debug('status=%s' %str(statusDict))
+        state = statusDict.get(self.aliases[0])
+        x = statusDict.get(self.aliases[1])
+        y = statusDict.get(self.aliases[2])
+        el = statusDict.get(self.aliases[3])
+        self.plot.update_plot(state, x, y, el)
+            
+    def update_ag(self, statusDict):
+        self.logger.debug('status=%s' %str(statusDict))
         state = statusDict.get(self.aliases[0])
         x = statusDict.get(self.aliases[1])
         y = statusDict.get(self.aliases[2])
         exp = statusDict.get(self.aliases[3])
         bottom = statusDict.get(self.aliases[4])
         ceil = statusDict.get(self.aliases[5]) 
-        self.ag.update_plot(state=state, x=x, y=y, \
+        self.plot.update_plot(state=state, x=x, y=y, \
                             exptime=exp, bottom=bottom, ceil=ceil)
 
 
-class TwoGuidingPlotPlugin(PlBase.Plugin):
-    def build_gui(self, container):
-        self.root = container
-
-        qtwidget = QtGui.QWidget()
-        self.plot = Plot.TwoGuidingPlot(qtwidget, logger=self.logger)
-       
-        layout = QtGui.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0) 
-        layout.addWidget(self.plot, stretch=1)
-        container.setLayout(layout)
-
-    def update(self, statusDict):
+    def update_twoguiding(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
         state = statusDict.get(self.aliases[0])
         guiding1_x = statusDict.get(self.aliases[1])
@@ -74,117 +90,64 @@ class TwoGuidingPlotPlugin(PlBase.Plugin):
                                guiding2_bottom, guiding2_ceil)
 
 
-class NsOptPlotPlugin(TwoGuidingPlotPlugin):
-    """ Ns-Opt AG/SV Plotting """
-  
-    def start(self):
-        self.aliases=['STATL.TELDRIVE', \
-                      'TSCL.AG1dX', 'TSCL.AG1dY', \
-                      'TSCL.SV1DX', 'TSCL.SV1DY', \
-                      'TSCV.AGExpTime', 'TSCV.SVExpTime',\
-                      'TSCV.AG1_I_BOTTOM', 'TSCV.AG1_I_CEIL', \
-                      'TSCV.SV1_I_BOTTOM', 'TSCV.SV1_I_CEIL']
-        self.controller.register_select('nsoptplot', self.update, self.aliases)
+
+    def change_config(self, controller, d):
+
+        obcp = d['inst']
+        if obcp.startswith('#'):
+            self.logger.debug('obcp is not assigned. %s' %obcp)
+            return 
 
 
-class HscPlotPlugin(TwoGuidingPlotPlugin):
-    """ Hsc SC/SHAG Plotting """
-  
-    def start(self):
-
-        self.aliases=['STATL.TELDRIVE', \
-                      'TSCL.HSC.SCAG.DX', 'TSCL.HSC.SCAG.DY', \
-                      'TSCL.HSC.SHAG.DX', 'TSCL.HSC.SHAG.DY', \
-                      'TSCV.HSC.SCAG.ExpTime', 'TSCV.HSC.SHAG.ExpTime', \
-                      'TSCV.HSC.SCAG.I_BOTTOM', 'TSCV.HSC.SCAG.I_CEIL', \
-                      'TSCV.HSC.SHAG.I_BOTTOM', 'TSCV.HSC.SHAG.I_CEIL']
-        self.controller.register_select('hscplot', self.update, self.aliases)
+        self.logger.debug('plot changing config dict=%s ins=%s' %(d, d['inst']))  
+        try:
+            sip.delete(self.plot)
+            sip.delete(self.vlayout)
+        except Exception as e:
+            self.logger.error('error: plot configuring layout. %s' %e)  
+        else:
+            self.set_layout(obcp=obcp) 
+            controller.register_select('plot', self.update, self.aliases)
 
 
-class FmosPlotPlugin(PlBase.Plugin):
-    """ FMOS Plotting """
-    aliases=['STATL.TELDRIVE', 'TSCL.AGFMOSdAZ', 'TSCL.AGFMOSdEL', 'TSCS.EL']
-  
+    def set_layout(self, obcp):
+
+        self.logger.debug('plot setlayout. obcp=%s' %obcp) 
+        self.__set_aliases(obcp)
+        self.logger.debug('plot update=%s  aliases=%s' %(self.update, self.aliases)) 
+    
+        qtwidget = QtGui.QWidget()
+
+        if obcp in self.ag:
+            self.plot = Plot.AgPlot(qtwidget, logger=self.logger)
+        elif obcp in self.ao:
+            self.plot = Plot.NsIrPlot(qtwidget, logger=self.logger)
+        elif obcp == self.agsv or obcp == self.hscag:
+            self.plot = Plot.TwoGuidingPlot(qtwidget, logger=self.logger)    
+        elif obcp == self.fmosag:
+            self.plot = Plot.FmosPlot(qtwidget, logger=self.logger)
+
+        self.vlayout = QtGui.QVBoxLayout()
+        self.vlayout.setContentsMargins(0, 0, 0, 0)
+        self.vlayout.setSpacing(0)
+        self.vlayout.addWidget(self.plot, stretch=1)
+        self.root.setLayout(self.vlayout)
+
     def build_gui(self, container):
         self.root = container
+        self.hscag = 'HSC'  
+        self.fmosag = 'FMOS'
+        self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'SPCAM',)
+        self.ao = ('IRCS', 'HICIAO', 'K3D', )
+        self.agsv = 'HDS'
 
-        qtwidget = QtGui.QWidget()
-        self.fmos=Plot.FmosPlot(qtwidget, logger=self.logger)
-       
-        layout = QtGui.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0) 
-        layout.addWidget(self.fmos,stretch=1)
-        container.setLayout(layout)
- 
+        try:
+            obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
+            self.set_layout(obcp=obcp)
+        except Exception as e:
+            self.logger.error('error: building layout. %s' %e)
+
     def start(self):
-#        self.logger.debug('start aliases=%s' %self.aliases)
-        self.controller.register_select('fmosplot', self.update, FmosPlotPlugin.aliases)
-
-    def update(self, statusDict):
-        self.logger.debug('status=%s' %str(statusDict))
-        state=statusDict.get(FmosPlotPlugin.aliases[0])
-        x=statusDict.get(FmosPlotPlugin.aliases[1])
-        y=statusDict.get(FmosPlotPlugin.aliases[2])
-        el=statusDict.get(FmosPlotPlugin.aliases[3])
-        self.fmos.update_plot(state, x, y, el)
-
-
-class NsIrPlotPlugin(PlBase.Plugin):
-    """ AO188 Plotting """
-    aliases=['AON.TT.TTX','AON.TT.TTY', 'AON.TT.WTTC1','AON.TT.WTTC2']
-  
-    def build_gui(self, container):
-        self.root = container
-
-        qtwidget = QtGui.QWidget()
-        self.nsir=Plot.NsIrPlot(qtwidget, logger=self.logger)
-       
-        layout = QtGui.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0) 
-        layout.addWidget(self.nsir,stretch=1)
-        container.setLayout(layout)
- 
-    def start(self):
-#        self.logger.debug('start aliases=%s' %self.aliases)
-        self.controller.register_select('nsirplot', self.update, NsIrPlotPlugin.aliases)
-
-    def update(self, statusDict):
-        self.logger.debug('status=%s' %str(statusDict))
-        ao1x=statusDict.get(NsIrPlotPlugin.aliases[0])
-        ao1y=statusDict.get(NsIrPlotPlugin.aliases[1])
-        ao2x=statusDict.get(NsIrPlotPlugin.aliases[2])
-        ao2y=statusDict.get(NsIrPlotPlugin.aliases[3])
-        self.nsir.update_plot(ao1x, ao1y, ao2x, ao2y)
-
-
-# not used. commented out
-# class PirPlotPlugin(PlBase.Plugin):
-#     """ PIR Plotting """
-#     aliases=['TSCL.AGPIRdX', 'TSCL.AGPIRdY']
-  
-#     def build_gui(self, container):
-#         self.root = container
-
-#         qtwidget = QtGui.QWidget()
-#         self.pir=Plot.Plot(qtwidget, logger=self.logger)
-       
-#         layout = QtGui.QVBoxLayout()
-#         layout.setContentsMargins(0, 0, 0, 0)
-#         layout.setSpacing(0) 
-#         layout.addWidget(self.pir,stretch=1)
-#         container.setLayout(layout)
- 
-#     def start(self):
-# #        self.logger.debug('start aliases=%s' %self.aliases)
-#         self.controller.register_select('pirplot', self.update, PirPlotPlugin.aliases)
-
-#     def update(self, statusDict):
-#         self.logger.debug('status=%s' %str(statusDict))
-#         x=statusDict.get(PirPlotPlugin.aliases[0])
-#         y=statusDict.get(PirPlotPlugin.aliases[1])
-#         self.pir.update_plot(x, y)
-
-
-
+        self.logger.debug('starting plot-updating...') 
+        self.controller.register_select('plot', self.update, self.aliases)
+        self.controller.add_callback('change-config', self.change_config)

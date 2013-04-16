@@ -14,10 +14,12 @@ class Exptime(Canvas):
     ''' Exposure Time  '''
     def __init__(self, parent=None, logger=None):
         super(Exptime, self).__init__(parent=parent, fs=10, width=110,\
-                                     height=25, align='vcenter', \
+                                     height=25, align='right', \
                                      logger=logger)
  
-        self.setIndent(55)
+        #self.setIndent(55)
+        self.setIndent(10)
+        #self.setAlignment(QtCore.Qt.AlignVCenter)
     def update_exptime(self, exptime):
         ''' exptime = TSCV.AGExpTime | TSCV.SVExpTime
         '''
@@ -26,9 +28,9 @@ class Exptime(Canvas):
         color=self.normal
 
         try:
-            text = 'Exp: {0:.0f} ms'.format(exptime)
+            text = '{0:.0f} ms :Exp'.format(exptime)
         except Exception as e:
-            text = 'Exp: {0}'.format('Undefiend') 
+            text = '{0} :Exp'.format('Undefiend') 
             color = self.alarm
         finally:
             self.__set_text(text, color)
@@ -42,33 +44,6 @@ class Exptime(Canvas):
         self.setText(QtCore.QString(text))
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
-
-
-# class ExptimeDisplay(QtGui.QWidget):
-#     def __init__(self, parent=None, logger=None):
-#         super(ExptimeDisplay, self).__init__(parent)
-   
-#         self.exptime_label = Canvas(parent=parent, fs=10, width=0,\
-#                                 height=25, align='center', \
-#                                 logger=logger)
-
-#         self.exptime_label.setText('Exp:')
-#         self.exptime_label.setIndent(0)
-#         #self.propid_label.setAlignment(QtCore.Qt.AlignVCenter) 
-
-#         self.exptime = Exptime(parent=parent, logger=logger)
-#         self.__set_layout() 
-
-#     def __set_layout(self):
-#         layout = QtGui.QHBoxLayout()
-#         layout.setSpacing(3) 
-#         layout.setMargin(0)
-#         layout.addWidget(self.exptime_label)
-#         layout.addWidget(self.exptime)
-#         self.setLayout(layout)
-
-#     def update_exptime(self, exptime):
-#         self.exptime.update_exptime(exptime)
 
     def tick(self):
         ''' testing solo mode '''
