@@ -1,9 +1,7 @@
 #
 # Control.py -- Controller for StatMon.
 #
-#[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Fri Apr 27 14:48:11 HST 2012
-#]
+# Eric Jeschke (eric@naoj.org)
 #
 # stdlib imports
 import sys, os
@@ -13,10 +11,7 @@ import thread, threading
 import Queue
 
 import remoteObjects as ro
-import Bunch
-import Callback
-import Future
-import Task
+from ginga.misc import Bunch, Callback, Future, Task
 
 class ControlError(Exception):
     """Exception for errors thrown in this module."""

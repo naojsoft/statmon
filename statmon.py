@@ -2,9 +2,7 @@
 #
 # statmon.py -- Flexible Gen2 status monitor.
 #
-#[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Fri Apr 27 14:42:26 HST 2012
-#]
+# Eric Jeschke (eric@naoj.org)
 #
 """
 Usage:
@@ -27,8 +25,7 @@ sys.path.insert(0, pluginHome)
 import remoteObjects as ro
 import remoteObjects.Monitor as Monitor
 import Gen2.soundsink as SoundSink
-import ModuleManager
-import Settings
+from ginga import ModuleManager, Settings
 
 # Local application imports
 import Model

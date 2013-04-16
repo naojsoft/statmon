@@ -1,8 +1,13 @@
+#
+# Model.py -- Model for StatMon.
+#
+# Eric Jeschke (eric@naoj.org)
+#
 import time
 import threading
 
 import remoteObjects.Monitor as Monitor
-import Callback
+from ginga.misc import Callback
 
 # import from SOSS.status ?
 statNone = '##STATNONE##'
