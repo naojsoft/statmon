@@ -83,7 +83,7 @@ class Adc(Canvas):
 
 
         text, color = self.adc(on_off=on_off, mode=mode, in_out=in_out)
-        self.setText(QtCore.QString(text))
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" %(color, self.bg))
 
     def tick(self):

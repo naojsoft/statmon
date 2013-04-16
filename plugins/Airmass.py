@@ -51,8 +51,8 @@ class Airmass(Canvas):
             color = self.alarm
             self.logger.error('error: airmass=%s' %(str(airmass)))
 
-        #self.setText(QtCore.QString('CalProbe: '))
-        self.setText(QtCore.QString(text))
+        #self.setText('CalProbe: ')
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
 

@@ -11,8 +11,8 @@ import Queue
 import traceback
 
 # GUI imports
-from PyQt4 import QtGui, QtCore
 from ginga.qtw import QtHelp
+from PyQt4 import QtGui, QtCore
 from ginga.misc import Bunch
 
 moduleHome = os.path.split(sys.modules[__name__].__file__)[0]

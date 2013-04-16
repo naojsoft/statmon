@@ -36,8 +36,8 @@ class Resource(Canvas):
             text = 'Undefined'
             color = self.alarm
 
-        # #self.setText(QtCore.QString('CalProbe: '))
-        self.setText(QtCore.QString(text))
+        # #self.setText('CalProbe: ')
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
 

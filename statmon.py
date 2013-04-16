@@ -14,6 +14,7 @@ import sys, os
 import threading
 import ssdlog
 
+from ginga.qtw import QtHelp
 from PyQt4 import QtGui, QtCore
 
 moduleHome = os.path.split(sys.modules[__name__].__file__)[0]
@@ -25,7 +26,7 @@ sys.path.insert(0, pluginHome)
 import remoteObjects as ro
 import remoteObjects.Monitor as Monitor
 import Gen2.soundsink as SoundSink
-from ginga import ModuleManager, Settings
+from ginga.misc import ModuleManager, Settings
 
 # Local application imports
 import Model
@@ -118,7 +119,7 @@ class StatMon(Controller, Viewer):
         sep.setSeparator(True)
         filemenu.addAction(sep)
         
-        item = QtGui.QAction(QtCore.QString("Quit"), menubar)
+        item = QtGui.QAction("Quit", menubar)
         item.triggered.connect(self.quit)
         filemenu.addAction(item)
 
@@ -165,7 +166,7 @@ def main(options, args):
         basedir = os.path.join(os.environ['HOME'], '.' + svcname)
     if not os.path.exists(basedir):
         os.mkdir(basedir)
-    settings = Settings.Settings(basefolder=basedir)
+    prefs = Settings.Preferences(basefolder=basedir, logger=logger)
 
     mm = ModuleManager.ModuleManager(logger)
 
@@ -179,7 +180,7 @@ def main(options, args):
     model = Model.StatusModel(logger)
     
     # Start up the control/display engine
-    statmon = StatMon(logger, threadPool, mm, settings,
+    statmon = StatMon(logger, threadPool, mm, prefs,
                       sndsink, ev_quit, model)
 
     # Build desired layout

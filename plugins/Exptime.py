@@ -41,7 +41,7 @@ class Exptime(Canvas):
         self.__set_text(text, color)
  
     def __set_text(self, text, color):
-        self.setText(QtCore.QString(text))
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
 

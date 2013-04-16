@@ -41,7 +41,7 @@ class Stage(Canvas):
             color=self.alarm
             bg=self.bg   
         finally:
-            self.setText(QtCore.QString(text))
+            self.setText(text)
             self.setStyleSheet("QLabel {color: %s; background-color: %s}" \
                                %(color, bg))
 

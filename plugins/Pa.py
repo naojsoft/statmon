@@ -64,8 +64,8 @@ class Pa(Canvas):
             color = self.alarm
             self.logger.error('error: pa=%s cmd_diff=%s' %(str(pa), str(cmd_diff)))
 
-        #self.setText(QtCore.QString('CalProbe: '))
-        self.setText(QtCore.QString(text))
+        #self.setText('CalProbe: ')
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
 

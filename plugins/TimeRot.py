@@ -65,7 +65,7 @@ class TimeRotLimit(Canvas):
                 hm = to_hour_min(limit)
                 text = '%s <= 30m %s' %(hm, rot_txt)
 
-        self.setText(QtCore.QString(text))
+        self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                             %(color, self.bg))
 
