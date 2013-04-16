@@ -3,7 +3,7 @@
 # 
 # Takeshi Inagaki (tinagaki@naoj.org)
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Fri Jun  8 14:56:15 HST 2012
+#  Last edit: Mon Apr 15 17:12:48 HST 2013
 #]
 #
 import time
@@ -26,7 +26,7 @@ import Gen2.senvmon.resourceMon as rmon
 import Gen2.senvmon.direction as dr
 
 from PyQt4 import QtGui, QtCore
-from Gen2.Fitsview.qtw import QtHelp
+from ginga.qtw import QtHelp
 
 al_ag_bright = 'TSCL.AG1Intensity'
 al_sv_bright = 'TSCL.SV1Intensity'

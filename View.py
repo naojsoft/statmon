@@ -2,7 +2,7 @@
 # Viewer.py -- Qt display handler for StatMon.
 #
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Thu Apr  5 14:28:47 HST 2012
+#  Last edit: Mon Apr 15 17:12:49 HST 2013
 #]
 #
 # stdlib imports
@@ -12,9 +12,8 @@ import traceback
 
 # GUI imports
 from PyQt4 import QtGui, QtCore
-from Gen2.Fitsview.qtw import QtHelp
-
-import Bunch
+from ginga.qtw import QtHelp
+from ginga.misc import Bunch
 
 moduleHome = os.path.split(sys.modules[__name__].__file__)[0]
 icon_path = os.path.abspath(os.path.join(moduleHome, '..', 'icons'))

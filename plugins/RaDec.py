@@ -2,7 +2,7 @@
 # RaDec.py -- RA/DEC plugin for StatMon
 # 
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Thu May 17 23:44:51 HST 2012
+#  Last edit: Mon Apr 15 17:12:48 HST 2013
 #]
 #
 import time
@@ -14,7 +14,7 @@ import PlBase
 import Bunch
 
 from PyQt4 import QtGui, QtCore
-from Gen2.Fitsview.qtw import QtHelp
+from ginga.qtw import QtHelp
 
 # For "RaDec" plugin
 al_ra = 'FITS.SBR.RA'
