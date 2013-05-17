@@ -99,7 +99,8 @@ class RotLimitPlugin(PlBase.Plugin):
                  'K3D': ('Rotator Ns Ir', (-175.0, 175.0), (-179.5, 179.5), (-180.0, 180.0)), 
                  'COMICS': ('Rotator Cs',  (-260.0, 260.0), (-269.5, 269.5), (-270.0, 270.0)),
                  'MOIRCS': ('Rotator Cs',  (-260.0, 260.0), (-269.5, 269.5), (-270.0, 270.0)),
-                 'FOCAS': ('Rotator Cs',  (-260.0, 260.0), (-269.5, 269.5), (-270.0, 270.0)),}
+                 'FOCAS': ('Rotator Cs',  (-260.0, 260.0), (-269.5, 269.5), (-270.0, 270.0)),
+                 'SUKA': ('Rotator Cs',  (-260.0, 260.0), (-269.5, 269.5), (-270.0, 270.0)),}
 
         try:
             self.title, self.warn, self.alarm, self.limit = limit[obcp]
@@ -216,7 +217,7 @@ class ProbeLimitPlugin(PlBase.Plugin):
 
         self.popt = 'SPCAM'  
         self.pir = 'FMOS'
-        self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'HDS',)
+        self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'HDS', 'SUKA')
         self.ao = ('IRCS', 'HICIAO', 'K3D', )
         self.popt2 = 'HSC'
  
@@ -258,7 +259,8 @@ class Probe1LimitPlugin(ProbeLimitPlugin):
                  'HDS': ('Ag_R Ns Opt', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)), 
                  'COMICS': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),
                  'MOIRCS': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),
-                 'FOCAS': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),}
+                 'FOCAS': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),
+                 'SUKA': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),}
 
         try:
             self.title, self.warn, self.alarm, self.limit = limit[obcp]
@@ -294,7 +296,8 @@ class Probe2LimitPlugin(ProbeLimitPlugin):
                  'HDS': ('Ag_Theta Ns Opt', (-270.0, 270.0), (-270.0, 270.0), (-270.0, 270.0)), 
                  'COMICS': ('Ag-Theta Cs', (-185.0, 185.0), (-185.0, 185.0), (-185.0, 185.0)),
                  'MOIRCS': ('Ag-Theta Cs', (-185.0, 185.0), (-185.0, 185.0), (-185.0, 185.0)),
-                 'FOCAS': ('Ag-Theta Cs', (-185.0, 185.0), (-185.0, 185.0), (-185.0, 185.0)),}
+                 'FOCAS': ('Ag-Theta Cs', (-185.0, 185.0), (-185.0, 185.0), (-185.0, 185.0)),
+                 'SUKA': ('Ag-Theta Cs', (-185.0, 185.0), (-185.0, 185.0), (-185.0, 185.0)),}
 
         try:
             self.title, self.warn, self.alarm, self.limit = limit[obcp]
