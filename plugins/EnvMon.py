@@ -124,7 +124,7 @@ class EnvMon(QtGui.QWidget):
         self.ws = StatusGraph.StatusGraph(title="Wind Speed (m/s)",
                              key="windspeed",
                              statusKeys=(winds_outside, winds_dome),
-                             alarmValues = (20,10),
+                             alarmValues = (19.9,10),
                              warningValues = (7,5),
                              logger=self.logger)
 

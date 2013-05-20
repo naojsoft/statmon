@@ -127,8 +127,8 @@ class AzElCanvas(FigureCanvas):
         d_offset=0.2
         directions = {'N':(self.center, self.center+d_offset),\
                       'S':(self.center, self.center-d_offset),\
-                      'W':(self.center+d_offset, self.center),\
-                      'E':(self.center-d_offset, self.center)}
+                      'E':(self.center+d_offset, self.center),\
+                      'W':(self.center-d_offset, self.center)}
 
         # dirctions 
         for key, vals in directions.items():
@@ -248,7 +248,9 @@ class AzEl(AzElCanvas):
         radius_outer = 0.49
         offset_deg = 4.7
         try:
-            direction +=90 # adjust drawing north:up 0 east:left 90, west:right -90, south:bottom 180
+            #direction +=90 # adjust drawing north:up 0 east:left 90, west:right -90, south:bottom 180  
+            rotation = 270 # north:0 east:90 west:-90 south:180
+            direction = (direction + rotation) * -1 # rotate direction and then flip it
             update_speed = speed / 100.0 # for drawing speed arrow
             # find out new position and shpe of both wind-direction and wind-spped
      
@@ -276,26 +278,29 @@ class AzEl(AzElCanvas):
             self.wind.set(**self.wind_kwargs)
         
             #self.wind.set_xy=([[0.4, 0.9], [0.6, 0.9],[0.5, 0.8]])
-    def __get_xy(self, degree, radius=0):
+    def __get_xy(self, degree, sign=1, radius=0):
 
         rad = math.radians(degree)
-        new_y = self.center + radius * math.sin(rad)
-        new_x = self.center + radius * math.cos(rad)
+        new_y = self.center + sign * radius * math.sin(rad)
+        new_x = self.center + sign * radius * math.cos(rad)
        
         return (new_x, new_y) 
 
     def __update_az(self, az):
 
-        rotation = 270.0 # degree
+        #rotation = 270.0 # degree
+        rotation = 180.0 # degree  south:0 north:180 east:-90 west:90
         try:
-            az += rotation # adjust drawing north:up 180 east:left -90, west:right 90, south:bottom 0
-            new_x, new_y = self.__get_xy(degree=az, radius=self.subaru_radius)
+            #az += rotation # adjust drawing north:up 180 east:left -90, west:right 90, south:bottom 0
+            new_x, new_y = self.__get_xy(degree=az, sign=-1, radius=self.subaru_radius)
         except Exception as e:
             self.logger.error("error: calc subaru's direction.  %s" %str(e))
         else:
             #self.arrow.xy=(new_x, new_y)
-            self.subaru._xy=(new_x, new_y)
-            self.subaru.orientation = math.radians(rotation+az)
+            #self.subaru._xy=(new_x, new_y)
+            self.subaru._xy=(new_y, new_x)
+            #self.subaru.orientation = math.radians(rotation+az)
+            self.subaru.orientation = math.radians(rotation-az)
             #self.subaru.orientation = math.radians(az)
  
     def __update_el(self, el, state):
