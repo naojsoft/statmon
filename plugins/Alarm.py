@@ -5,7 +5,7 @@
 # that can be "plugged in" to statmon.
 # 
 #[ Russell Kackley (rkackley@naoj.org) --
-#  Last edit: Tue Jun 19 08:25:40 HST 2012
+#  Last edit: Mon Jun 24 16:02:13 HST 2013
 #]
 #
 import os
@@ -15,6 +15,7 @@ import remoteObjects as ro
 import Gen2.alarm.alarm_gui as AlarmGui
 import Gen2.alarm.StatusVar as StatusVar
 import Gen2.alarm.StatusValHistory as StatusValHistory
+import SOSS.status.common as common
 import PlBase
 
 class Alarm(PlBase.Plugin):
@@ -96,12 +97,21 @@ class Alarm(PlBase.Plugin):
             if 'ALARM_' in name:
                 currentAlarmItem = statusDict[name]
                 previousAlarmItem = self.previousStatusDict[name]
-                changed = False
-                for attribute in currentAlarmItem:
-                    if currentAlarmItem[attribute] != previousAlarmItem[attribute]:
-                        changed = True
-                        break
-                if changed:
+                # We cannot check the attributes for changes if either
+                # of the currentAlarmItem or previousAlarmItem values
+                # are STATERROR or STATNONE
+                notAllowed = (common.STATERROR, common.STATNONE)
+                if previousAlarmItem not in notAllowed and \
+                       currentAlarmItem not in notAllowed:
+                    changed = False
+                    for attribute in currentAlarmItem:
+                        if currentAlarmItem[attribute] != previousAlarmItem[attribute]:
+                            changed = True
+                            break
+                    if changed:
+                        changedStatusDict[name] = currentAlarmItem
+                elif previousAlarmItem in notAllowed and \
+                         currentAlarmItem not in notAllowed:
                     changedStatusDict[name] = currentAlarmItem
             elif name == 'STS.TIME1':
                 # STS.TIME1 is a scalar quantity, so just check to see
