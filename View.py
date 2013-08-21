@@ -156,7 +156,7 @@ class Viewer(object):
 
             # Add the widget to a workspace and save the tab name in
             # case we need to delete the widget later on.
-            dsTabName = self.ds.add_page(wsName, widget, 2, tabName)
+            dsTabName = self.ds.add_tab(wsName, widget, 2, tabName)
             self.plugins[pluginName].setvals(wsTabName=dsTabName)
 
             # Start the plugin
@@ -186,7 +186,7 @@ class Viewer(object):
             textw.setReadOnly(True)
             vbox.addWidget(textw, stretch=1)
                 
-            self.ds.add_page(wsName, widget, 2, tabName)
+            self.ds.add_tab(wsName, widget, 2, tabName)
 
     def close_plugin(self, pluginName):
         bnch = self.plugins[pluginName]

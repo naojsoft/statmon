@@ -349,10 +349,10 @@ class AzEl(AzElCanvas):
             state = STATL.TELDRIVE '''
 
         self.logger.debug('updating az=%s el=%s winddir=%s windspeed=%s state=%s'  %(str(az), str(el), str(winddir), str(windspeed), state)) 
-       
+
+        self.__update_el(el, state)       
         self.__update_wind(direction=winddir, speed=windspeed)          
         self.__update_az(az)
-        self.__update_el(el, state)
         self.__update_lightpath(el)
         self.draw()     
 
