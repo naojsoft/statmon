@@ -36,40 +36,48 @@ from Control import Controller
 defaultServiceName = 'statmon'
 version = "20120405.0"
 
-default_layout = ['vpanel', {},
-                  ['ws', dict(name='top', height=120, show_tabs=False), ],
-                  ['hpanel', dict(height=1200),
-                   #['ws', dict(name='left', width=400), ],
-                   ['vpanel', dict(width=250),
-                    ['ws', dict(name='left1', height=75, show_tabs=False), ],
-                    ['ws', dict(name='left2', height=350, show_tabs=False), ],
-                    ['ws', dict(name='left3', height=250, show_tabs=False),],
-                    ['ws', dict(name='left4', height=60, show_tabs=False),],
-                    ['ws', dict(name='left5', height=60, show_tabs=False),],
-                    #['ws', dict(name='left6', height=80, show_tabs=False),], 
-                   ],
-                   ['vpanel', dict(width=350),
-                    ['ws', dict(name='middle11', height=500, show_tabs=False), ],
-                    ['ws', dict(name='middle12', height=80, show_tabs=False), ],
-                    ['ws', dict(name='middle13', height=80, show_tabs=False), ],
-                    ['ws', dict(name='middle14', height=80, show_tabs=False), ],
-                    ['ws', dict(name='middle15', height=80, show_tabs=False), ],
-                   ],
-                   ['vpanel', dict(width=200),
-                    ['ws', dict(name='middle21', height=25, show_tabs=False), ],
-                    ['ws', dict(name='middle22', height=150, show_tabs=False), ],
-                    ['ws', dict(name='middle23', height=50, show_tabs=False), ],
-                    ['ws', dict(name='middle24', height=25, show_tabs=False), ],
-                    ['ws', dict(name='middle25', height=550, show_tabs=False), ],
-                    #['ws', dict(name='middle26', height=50, show_tabs=False), ],
-                   ],
-
-                   ['vpanel', dict(width=800),
-                    ['ws', dict(name='right', width=800), ],
+default_layout = ['seq', {},
+                  ['vbox', dict(name='top', width=1850, height=1100),
+                   dict(row=['hbox', dict(name='menubox')],
+                        stretch=0),
+                   
+                   dict(row=['vpanel', {},
+                             ['ws', dict(name='top', height=120, show_tabs=False), ],
+                             ['hpanel', dict(height=1000),
+                              #['ws', dict(name='left', width=400), ],
+                              ['vpanel', dict(width=300),
+                               ['ws', dict(name='left1', height=75, show_tabs=False), ],
+                               ['ws', dict(name='left2', height=350, show_tabs=False), ],
+                               ['ws', dict(name='left3', height=250, show_tabs=False),],
+                               ['ws', dict(name='left4', height=60, show_tabs=False),],
+                               ['ws', dict(name='left5', height=60, show_tabs=False),],
+                               #['ws', dict(name='left6', height=80, show_tabs=False),], 
+                               ],
+                              ['vpanel', dict(width=350),
+                               ['ws', dict(name='middle11', height=500, show_tabs=False), ],
+                               ['ws', dict(name='middle12', height=80, show_tabs=False), ],
+                               ['ws', dict(name='middle13', height=80, show_tabs=False), ],
+                               ['ws', dict(name='middle14', height=80, show_tabs=False), ],
+                               ['ws', dict(name='middle15', height=80, show_tabs=False), ],
+                               ],
+                              ['vpanel', dict(width=450),
+                               ['ws', dict(name='middle21', height=25, show_tabs=False), ],
+                               ['ws', dict(name='middle22', height=150, show_tabs=False), ],
+                               ['ws', dict(name='middle23', height=50, show_tabs=False), ],
+                               ['ws', dict(name='middle24', height=25, show_tabs=False), ],
+                               ['ws', dict(name='middle25', height=550, show_tabs=False), ],
+                               #['ws', dict(name='middle26', height=50, show_tabs=False), ],
+                               ],
+                              
+                              ['vpanel', dict(width=400),
+                               ['ws', dict(name='right', width=800), ],
+                               ]
+                              ],
+                             ['ws', dict(name='bottom', height=50, show_tabs=False), ],
+                             ], stretch=1),
+                   dict(row=['hbox', dict(name='statusbox')], stretch=0),
                    ]
-                  ],
-                 ['ws', dict(name='bottom', height=50, show_tabs=False), ],
-                 ]
+                  ]
                  
 plugins = [
     # pluginName, moduleName, className, workspaceName, tabName
@@ -110,7 +118,7 @@ class StatMon(Controller, Viewer):
         
     def add_menus(self):
         menubar = QtGui.QMenuBar()
-        self.w.mframe.addWidget(menubar, stretch=0)
+        self.w.menubox.layout().addWidget(menubar, stretch=0)
 
         # create a File pulldown menu, and add it to the menu bar
         filemenu = menubar.addMenu("File")
@@ -126,6 +134,9 @@ class StatMon(Controller, Viewer):
         # create a Option pulldown menu, and add it to the menu bar
         ## optionmenu = menubar.addMenu("Option")
 
+    def add_statusbar(self):
+        self.w.status = QtGui.QStatusBar()
+        self.w.statusbox.layout().addWidget(self.w.status, stretch=1)
    
 def main(options, args):
     # Create top level logger.
@@ -184,8 +195,9 @@ def main(options, args):
                       sndsink, ev_quit, model)
 
     # Build desired layout
-    root = statmon.build_toplevel(layout=default_layout)
-    root.show()
+    statmon.build_toplevel(layout=default_layout)
+    for w in statmon.ds.toplevels:
+        w.showNormal()
 
     for pluginName, moduleName, className, wsName, tabName in plugins:
         statmon.load_plugin(pluginName, moduleName, className,

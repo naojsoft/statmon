@@ -67,28 +67,32 @@ class Viewer(object):
         
 
     def build_toplevel(self, layout):
-        # Create root window and add delete/destroy callbacks
-        root = QtGui.QWidget()
-        root.connect(root, QtCore.SIGNAL('closed()'), 
-                     self.quit)
-        root.resize(self.default_width, self.default_height)
+        # # Create root window and add delete/destroy callbacks
+        # root = QtGui.QWidget()
+        # root.connect(root, QtCore.SIGNAL('closed()'), 
+        #              self.quit)
+        # root.resize(self.default_width, self.default_height)
         
-        self.w.root = root
+        # self.w.root = root
 
-        # access main frame
-        vbox = QtGui.QVBoxLayout()
-        vbox.setContentsMargins(2, 2, 2, 2)
-        vbox.setSpacing(2)
-        root.setLayout(vbox)
-        self.w.mframe = vbox
-
-        # Add menubar and menus, if desired
-        self.add_menus()
+        # # access main frame
+        # vbox = QtGui.QVBoxLayout()
+        # vbox.setContentsMargins(2, 2, 2, 2)
+        # vbox.setSpacing(2)
+        # root.setLayout(vbox)
+        # self.w.mframe = vbox
 
         # Dynamically create the desktop layout
         self.ds = QtHelp.Desktop()
-        self.w.mvbox = self.ds.make_desktop(layout, widgetDict=self.w)
-        self.w.mframe.addWidget(self.w.mvbox, stretch=1)
+        self.ds.make_desktop(layout, widgetDict=self.w)
+
+        root = self.ds.toplevels[0]
+        root.connect(root, QtCore.SIGNAL('closed()'), 
+                     self.quit)
+        self.w.root = root
+
+        # Add menubar and menus, if desired
+        self.add_menus()
 
         # Add popup dialogs
         self.add_dialogs()
@@ -115,8 +119,7 @@ class Viewer(object):
         """Subclass should override this to create their own status bar
         or to omit a status bar.
         """
-        self.w.status = QtGui.QStatusBar()
-        self.w.mframe.addWidget(self.w.status)
+        pass
 
     def set_titlebar(self, text):
         """Sets the title of the top level window.
