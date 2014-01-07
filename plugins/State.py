@@ -16,7 +16,7 @@ class State(Canvas):
 
         self.fg='white'
         self.bg='green'
-        super(State, self).__init__(parent=parent, fs=27, width=350, \
+        super(State, self).__init__(parent=parent, fs=23, width=350, \
                                     height=75, fg='white', \
                                     bg='green', logger=logger )
 

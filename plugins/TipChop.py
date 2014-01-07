@@ -113,7 +113,7 @@ def main(options, args):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=250; self.h=25;
+            self.w=125; self.h=35;
             self.init_ui()
 
         def init_ui(self):

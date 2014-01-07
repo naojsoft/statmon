@@ -17,7 +17,7 @@ class Focus(Canvas):
     ''' telescope focus  '''
 
     def __init__(self, parent=None, logger=None):
-        super(Focus, self).__init__(parent=parent, fs=22, width=250, height=35, frame=True, linewidth=1,  logger=logger )
+        super(Focus, self).__init__(parent=parent, fs=18, width=250, height=35, frame=True, linewidth=1,  logger=logger )
 
     # to do 0x11111111 is a tentative for popt2. need to figure it out. 
     foci = {0x01000000: 'Prime Optical',

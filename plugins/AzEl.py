@@ -244,6 +244,7 @@ class AzEl(AzElCanvas):
 
     def __update_wind(self, direction, speed):
 
+        self.logger.debug('updating wind. dir=%s  speed=%s' %(str(direction), str(speed)) )
         radius_inner = 0.429
         radius_outer = 0.49
         offset_deg = 4.7
@@ -273,10 +274,21 @@ class AzEl(AzElCanvas):
                 alpha = 0.8
 
             update_direction = [[a_x, a_y], [b_x, b_y], [c_x, c_y],]
-            self.wind.set_xy(update_direction)
-            self.wind_kwargs = dict(alpha=alpha, color=color, lw=0)
-            self.wind.set(**self.wind_kwargs)
-        
+            try:
+                #self.logger.debug('wind set....')
+                #self.wind.set_xy(update_direction)
+                #self.wind_kwargs = dict(alpha=1, color=color, lw=0)
+                #self.wind.set(**self.wind_kwargs)
+                Artist.remove(self.wind)
+                self.wind_kwargs = dict(alpha=alpha, color=color, lw=0)
+                self.wind = mpatches.Polygon(xy=update_direction,
+                                            **self.wind_kwargs)
+
+                self.axes.add_patch(self.wind)
+
+            except Exception as e:
+                self.logger.error('error: updating wind. %s' %e)          
+
             #self.wind.set_xy=([[0.4, 0.9], [0.6, 0.9],[0.5, 0.8]])
     def __get_xy(self, degree, sign=1, radius=0):
 
@@ -351,9 +363,11 @@ class AzEl(AzElCanvas):
         self.logger.debug('updating az=%s el=%s winddir=%s windspeed=%s state=%s'  %(str(az), str(el), str(winddir), str(windspeed), state)) 
 
         self.__update_el(el, state)       
-        self.__update_wind(direction=winddir, speed=windspeed)          
+        #self.__update_wind(direction=winddir, speed=windspeed)          
         self.__update_az(az)
         self.__update_lightpath(el)
+        self.__update_wind(direction=winddir, speed=windspeed)          
+
         self.draw()     
 
     def tick(self, el=None):

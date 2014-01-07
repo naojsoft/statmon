@@ -121,8 +121,8 @@ class WindscreenCanvas(FigureCanvas):
         self.axes.add_patch(self.windscreen)
 
         # draw text
-        self.msg=self.axes.text(0.9, 0.45, 'Init', \
-                                color=self.normal,  va='baseline', ha='right', \
+        self.msg=self.axes.text(0.9, 0.48, 'Init', \
+                                color=self.normal,  va='top', ha='right', \
                                 transform=self.axes.transAxes, fontsize=13)
 
         # set x,y limit values  

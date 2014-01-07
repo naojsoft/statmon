@@ -25,7 +25,7 @@ class TopscreenCanvas(FigureCanvas):
     """ Topscreen """
     def __init__(self, parent=None, width=1, height=1,  logger=None):
 
-        sub=SubplotParams(left=0.0, bottom=0, right=1, \
+        sub=SubplotParams(left=0, bottom=0, right=1, \
                           top=1, wspace=0, hspace=0)
         self.fig = Figure(figsize=(width, height), facecolor='white', \
                           subplotpars=sub)
@@ -35,7 +35,7 @@ class TopscreenCanvas(FigureCanvas):
         #self.axes.grid(True)
 
         # y axis values. these are fixed values. 
-        self.y_axis=[-1, 0, 1]
+        self.y_axis=[-1.0, 0, 1]
         self.center_y=0.0
 
         FigureCanvas.__init__(self, self.fig)
@@ -94,9 +94,10 @@ class TopscreenCanvas(FigureCanvas):
 
         # draw x-axis line
         line_kwargs=dict(alpha=0.7, ls='-', lw=0.7 , color=self.screen_color, 
-                         marker='.', ms=10.0, mew=1, markevery=(0,1)) 
+                         marker='|', ms=10.0, mew=2, markevery=(0,1)) 
 
-        middle=[max(limit), min(limit)] 
+        offset_drawing = 0.04
+        middle=[max(limit)-offset_drawing, min(limit)+offset_drawing] 
         line=Line2D(middle, [self.center_y]*len(middle), **line_kwargs)
         self.axes.add_line(line)
 
