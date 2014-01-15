@@ -245,9 +245,9 @@ class Probe1LimitPlugin(ProbeLimitPlugin):
         if obcp in self.ag:
             self.aliases = ['TSCV.AGR', 'TSCL.AG_R_CMD']     
         elif obcp == self.popt:
-            self.aliases = ['TSCL.AGPF_Y', 'TSCL.AGPF_Y_CMD']
+            self.aliases = ['TSCL.AGPF_X', 'TSCL.AGPF_X_CMD']
         elif obcp == self.pir:
-            self.aliases = ['TSCL.AGPIR_Y', 'TSCL.AGPIR_Y_CMD']
+            self.aliases = ['TSCL.AGPIR_X', 'TSCL.AGPIR_X_CMD']
         else:
             self.aliases = [None, None]
 
