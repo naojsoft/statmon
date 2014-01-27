@@ -2,7 +2,7 @@
 # Viewer.py -- Qt display handler for StatMon.
 #
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Mon Apr 15 17:12:49 HST 2013
+#  Last edit: Mon Jan 27 12:57:45 HST 2014
 #]
 #
 # stdlib imports
@@ -67,28 +67,12 @@ class Viewer(object):
         
 
     def build_toplevel(self, layout):
-        # # Create root window and add delete/destroy callbacks
-        # root = QtGui.QWidget()
-        # root.connect(root, QtCore.SIGNAL('closed()'), 
-        #              self.quit)
-        # root.resize(self.default_width, self.default_height)
-        
-        # self.w.root = root
-
-        # # access main frame
-        # vbox = QtGui.QVBoxLayout()
-        # vbox.setContentsMargins(2, 2, 2, 2)
-        # vbox.setSpacing(2)
-        # root.setLayout(vbox)
-        # self.w.mframe = vbox
-
         # Dynamically create the desktop layout
         self.ds = QtHelp.Desktop()
         self.ds.make_desktop(layout, widgetDict=self.w)
+        self.ds.add_callback('all-closed', self.quit)
 
         root = self.ds.toplevels[0]
-        root.connect(root, QtCore.SIGNAL('closed()'), 
-                     self.quit)
         self.w.root = root
 
         # Add menubar and menus, if desired

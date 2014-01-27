@@ -14,7 +14,7 @@ class FocusZ(Canvas):
     ''' telescope focus z '''
     def __init__(self, parent=None, logger=None):
 
-        super(FocusZ, self).__init__(parent=parent, fs=12, width=250, \
+        super(FocusZ, self).__init__(parent=parent, fs=14, width=250, \
                                      height=25, frame=True, linewidth=0.1, \
                                      logger=logger )
 

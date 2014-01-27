@@ -12,9 +12,9 @@ progname = os.path.basename(sys.argv[0])
 class CalProbe(Canvas):
     ''' Cal Source Probe  '''
     def __init__(self, parent=None, logger=None):
-        super(CalProbe, self).__init__(parent=parent, fs=10, width=200,\
+        super(CalProbe, self).__init__(parent=parent, fs=13, width=200,\
                                        height=25, align='vcenter', \
-                                       weight='bold', logger=logger)
+                                       weight='normal', logger=logger)
 
     def update_calprobe(self, probe):
         ''' probe = TSCL.CAL_POS '''
@@ -38,9 +38,9 @@ class CalProbeDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(CalProbeDisplay, self).__init__(parent)
    
-        self.calprobe_label = Canvas(parent=parent, fs=10, width=175,\
+        self.calprobe_label = Canvas(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', \
-                                weight='bold', logger=logger)
+                                weight='normal', logger=logger)
 
         self.calprobe_label.setText('CalProbe')
         self.calprobe_label.setIndent(15)

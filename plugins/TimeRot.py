@@ -14,9 +14,9 @@ progname = os.path.basename(sys.argv[0])
 class TimeRotLimit(Canvas):
     ''' Time to Rotator Limit   '''
     def __init__(self, parent=None, logger=None):
-        super(TimeRotLimit, self).__init__(parent=parent, fs=10, width=200,\
+        super(TimeRotLimit, self).__init__(parent=parent, fs=13, width=200,\
                                            height=25, align='vcenter', \
-                                           weight='bold', logger=logger)
+                                           weight='normal', logger=logger)
  
     def update_rotlimit(self, flag, rot, link, focus, focus2):
         ''' flag = TSCL.LIMIT_FLAG 
@@ -73,9 +73,9 @@ class TimeRotLimitDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(TimeRotLimitDisplay, self).__init__(parent)
    
-        self.timelimit_label = Canvas(parent=parent, fs=10, width=175,\
+        self.timelimit_label = Canvas(parent=parent, fs=13, width=175,\
                                       height=25, align='vcenter', \
-                                      weight='bold', logger=logger)
+                                      weight='normal', logger=logger)
 
         self.timelimit_label.setText('Time to Rot Limit')
         self.timelimit_label.setIndent(15)

@@ -14,9 +14,9 @@ progname = os.path.basename(sys.argv[0])
 class Pa(Canvas):
     ''' Position Angle   '''
     def __init__(self, parent=None, logger=None):
-        super(Pa, self).__init__(parent=parent, fs=10, width=200,\
+        super(Pa, self).__init__(parent=parent, fs=13, width=200,\
                                      height=25, align='vcenter', \
-                                     weight='bold', logger=logger)
+                                     weight='normal', logger=logger)
  
     def convert_to_float(self, cmd_diff):
    
@@ -74,9 +74,9 @@ class PaDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(PaDisplay, self).__init__(parent)
    
-        self.pa_label = Canvas(parent=parent, fs=10, width=175,\
+        self.pa_label = Canvas(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', \
-                                weight='bold', logger=logger)
+                                weight='normal', logger=logger)
 
         self.pa_label.setText('Position Angle')
         self.pa_label.setIndent(15)

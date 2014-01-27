@@ -13,7 +13,7 @@ progname = os.path.basename(sys.argv[0])
 class Object(Canvas):
     ''' Object  '''
     def __init__(self, parent=None, logger=None):
-        super(Object, self).__init__(parent=parent, fs=10, width=200,\
+        super(Object, self).__init__(parent=parent, fs=13, width=200,\
                                      height=25, align='vcenter', \
                                      weight='bold', logger=logger)
 
@@ -42,9 +42,9 @@ class ObjectDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(ObjectDisplay, self).__init__(parent)
    
-        self.obj_label = Canvas(parent=parent, fs=10, width=175,\
+        self.obj_label = Canvas(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', \
-                                weight='bold', logger=logger)
+                                weight='normal', logger=logger)
 
         self.obj_label.setText('Object')
         self.obj_label.setIndent(15)

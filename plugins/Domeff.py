@@ -70,7 +70,7 @@ class DomeffCanvas(FigureCanvas):
         kwargs = dict(fc=self.bg, ec=self.normal, lw=1.5)
  
         # 10W Label
-        self.axes.text(0.1, 0.3, "10W", common_keys, size=11, color=self.normal)
+        self.axes.text(0.1, 0.3, "10W", common_keys, size=13, color=self.normal)
         
         # 10W frame
         bs = mpatches.BoxStyle("Round4", pad=0.05) 
@@ -79,7 +79,7 @@ class DomeffCanvas(FigureCanvas):
         self.axes.add_patch(self.frame_10w)
 
         # 600W Label
-        self.axes.text(0.36, 0.3, "600W", common_keys, size=11, color=self.normal)
+        self.axes.text(0.36, 0.3, "600W", common_keys, size=13, color=self.normal)
        
         # 600# frame
         self.frame_600w = mpatches.FancyBboxPatch((0.3, 0.2), 0.11, 0.6, \
@@ -211,9 +211,9 @@ class DomeffDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(DomeffDisplay, self).__init__(parent)
    
-        self.domeff_label = Canvas(parent=parent, fs=10, width=175,\
+        self.domeff_label = Canvas(parent=parent, fs=13, width=175,\
                                    height=25, align='vcenter', \
-                                   weight='bold', logger=logger)
+                                   weight='normal', logger=logger)
 
         self.domeff_label.setText('Domeff')
         self.domeff_label.setIndent(15)

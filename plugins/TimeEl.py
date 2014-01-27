@@ -26,9 +26,9 @@ def to_hour_min(limit):
 class TimeElLimit(Canvas):
     ''' Time to Elevation Limit   '''
     def __init__(self, parent=None, logger=None):
-        super(TimeElLimit, self).__init__(parent=parent, fs=10, width=200,\
+        super(TimeElLimit, self).__init__(parent=parent, fs=13, width=200,\
                                           height=25, align='vcenter', \
-                                          weight='bold', logger=logger)
+                                          weight='normal', logger=logger)
  
     def update_ellimit(self, flag, low, high):
         ''' flag = TSCL.LIMIT_FLAG 
@@ -80,9 +80,9 @@ class TimeElLimitDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(TimeElLimitDisplay, self).__init__(parent)
    
-        self.timelimit_label = Canvas(parent=parent, fs=10, width=175,\
+        self.timelimit_label = Canvas(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', \
-                                weight='bold', logger=logger)
+                                weight='normal', logger=logger)
 
         self.timelimit_label.setText('Time to EL Limit')
         self.timelimit_label.setIndent(15)

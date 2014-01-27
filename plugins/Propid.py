@@ -13,9 +13,9 @@ progname = os.path.basename(sys.argv[0])
 class PropId(Canvas):
     ''' Proposal ID  '''
     def __init__(self, parent=None, logger=None):
-        super(PropId, self).__init__(parent=parent, fs=10, width=200,\
+        super(PropId, self).__init__(parent=parent, fs=13, width=200,\
                                      height=25, align='vcenter', \
-                                     weight='bold', logger=logger)
+                                     weight='normal', logger=logger)
  
     def update_propid(self, propid):
         ''' propid = FITS.XXX.PROP_ID 
@@ -44,8 +44,8 @@ class PropIdDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(PropIdDisplay, self).__init__(parent)
    
-        self.propid_label = Canvas(parent=parent, fs=10, width=175,\
-                                height=25, align='vcenter', weight='bold', \
+        self.propid_label = Canvas(parent=parent, fs=13, width=175,\
+                                height=25, align='vcenter', weight='normal', \
                                 logger=logger)
 
         self.propid_label.setText('Proposal ID')

@@ -74,7 +74,7 @@ class CalCanvas(FigureCanvas):
     def init_figure(self):
         ''' initial drawing '''
 
-        common_keys = dict(va='baseline', ha="center", color=self.normal, size=11)       
+        common_keys = dict(va='baseline', ha="center", color=self.normal, size=12)       
         w = 0.11
         h = 0.6 
    
@@ -154,7 +154,7 @@ class Cal(CalCanvas):
         CalCanvas.__init__(self, *args, **kwargs)
 
         # display milliampere(mA)
-        self.ma = Canvas(parent=kwargs['parent'], fs=8, width=175,\
+        self.ma = Canvas(parent=kwargs['parent'], fs=10, width=175,\
                              height=25, align='vcenter', \
                              logger=kwargs['logger'])
 
@@ -311,8 +311,8 @@ class CalDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(CalDisplay, self).__init__(parent)
    
-        self.cal_label = Canvas(parent=parent, fs=10, width=175,\
-                                height=25, align='vcenter', weight='bold', \
+        self.cal_label = Canvas(parent=parent, fs=13, width=175,\
+                                height=25, align='vcenter', weight='normal', \
                                 logger=logger)
 
         self.cal_label.setText('Cal')
@@ -353,14 +353,14 @@ class CalDisplay(QtGui.QWidget):
         hal1 = hal2 = '2a'
         rgl1 = rgl2 = '22'
 
-        #hal1 = '1a'
-        #hal2 = '2a'
+        hal1 = '1a'
+        hal2 = '2a'
 
         # on
         hct1= 'a9'; hct2 = '9' 
 
         # test
-        hct1= '6a'; hct2 = 'a' 
+        #hct1= '6a'; hct2 = 'a' 
         #hct1= 'aa'; hct2 = 'a' 
 
 
