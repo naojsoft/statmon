@@ -29,7 +29,7 @@ class Object(Canvas):
             text = '{0}'.format(obj)
         else:
             #text = '%s %s' %(label.ljust(15), 'Undefined'.rjust(20))
-            text = '{0}'.format('Undefiend')
+            text = '{0}'.format('Undefined')
             color = self.alarm
             self.logger.error('error: object undef. object=%s' %(str(obj)))
 

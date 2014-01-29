@@ -23,7 +23,7 @@ class DomeShutter(Canvas):
 
         if dome in ERROR:
             self.logger.error('error: dome=%s' %(str(dome)))   
-            text='Dome Shutter Undefiend'
+            text='Dome Shutter Undefined'
             bg=self.alarm
             fg=self.fg
         elif dome == 0x50: # dome shutter open

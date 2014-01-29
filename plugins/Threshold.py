@@ -30,7 +30,7 @@ class Threshold(Canvas):
         try:
             text = 'Th: {0:.0f} / {1:.0f}'.format(bottom, ceil)
         except Exception as e:
-            text = 'Threshold: {0}'.format('Undefiend') 
+            text = 'Threshold: {0}'.format('Undefined') 
             color = self.alarm
 
         self.setText(text)

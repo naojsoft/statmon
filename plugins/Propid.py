@@ -30,7 +30,7 @@ class PropId(Canvas):
             #text = '%s %s' %(label.ljust(15), propid.rjust(20))  
         else:
             #text = '%s %s' %(label.ljust(15), 'Undefined'.rjust(20))         
-            text = '{0}'.format('Undefiend')
+            text = '{0}'.format('Undefined')
             color = self.alarm
             self.logger.error('error: propid undef. propid=%s' %(str(propid)))
 

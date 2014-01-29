@@ -30,7 +30,7 @@ class Exptime(Canvas):
         try:
             text = '{0:.0f} ms :Exp'.format(exptime)
         except Exception as e:
-            text = '{0} :Exp'.format('Undefiend') 
+            text = '{0} :Exp'.format('Undefined') 
             color = self.alarm
         finally:
             self.__set_text(text, color)
