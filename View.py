@@ -28,7 +28,12 @@ class Viewer(object):
      
     def __init__(self):
         # Create the top level Qt app
-        QtGui.QApplication.setGraphicsSystem('raster')
+        #QtGui.QApplication.setGraphicsSystem('raster')
+
+        QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
+        QtGui.QApplication.setPalette(QtGui.QApplication.style().standardPalette())
+
+
         app = QtGui.QApplication([])
         app.connect(app, QtCore.SIGNAL('lastWindowClosed()'),
                     self.quit)

@@ -65,8 +65,8 @@ default_layout = ['seq', {},
                                ['ws', dict(name='middle22', height=150, show_tabs=False), ],
                                ['ws', dict(name='middle23', height=50, show_tabs=False), ],
                                ['ws', dict(name='middle24', height=25, show_tabs=False), ],
-                               ['ws', dict(name='middle25', height=550, show_tabs=False), ],
-                               #['ws', dict(name='middle26', height=50, show_tabs=False), ],
+                               ['ws', dict(name='middle25', height=350, show_tabs=False), ],
+                               ['ws', dict(name='middle26', height=125, show_tabs=False), ],
                                ],
                               
                               ['vpanel', dict(width=400),
@@ -98,6 +98,7 @@ plugins = [
     ('cal', 'CalPlugin', 'CalPlugin', 'middle23', ''),
     ('calprobe', 'CalprobePlugin', 'CalprobePlugin', 'middle24', ''),
     ('target', 'TargetPlugin', 'TargetPlugin', 'middle22', ''),
+    ('envmon2', 'EnvMon2Plugin', 'EnvMon2Plugin', 'middle26', ''),
     ('alarm', 'Alarm', 'Alarm', 'middle25', ''),
     ]
 
