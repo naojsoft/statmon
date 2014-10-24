@@ -9,6 +9,8 @@ import time
 import math
 import astro.radec as radec
 import astro.wcs as wcs
+from datetime import datetime
+from pytz import timezone
 
 import PlBase
 import Bunch
@@ -227,8 +229,15 @@ class Times(PlBase.Plugin):
         t_sec = statusDict[al_epoch]
         ut1_utc = statusDict[al_ut1utc]
 
-        hst = time.strftime('%H:%M:%S (%b/%d)', time.localtime(t_sec))
-        ut = time.strftime('%H:%M:%S (%b/%d)', time.gmtime(t_sec))
+        # Display HST even in Mitaka, Japan
+        fmt = '%H:%M:%S (%b/%d)'
+        zone = 'HST'
+        hst_time = datetime.now(timezone(zone))
+        hst = hst_time.strftime(fmt)
+        ut = time.strftime(fmt, time.gmtime(t_sec))
+
+        #hst = time.strftime('%H:%M:%S (%b/%d)', time.localtime(t_sec))
+        #ut = time.strftime('%H:%M:%S (%b/%d)', time.gmtime(t_sec))
         lst_sec = wcs.calcLST_sec(t_sec, ut1_utc)
         lst_tup = wcs.adjustTime(lst_sec, 0)
         lst = '%02d:%02d:%02d' % lst_tup[3:6]
