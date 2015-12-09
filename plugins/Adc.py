@@ -7,13 +7,15 @@ import os
 #import sip
 #sip.setapi('QVariant', 2)
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
+
+from CustomLabel import Label, ERROR
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
     
-class Adc(Canvas):
+class Adc(Label):
     ''' Cs/Ns ADC  '''
     def __init__(self, parent=None, logger=None):
         super(Adc, self).__init__(parent=parent, fs=11.5, width=125, height=35, logger=logger )
@@ -25,10 +27,10 @@ class Adc(Canvas):
         self.adc_off = 2 # hex 0x02
         self.adc_on = 1 # hex 0x01
 
-    def __adc_power(self, on_off, mode):
+    def _adc_power(self, on_off, mode):
          
         power = {self.adc_off: ('ADC Free', self.alarm), \
-                 self.adc_on: self.__adc_mode(mode)}
+                 self.adc_on: self._adc_mode(mode)}
 
         self.logger.debug('Adc power on_off=%s mode=%s' %(on_off, mode)) 
         try:
@@ -41,7 +43,7 @@ class Adc(Canvas):
         finally:
             return (text, color)
 
-    def __adc_mode(self, mode):
+    def _adc_mode(self, mode):
         
         adc = {self.mode_link: ('ADC Link', self.normal), \
                self.mode_free: ('ADC Free', self.alarm)}
@@ -61,7 +63,7 @@ class Adc(Canvas):
     def adc(self, on_off, mode, in_out):
 
         adc = {self.adc_out: ('ADC Out', self.normal), \
-               self.adc_in: self.__adc_power(on_off, mode)}
+               self.adc_in: self._adc_power(on_off, mode)}
 
         self.logger.debug('Adc on_off=%s mode=%s in_out=%s' %(on_off, mode, in_out)) 
         try:
@@ -91,22 +93,22 @@ class Adc(Canvas):
         import random  
         random.seed()
 
-        onoffindx=random.randrange(0, 4)
-        mindx=random.randrange(0, 4)
-        ioindx=random.randrange(0, 4)
+        onoffindx = random.randrange(0, 4)
+        mindx = random.randrange(0, 4)
+        ioindx = random.randrange(0, 4)
         
-        findx=random.randrange(0, 16)
+        findx = random.randrange(0, 16)
 
-        on_off=[0x01, 0x02, '##ERROR##', 0x04 ]
+        on_off = [0x01, 0x02, '##ERROR##', 0x04 ]
  
-        mode=[self.mode_free, self.mode_link, '##ERROR##', self.mode_link]
+        mode = [self.mode_free, self.mode_link, '##ERROR##', self.mode_link]
 
-        in_out=[0x08, 0x10, '##ERROR##', 0x03]
+        in_out = [0x08, 0x10, '##ERROR##', 0x03]
 
         try:
-            on_off=on_off[onoffindx]
-            mode=mode[mindx]
-            in_out=in_out[ioindx]
+            on_off = on_off[onoffindx]
+            mode = mode[mindx]
+            in_out = in_out[ioindx]
             #focus=focus[findx]
         except Exception as e:
             print e

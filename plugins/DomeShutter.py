@@ -2,14 +2,16 @@
 
 import sys
 import os
-import ssdlog
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
 
+from PyQt4 import QtCore, QtGui
+
+from CustomLabel import Label, ERROR
+import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
 
-class DomeShutter(Canvas):
+class DomeShutter(Label):
 
     ''' state of the DomeShutter  '''
     def __init__(self, parent=None, logger=None):
@@ -23,30 +25,29 @@ class DomeShutter(Canvas):
 
         if dome in ERROR:
             self.logger.error('error: dome=%s' %(str(dome)))   
-            text='Dome Shutter Undefined'
-            bg=self.alarm
-            fg=self.fg
+            text = 'Dome Shutter Undefined'
+            bg = self.alarm
+            fg = self.fg
         elif dome == 0x50: # dome shutter open
             self.logger.debug('open dome=%s' %(str(dome)))
-            text='Dome Shutter Open'
-            bg=self.fg  
-            fg=self.normal
+            text = 'Dome Shutter Open'
+            bg = self.fg  
+            fg = self.normal
         elif dome == 0x00: # dome shuuter close
             self.logger.debug('close dome=%s' %(str(dome)))
-            text='Dome Shutter Closed'
-            bg=self.bg
-            fg=self.fg
+            text = 'Dome Shutter Closed'
+            bg = self.bg
+            fg = self.fg
         else: # dome shutter  partial
             self.logger.debug('partial dome=%s' %(str(dome)))
-            text='Dome Shuter Partial'
-            bg=self.warn
-            fg=self.fg
+            text = 'Dome Shuter Partial'
+            bg = self.warn
+            fg = self.fg
 
         self.logger.debug('text=%s fg=%s bg=%s' %(text, fg, bg))      
 
         self.setStyleSheet("QLabel {color: %s; background-color: %s}" %(fg, bg))
         self.setText(text)
-
 
     def tick(self):
         ''' testing solo mode '''
@@ -54,16 +55,17 @@ class DomeShutter(Canvas):
         import random  
         random.seed()
 
-        indx=random.randrange(0,12)
-        dome=['##NODATA##', 0x50, 0xA0, None,  0x20, 'Unkonw', \
-              0x80, 0x90, '##STATNONE##', 0x00, 0x10, '##ERROR##']
+        indx = random.randrange(0,12)
+        dome = ['##NODATA##', 0x50, 0xA0, None,  0x20, 'Unkonw', \
+                0x80, 0x90, '##STATNONE##', 0x00, 0x10, '##ERROR##']
 
         try:
-            dome=dome[indx]
+            dome = dome[indx]
             self.update_dome(dome)
         except Exception as e:
             self.logger.error('error: %s' %e)
             pass
+
 
 def main(options, args):
 

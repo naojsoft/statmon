@@ -3,14 +3,16 @@
 import sys
 import os
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
+
+from CustomLabel import Label, ERROR
 
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
     
-class PropId(Canvas):
+class PropId(Label):
     ''' Proposal ID  '''
     def __init__(self, parent=None, logger=None):
         super(PropId, self).__init__(parent=parent, fs=13, width=200,\
@@ -44,7 +46,7 @@ class PropIdDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(PropIdDisplay, self).__init__(parent)
    
-        self.propid_label = Canvas(parent=parent, fs=13, width=175,\
+        self.propid_label = Label(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', weight='normal', \
                                 logger=logger)
 

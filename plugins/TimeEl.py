@@ -3,8 +3,9 @@
 import sys
 import os
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
 
+from CustomLabel import Label, ERROR
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
@@ -23,7 +24,7 @@ def to_hour_min(limit):
     finally:
         return hm 
 
-class TimeElLimit(Canvas):
+class TimeElLimit(Label):
     ''' Time to Elevation Limit   '''
     def __init__(self, parent=None, logger=None):
         super(TimeElLimit, self).__init__(parent=parent, fs=13, width=200,\
@@ -40,7 +41,7 @@ class TimeElLimit(Canvas):
         high_limit = 2
         high_limit2 = 3 
         limit = 721 # in minute
-        color=self.normal
+        color = self.normal
         el_txt = ''
  
         if flag in ERROR or low in ERROR or high in ERROR:
@@ -80,17 +81,17 @@ class TimeElLimitDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(TimeElLimitDisplay, self).__init__(parent)
    
-        self.timelimit_label = Canvas(parent=parent, fs=13, width=175,\
-                                height=25, align='vcenter', \
-                                weight='normal', logger=logger)
+        self.timelimit_label = Label(parent=parent, fs=13, width=175,\
+                                     height=25, align='vcenter', \
+                                     weight='normal', logger=logger)
 
         self.timelimit_label.setText('Time to EL Limit')
         self.timelimit_label.setIndent(15)
 
         self.ellimit = TimeElLimit(parent=parent, logger=logger)
-        self.__set_layout() 
+        self._set_layout() 
 
-    def __set_layout(self):
+    def _set_layout(self):
         ellayout = QtGui.QHBoxLayout()
         ellayout.setSpacing(0) 
         ellayout.setMargin(0)

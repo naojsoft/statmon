@@ -3,15 +3,16 @@
 import sys
 import os
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
 
+from CustomLabel import Label, ERROR
 import ssdlog
 from TimeEl import to_hour_min 
 
 progname = os.path.basename(sys.argv[0])
 
 
-class TimeAzLimit(Canvas):
+class TimeAzLimit(Label):
     ''' Time to Azimuth Limit   '''
     def __init__(self, parent=None, logger=None):
         super(TimeAzLimit, self).__init__(parent=parent, fs=13, width=200,\
@@ -61,7 +62,7 @@ class TimeAzLimitDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(TimeAzLimitDisplay, self).__init__(parent)
    
-        self.timelimit_label = Canvas(parent=parent, fs=13, width=175,\
+        self.timelimit_label = Label(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', \
                                 weight='normal', logger=logger)
 
@@ -69,9 +70,9 @@ class TimeAzLimitDisplay(QtGui.QWidget):
         self.timelimit_label.setIndent(15)
 
         self.azlimit = TimeAzLimit(parent=parent, logger=logger)
-        self.__set_layout() 
+        self._set_layout() 
 
-    def __set_layout(self):
+    def _set_layout(self):
         azlayout = QtGui.QHBoxLayout()
         azlayout.setSpacing(0) 
         azlayout.setMargin(0)

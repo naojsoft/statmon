@@ -3,24 +3,21 @@
 import sys
 import os
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
 
+from CustomLabel import Label, ERROR
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
 
-class TipChop(Canvas):
+class TipChop(Label):
     ''' telescope 2nd mirror   '''
     def __init__(self, parent=None, logger=None):
         super(TipChop, self).__init__(parent=parent, fs=16, width=125, \
                                       height=35, logger=logger )
 
-    # m2ir=[0x00001000, 0x00002000, 0x00004000, 0x00008000, 
-    #       0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010]
-
     def update_tipchop(self, mode, drive, data, state, focus=None, focus2=None):
-    #def update_tipchop(self, focus, focus2):
         ''' 
            mode=TSCV.TT_Mode
            drive=TSCV.TT_Drive
@@ -33,29 +30,27 @@ class TipChop(Canvas):
         self.logger.debug('mode=%s drive=%s  data=%s state=%s' %(str(mode), str(drive), str(data), str(state)))
         self.logger.debug('focus=%s focus2=%s' %(str(focus), str(focus2)))
 
-        color=self.normal
-        # if  not (focus in TipChop.m2ir or \
-        #         (focus==0x00000000 and focus2==0x01)):
-        #     text=''
+        color = self.normal
+
         if mode in ERROR or drive in ERROR or \
              data in ERROR or state in ERROR:
-            text=''
+            text = ''
         elif not drive&0x01 and drive&0x02: # not drive on
-            text=''
+            text = ''
         elif mode&0x47 == 0x04:  # positon mode is ok
-            text=''
+            text = ''
         elif mode&0x47 == 0x02: # tip-tilt mode
-            text='Tip-Tilt'
+            text = 'Tip-Tilt'
             if not data&0x01: # data not available
-                color=self.warn
+                color = self.warn
         elif mode&0x47 == 0x01: # chopping mode
-            text='Chopping'
+            text = 'Chopping'
             # choppig stop/not chopping start/not chopping start ready
             if state&0x02 or (not state&0x05 == 0x05): 
                 color = self.warn
         else:   
-            text='Tip/Chop Undefined'
-            color=self.alarm
+            text = 'Tip/Chop Undefined'
+            color = self.alarm
  
         self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
@@ -66,26 +61,26 @@ class TipChop(Canvas):
         import random  
         random.seed()
 
-        findx=random.randrange(0, 11)
-        f2indx=random.randrange(0, 6) 
+        findx = random.randrange(0, 11)
+        f2indx = random.randrange(0, 6) 
       
-        mindx=random.randrange(0, 4) 
-        dindx=random.randrange(0, 2) 
-        daindx=random.randrange(0, 2) 
-        sindx=random.randrange(0,3) 
+        mindx = random.randrange(0, 4) 
+        dindx = random.randrange(0, 2) 
+        daindx = random.randrange(0, 2) 
+        sindx = random.randrange(0,3) 
        
         print findx, f2indx, mindx, dindx, daindx, sindx
  
-        mode=[0x04, 0x02, 0x01, None]
-        drive=[0x02, 0x01]
-        data=[0x02, 0x01]
-        state=[0x02, 0x05, 0x00]
+        mode = [0x04, 0x02, 0x01, None]
+        drive = [0x02, 0x01]
+        data = [0x02, 0x01]
+        state = [0x02, 0x05, 0x00]
 
-        foci=[0x00001000, 0x00002000, 0x00004000, '##STATNONE##', \
-              0x00008000, 0x00000001, 0x00000002, 0x00000004, \
-              0x00000008, 0x00000010, 0x00000000]
+        foci = [0x00001000, 0x00002000, 0x00004000, '##STATNONE##', \
+                0x00008000, 0x00000001, 0x00000002, 0x00000004, \
+                0x00000008, 0x00000010, 0x00000000]
  
-        foci2=[0x01, 0x02, 0x04, "Unknown", 0x01, 0x01]
+        foci2 = [0x01, 0x02, 0x04, "Unknown", 0x01, 0x01]
         try:
             mode=mode[mindx]
             drive=drive[dindx]
@@ -132,7 +127,7 @@ def main(options, args):
 
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget) 
-            self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
+            self.statusBar().showMessage("TipChop starting...", options.interval)
 
         def closeEvent(self, ce):
             self.close()
@@ -173,9 +168,6 @@ if __name__ == '__main__':
                       default=1000,
                       help="Inverval for plotting(milli sec).")
     # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--mode", dest="mode",
-                      default='ag',
-                      help="Specify a plotting mode [ag | sv | pir | fmos]")
 
     ssdlog.addlogopts(optprs)
     

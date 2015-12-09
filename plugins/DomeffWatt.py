@@ -12,9 +12,6 @@ import matplotlib.patches as mpatches
 from matplotlib.figure import SubplotParams
 from matplotlib.artist import Artist
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
-from Dummy import Dummy
-
 import ssdlog
 import PlBase
 from error import *
@@ -28,7 +25,7 @@ class DomeffCanvas(FigureCanvas):
     """ Dome Flat drawing canvas """
     def __init__(self, parent=None, width=1, height=1,  dpi=None, logger=None):
       
-        sub=SubplotParams(left=0, bottom=0, right=1, \
+        sub = SubplotParams(left=0, bottom=0, right=1, \
                           top=1, wspace=0, hspace=0)
         self.fig = Figure(figsize=(width, height), \
                           facecolor='white', subplotpars=sub)
@@ -48,8 +45,8 @@ class DomeffCanvas(FigureCanvas):
         #self.x_scale=[-0.007, 1.0]
         #self.y_scale=[-0.002,  1.011]
 
-        self.x_scale=[0, 1]
-        self.y_scale=[0, 1]
+        self.x_scale = [0, 1]
+        self.y_scale = [0, 1]
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
@@ -210,9 +207,9 @@ class DomeffWattDisplay(QtGui.QWidget):
         super(DomeffWattDisplay, self).__init__(parent)
    
         self.domeffwatt = DomeffWatt(parent=parent, logger=logger)
-        self.__set_layout() 
+        self._set_layout() 
 
-    def __set_layout(self):
+    def _set_layout(self):
         hlayout = QtGui.QHBoxLayout()
         hlayout.setSpacing(0) 
         hlayout.setMargin(0)
@@ -240,7 +237,6 @@ class DomeffWattDisplay(QtGui.QWidget):
             pass
         else:  
             self.update_domeff_watt(ff_a, ff_1b, ff_2b, ff_3b, ff_4b)
-
 
 
 def main(options, args):

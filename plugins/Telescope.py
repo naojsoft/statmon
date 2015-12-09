@@ -24,6 +24,7 @@ import ImgRot
 import Adc
 from TipChop import TipChop
 from Waveplate import Waveplate
+from AoShutter import AoShutter 
 from Dummy import Dummy
 
 progname = os.path.basename(sys.argv[0])
@@ -162,21 +163,29 @@ class TelescopeGui(QtGui.QWidget):
     def nsir_layout(self, rlayout):
         ''' nasmyth focus infrared'''
 
-        r1layout=QtGui.QVBoxLayout()
+        r1layout = QtGui.QVBoxLayout()
         #r1layout.addWidget(self.d1)
-        empty_shell=Dummy(height=95, logger=self.logger) 
+        empty_shell = Dummy(height=95, logger=self.logger) 
         r1layout.addWidget(empty_shell)
 
-        r2layout=QtGui.QVBoxLayout()
+        r2layout = QtGui.QVBoxLayout()
         r2layout.setSpacing(1)
-        empty_shell=Dummy(height=1, logger=self.logger)    
+        empty_shell = Dummy(height=1, logger=self.logger)    
         r2layout.addWidget(empty_shell)
-        self.imgrot=ImgRot.ImgRotNsIr(logger=self.logger)   
+        self.imgrot = ImgRot.ImgRotNsIr(logger=self.logger)   
         r2layout.addWidget(self.imgrot) 
-        self.waveplate=Waveplate(logger=self.logger)   
+        self.waveplate = Waveplate(logger=self.logger)   
         r2layout.addWidget(self.waveplate) 
-        empty_shell=Dummy(height=250, logger=self.logger)
+        empty_shell = Dummy(height=30, logger=self.logger)
         r2layout.addWidget(empty_shell)
+
+        self.aoshutter = AoShutter(logger=self.logger)
+        r2layout.addWidget(self.aoshutter) 
+
+        empty_shell = Dummy(height=150, logger=self.logger)
+        r2layout.addWidget(empty_shell)
+
+
 
         rlayout.addLayout(r1layout)
         rlayout.addLayout(r2layout)
@@ -292,6 +301,10 @@ class Telescope(TelescopeGui):
         self.waveplate.update_waveplate(stage1=kargs.get('WAV.STG1_PS'), \
                                         stage2=kargs.get('WAV.STG2_PS'), \
                                         stage3=kargs.get('WAV.STG3_PS'),)
+
+        self.aoshutter.update_aoshutter(lwsh=kargs.get('AON.LWFS.LASH'), \
+                                        hwsh=kargs.get('AON.HWFS.LASH'))
+
 
     def update_csir(self, **kargs):
         self.tipchop.update_tipchop(mode=kargs.get('TSCV.TT_Mode'), \
@@ -431,6 +444,7 @@ class Telescope(TelescopeGui):
             self.imgrot.tick()
         if self.obcp in ('HICIAO', 'IRCS', 'K3D'):
             self.waveplate.tick()
+            self.aoshutter.tick()
         if self.obcp in ('HDS', 'FOCAS', 'SPCAM', 'HSC'): 
             self.adc.tick()
         if self.obcp == 'COMICS':

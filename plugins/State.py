@@ -4,13 +4,16 @@ import sys
 import os
 import ssdlog
 
+from PyQt4 import QtCore, QtGui
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from CustomLabel import Label, ERROR
+import ssdlog
+
 
 progname = os.path.basename(sys.argv[0])
     
 
-class State(Canvas):
+class State(Label):
     ''' state of the telescope in pointing/slewing/tracking/guiding  '''
     def __init__(self, parent=None, logger=None ):
 

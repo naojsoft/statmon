@@ -3,14 +3,15 @@
 import sys
 import os
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
 
+from CustomLabel import Label, ERROR
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
 
-class FocusZ(Canvas):
+class FocusZ(Label):
     ''' telescope focus z '''
     def __init__(self, parent=None, logger=None):
 
@@ -24,11 +25,11 @@ class FocusZ(Canvas):
         self.logger.debug('z=%s' %str(z))
         #self.text='Focus: {0:<.04f} mm'.format(z)  
         try:
-            text="Focus: %.4f mm" %z
-            color=self.normal
+            text = "Focus: %.4f mm" %z
+            color = self.normal
         except Exception:
-            text="Focus: Undefined"
-            color=self.alarm
+            text = "Focus: Undefined"
+            color = self.alarm
             self.logger.error('error: focus z undef. z=%s' %str(z))
         self.setStyleSheet("QLabel {color :%s; background-color:%s}" \
                            %(color, self.bg) )
@@ -39,7 +40,7 @@ class FocusZ(Canvas):
         import random  
         random.seed()
 
-        z=random.random()*random.randrange(-20, 20)
+        z = random.random()*random.randrange(-20, 20)
         self.update_z(z)
 
 
@@ -52,7 +53,7 @@ def main(options, args):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=250; self.h=25;
+            self.w = 250; self.h = 25;
             self.init_ui()
 
         def init_ui(self):

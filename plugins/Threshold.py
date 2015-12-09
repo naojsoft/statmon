@@ -3,14 +3,15 @@
 import sys
 import os
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
 
+from CustomLabel import Label, ERROR
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
     
-class Threshold(Canvas):
+class Threshold(Label):
     ''' Threshold(guiding image)  '''
     def __init__(self, parent=None, logger=None):
         super(Threshold, self).__init__(parent=parent, fs=10, width=85,\
@@ -18,14 +19,14 @@ class Threshold(Canvas):
                                      logger=logger)
  
         self.setIndent(10)
+
     def update_threshold(self, bottom, ceil):
         ''' bottom = TSCV.AG1_I_BOTTOM | TSCV.SV1_I_BOTTOM
             ceil = TSCV.AG1_I_CEIL | TSCV.SV1_I_CEIL
         '''
-                  
         self.logger.debug('bottom=%s ceil=%s' %(str(bottom), str(ceil)))
 
-        color=self.normal
+        color = self.normal
 
         try:
             text = 'Th: {0:.0f} / {1:.0f}'.format(bottom, ceil)
@@ -37,33 +38,6 @@ class Threshold(Canvas):
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
 
-
-# class ThresholdDisplay(QtGui.QWidget):
-#     def __init__(self, parent=None, logger=None):
-#         super(ThresholdDisplay, self).__init__(parent)
-   
-#         self.exptime_label = Canvas(parent=parent, fs=10, width=10,\
-#                                 height=25, align='vcenter', \
-#                                 logger=logger)
-
-#         self.threshold_label.setText('Threshold:')
-#         self.threshold_label.setIndent(5)
-#         #self.propid_label.setAlignment(QtCore.Qt.AlignVCenter) 
-
-#         self.threshold = Threshold(parent=parent, logger=logger)
-#         self.__set_layout() 
-
-#     def __set_layout(self):
-#         layout = QtGui.QHBoxLayout()
-#         layout.setSpacing(1) 
-#         layout.setMargin(0)
-#         layout.addWidget(self.threshold_label)
-#         layout.addWidget(self.threshold)
-#         self.setLayout(layout)
-
-#     def update_threshold(self, bottom, ceil):
-#         self.threshold.update_threshold(bottom, ceil)
-
     def tick(self):
         ''' testing solo mode '''
         import random  
@@ -71,6 +45,7 @@ class Threshold(Canvas):
         bottom = random.randrange(0, 30000)
         ceil = random.randrange(30000, 70000)
         self.update_threshold(bottom, ceil)
+
 
 def main(options, args):
 
@@ -100,7 +75,7 @@ def main(options, args):
 
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget) 
-            self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
+            self.statusBar().showMessage("threshold starting...", options.interval)
 
         def closeEvent(self, ce):
             self.close()
@@ -140,10 +115,6 @@ if __name__ == '__main__':
     optprs.add_option("--interval", dest="interval", type='int',
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--mode", dest="mode",
-                      default='ag',
-                      help="Specify a plotting mode [ag | sv | pir | fmos]")
 
     ssdlog.addlogopts(optprs)
     

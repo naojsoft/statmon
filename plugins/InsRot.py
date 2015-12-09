@@ -7,46 +7,15 @@ import os
 #import sip
 #sip.setapi('QVariant', 2)
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
 
+from CustomLabel import Label, ERROR
 import ssdlog
-
 
 progname = os.path.basename(sys.argv[0])
 
-   
-# class InsRot(QtGui.QLabel):
-#     ''' state of the telescope in pointing/slewing/tracking/guiding  '''
-#     def __init__(self, parent=None, logger=None):
-#         super(InsRot, self).__init__(parent)
 
-#         self.bg='white'
-#         self.alarm='red'
-#         self.normal='green'
-#         self.warn='orange'
-#         self.w=125
-#         self.h=20
-
-#         self.logger=logger
-       
-#         self.__init_label()
-
-#     def __init_label(self):
-#         self.font = QtGui.QFont('UnDotum', 11.5) 
-#         self.setText('Initializing')
-#         self.setAlignment(QtCore.Qt.AlignCenter)
-#         self.setFont(self.font)
-
-#         self.setStyleSheet("QLabel {color :%s ; background-color:%s}" %(self.normal, self.bg))
-
-#     def minimumSizeHint(self):
-#         return QtCore.QSize(self.w, self.h)
-
-#     def sizeHint(self):
-#         return QtCore.QSize(self.w, self.h)
-
-
-class InsRot(Canvas):
+class InsRot(Label):
     ''' instrument rotator   '''
     def __init__(self, parent=None, logger=None):
         super(InsRot, self).__init__(parent=parent, fs=11.5, width=125, \
@@ -57,13 +26,13 @@ class InsRot(Canvas):
 
         if insrot == self.insrot_free or mode == self.mode_free:
             text = 'InsRot Free'
-            color=self.warn
+            color = self.warn
         elif insrot == self.insrot_link and mode == self.mode_link:
             text = 'InsRot Link'
-            color=self.normal
+            color = self.normal
         else:
-            text='InsRot Undefined'
-            color=self.alarm
+            text = 'InsRot Undefined'
+            color = self.alarm
 
         self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
@@ -74,10 +43,10 @@ class InsRotPf(InsRot):
     ''' prime focus rotator  '''
     def __init__(self, parent=None, logger=None):
 
-        self.insrot_free=0x02
-        self.insrot_link=0x01
-        self.mode_free=0x20
-        self.mode_link=0x10
+        self.insrot_free = 0x02
+        self.insrot_link = 0x01
+        self.mode_free = 0x20
+        self.mode_link = 0x10
         super(InsRotPf, self).__init__(parent, logger)
 
     def update_insrot(self, insrot, mode):
@@ -92,18 +61,18 @@ class InsRotPf(InsRot):
         import random  
         random.seed()
 
-        rindx=random.randrange(0, 6)
-        mindx=random.randrange(0, 6)
+        rindx = random.randrange(0, 6)
+        mindx = random.randrange(0, 6)
 
-        insrot=[0x01, 0x02, 0x02, 0x01,  '##NODATA##', '##ERROR##']
+        insrot = [0x01, 0x02, 0x02, 0x01,  '##NODATA##', '##ERROR##']
  
-        mode=[0x10, 0x20, None, '##STATNONE##', 0x10, 0x20]
+        mode = [0x10, 0x20, None, '##STATNONE##', 0x10, 0x20]
         try:
-            insrot=insrot[rindx]
-            mode=mode[mindx]
+            insrot = insrot[rindx]
+            mode = mode[mindx]
         except Exception as e:
-            insrot=0x01
-            mode=0x10
+            insrot = 0x01
+            mode = 0x10
             print e
         self.update_insrot(insrot, mode)
 
@@ -112,10 +81,10 @@ class InsRotCs(InsRot):
     ''' cassegrain rotator  '''
     def __init__(self, parent=None, logger=None):
 
-        self.insrot_free=0x02
-        self.insrot_link=0x01
-        self.mode_free=0x02
-        self.mode_link=0x01
+        self.insrot_free = 0x02
+        self.insrot_link = 0x01
+        self.mode_free = 0x02
+        self.mode_link = 0x01
         super(InsRotCs, self).__init__(parent, logger)
 
     def update_insrot(self, insrot, mode):
@@ -129,18 +98,18 @@ class InsRotCs(InsRot):
         import random  
         random.seed()
 
-        rindx=random.randrange(0, 6)
-        mindx=random.randrange(0, 6)
+        rindx = random.randrange(0, 6)
+        mindx = random.randrange(0, 6)
 
-        insrot=[0x01, 0x02, None, 0x02, '##NODATA##', 0x01]
+        insrot = [0x01, 0x02, None, 0x02, '##NODATA##', 0x01]
  
-        mode=[0x01, 0x02, 0x02, '##STATNONE##', 0x01, '##ERROR##']
+        mode = [0x01, 0x02, 0x02, '##STATNONE##', 0x01, '##ERROR##']
         try:
-            insrot=insrot[rindx]
-            mode=mode[mindx]
+            insrot = insrot[rindx]
+            mode = mode[mindx]
         except Exception as e:
-            insrot=0x01
-            mode=0x10
+            insrot = 0x01
+            mode = 0x10
             print e
         self.update_insrot(insrot, mode)
 

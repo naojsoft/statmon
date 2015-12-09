@@ -3,86 +3,68 @@
 import sys
 import os
 
-from PyQt4 import QtCore, QtGui
+import time
+import datetime
+import collections
 
+from PyQt4 import QtCore
+from PyQt4 import QtGui
+
+import Bunch
+from TscStatus import StatusTime
 from CustomLabel import Label, ERROR
-
+from Dummy import Dummy
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
 
-class Object(Label):
-    ''' Object  '''
-    def __init__(self, parent=None, logger=None):
-        super(Object, self).__init__(parent=parent, fs=13, width=200,\
-                                     height=25, align='vcenter', \
-                                     weight='bold', logger=logger)
-
-    def update_object(self, obj):
-        ''' object = FITS.XXX.OBJECT '''
-
-        self.logger.debug('obj=%s' %(str(obj)))
-
-        color=self.normal
-
-        if not obj in ERROR:
-            #text = '%s %s' %(label.ljust(15), obj.rjust(20))            
-            text = '{0}'.format(obj)
-        else:
-            #text = '%s %s' %(label.ljust(15), 'Undefined'.rjust(20))
-            text = '{0}'.format('Undefined')
-            color = self.alarm
-            self.logger.error('error: object undef. object=%s' %(str(obj)))
-
-        #self.setText('CalProbe: ')
-        self.setText(text)
-        self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
-                           %(color, self.bg))
-
-
-class ObjectDisplay(QtGui.QWidget):
-    def __init__(self, parent=None, logger=None):
-        super(ObjectDisplay, self).__init__(parent)
+class MonDisplay(QtGui.QWidget):
+    def __init__(self, parent=None, monitortime=None, timedelta=None, label=None, logger=None):
+        super(MonDisplay, self).__init__(parent)
    
-        self.obj_label = Label(parent=parent, fs=13, width=175,\
-                                height=25, align='vcenter', \
-                                weight='normal', logger=logger)
+        self.mon_label = Label(parent=parent, fs=13, width=175,\
+                                height=25, align='vcenter', weight='normal', \
+                                logger=logger)
 
-        self.obj_label.setText('Object')
-        self.obj_label.setIndent(15)
-        #self.obj_label.setAlignment(QtCore.Qt.AlignVCenter) 
+        #self.insdata = INSdata()
 
-        self.obj = Object(parent=parent, logger=logger)
+        self.mon_label.setText('%s:' %label)
+        self.mon_label.setIndent(15)
+
+        self.mon = StatusTime(parent=parent, timedelta=timedelta, logger=logger)
         self._set_layout() 
+
+        timer = QtCore.QTimer(self)
+        timer.timeout.connect(self.mon.monitoring)
+        timer.start(monitortime)
 
     def _set_layout(self):
         objlayout = QtGui.QHBoxLayout()
         objlayout.setSpacing(0) 
         objlayout.setMargin(0)
-        objlayout.addWidget(self.obj_label)
-        objlayout.addWidget(self.obj)
+        objlayout.addWidget(self.mon_label)
+        objlayout.addWidget(self.mon)
         self.setLayout(objlayout)
 
-    def update_object(self, obj):
-        self.obj.update_object(obj)
+    def update_mon(self, mon_time):
+        ''' mon_time = CONTROLLER's last updated time
+        '''
+        self.mon.update_statustime(mon_time)    
+
 
     def tick(self):
         ''' testing solo mode '''
         import random  
         random.seed()
+        num = random.randrange(0, 9)
 
-        indx = random.randrange(0, 9)
-
-        obj = ['FOFOSS', None, 'NAOJ1212', 'M78asfaf', "Unknown", \
-               '##STATNONE##', '##NODATA##', 'GINZA', '##ERROR##']
+        if not num % 5:
+            mon_time = '##NODATA##'
+        else:
+            mon_time = time.time()
  
-        try:
-            obj = obj[indx]
-        except Exception as e:
-            obj = 'SUBARU'
-            print e
-        self.update_object(obj)
+        self.update_mon(mon_time=mon_time)
 
 
 def main(options, args):
@@ -104,16 +86,18 @@ def main(options, args):
             l = QtGui.QVBoxLayout(self.main_widget)
             l.setMargin(0) 
             l.setSpacing(0)
-            obj = ObjectDisplay(parent=self.main_widget, logger=logger)
-            l.addWidget(obj)
 
+            m = MonDisplay(parent=self.main_widget, monitortime=options.monitortime,\
+                           timedelta=options.timedelta, label='MON', logger=logger)
+            l.addWidget(m)
+       
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), obj.tick)
+            timer.timeout.connect(m.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget) 
-            self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
+            self.statusBar().showMessage("Mon starting...", options.interval)
 
         def closeEvent(self, ce):
             self.close()
@@ -153,10 +137,12 @@ if __name__ == '__main__':
     optprs.add_option("--interval", dest="interval", type='int',
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--mode", dest="mode",
-                      default='ag',
-                      help="Specify a plotting mode [ag | sv | pir | fmos]")
+    optprs.add_option("--monitortime", dest="monitortime", type='int',
+                      default=10000,
+                      help="Monitor status arriving time in every milli secs.")
+    optprs.add_option("--timedelta", dest="timedelta", type='int',
+                      default=10,
+                      help="Specify time delta btw current and previous status receiving time.")
 
     ssdlog.addlogopts(optprs)
     
@@ -183,4 +169,5 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
+
 

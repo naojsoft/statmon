@@ -4,21 +4,21 @@ import sys
 import os
 import math
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
 
+from CustomLabel import Label, ERROR
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
     
-class Pa(Canvas):
+class Pa(object):
     ''' Position Angle   '''
-    def __init__(self, parent=None, logger=None):
-        super(Pa, self).__init__(parent=parent, fs=13, width=200,\
-                                     height=25, align='vcenter', \
-                                     weight='normal', logger=logger)
+    def __init__(self, logger=None):
+        super(Pa, self).__init__()
+        self.logger = logger
  
-    def convert_to_float(self, cmd_diff):
+    def cmd_diff(self, cmd_diff):
    
         try:
             cmd_diff = math.fabs(float(cmd_diff)) 
@@ -28,7 +28,7 @@ class Pa(Canvas):
         finally:
             return cmd_diff
 
-    def get_calc_pa(self, pa):
+    def pa(self, pa):
         
         try:
             pa = ((pa + 540.0) % 360.0) - 180.0
@@ -38,6 +38,36 @@ class Pa(Canvas):
         finally:
             return pa
 
+
+class PaDisplay(QtGui.QWidget):
+    def __init__(self, parent=None, logger=None):
+        super(PaDisplay, self).__init__(parent)
+   
+        self.pa_label = Label(parent=parent, fs=13, width=175,\
+                                height=25, align='vcenter', \
+                                weight='normal', logger=logger)
+
+        self.pa_val = Label(parent=parent, fs=13, width=175,\
+                                height=25, align='vcenter', \
+                                weight='normal', logger=logger)
+
+        self.pa_label.setText('Position Angle')
+        self.pa_label.setIndent(15)
+
+        self.pa = Pa(logger=logger)
+
+        self.__set_layout()
+       
+        self.logger = logger    
+
+    def __set_layout(self):
+        layout = QtGui.QHBoxLayout()
+        layout.setSpacing(0) 
+        layout.setMargin(0)
+        layout.addWidget(self.pa_label)
+        layout.addWidget(self.pa_val)
+        self.setLayout(layout)
+
     def update_pa(self, pa, cmd_diff):
         ''' pa = TSCL.INSROTPA_PF # POPT
             pa = TSCL.InsRotPA  # CS
@@ -45,55 +75,28 @@ class Pa(Canvas):
             cmd_diff = STATS.ROTDIF_PF # POPT
             cmd_diff = STATS.ROTDIF # CS/NS
         '''
-                  
-        self.logger.debug('position angle pa=%s cmd_diff=%s' %(str(pa), str(cmd_diff)))
 
-        color=self.normal
-        pa = self.get_calc_pa(pa)
-        cmd_diff = self.convert_to_float(cmd_diff)     
+        pa = self.pa.pa(pa)
+        cmd_diff = self.pa.cmd_diff(cmd_diff)
 
         diff = 0.1
+        color = self.pa_val.normal
+
         if not (pa in ERROR or cmd_diff in ERROR):
             text = '{0:.2f} deg'.format(pa)
             if cmd_diff >= diff:
-                color = self.warn
+                color =  self.pa_val.warn
                 #text = '{0:.2f} deg.  cmd_diff={1:.2f}>={2}'.format(pa, cmd_diff, diff)
                 text = '{0:.2f} deg  Diff:{1:.2f}'.format(pa, cmd_diff)     
         else:
             text = '{0}'.format('Undefined')
-            color = self.alarm
+            color =  self.pa_val.alarm
             self.logger.error('error: pa=%s cmd_diff=%s' %(str(pa), str(cmd_diff)))
 
         #self.setText('CalProbe: ')
-        self.setText(text)
-        self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
-                           %(color, self.bg))
-
-
-class PaDisplay(QtGui.QWidget):
-    def __init__(self, parent=None, logger=None):
-        super(PaDisplay, self).__init__(parent)
-   
-        self.pa_label = Canvas(parent=parent, fs=13, width=175,\
-                                height=25, align='vcenter', \
-                                weight='normal', logger=logger)
-
-        self.pa_label.setText('Position Angle')
-        self.pa_label.setIndent(15)
-
-        self.pa = Pa(parent=parent, logger=logger)
-        self.__set_layout() 
-
-    def __set_layout(self):
-        layout = QtGui.QHBoxLayout()
-        layout.setSpacing(0) 
-        layout.setMargin(0)
-        layout.addWidget(self.pa_label)
-        layout.addWidget(self.pa)
-        self.setLayout(layout)
-
-    def update_pa(self, pa, cmd_diff):
-        self.pa.update_pa(pa, cmd_diff)
+        self.pa_val.setText(text)
+        self.pa_val.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
+                           %(color,  self.pa_val.bg))
 
     def tick(self):
         ''' testing solo mode '''

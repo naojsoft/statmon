@@ -3,13 +3,15 @@
 import sys
 import os
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
 
+from CustomLabel import Label, ERROR
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
+
     
-class CalProbe(Canvas):
+class CalProbe(Label):
     ''' Cal Source Probe  '''
     def __init__(self, parent=None, logger=None):
         super(CalProbe, self).__init__(parent=parent, fs=13, width=200,\
@@ -21,7 +23,7 @@ class CalProbe(Canvas):
 
         self.logger.debug('probe=%s' %(str(probe)))
 
-        color=self.normal
+        color = self.normal
         try:
             text = '{0:+3.3f} mm'.format(probe)
         except Exception:
@@ -38,7 +40,7 @@ class CalProbeDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(CalProbeDisplay, self).__init__(parent)
    
-        self.calprobe_label = Canvas(parent=parent, fs=13, width=175,\
+        self.calprobe_label = Label(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', \
                                 weight='normal', logger=logger)
 
@@ -46,9 +48,9 @@ class CalProbeDisplay(QtGui.QWidget):
         self.calprobe_label.setIndent(15)
 
         self.calprobe = CalProbe(parent=parent, logger=logger)
-        self.__set_layout() 
+        self._set_layout() 
 
-    def __set_layout(self):
+    def _set_layout(self):
         layout = QtGui.QHBoxLayout()
         layout.setSpacing(0) 
         layout.setMargin(0)

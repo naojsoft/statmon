@@ -7,60 +7,24 @@ import os
 #import sip
 #sip.setapi('QVariant', 2)
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
 
+from CustomLabel import Label, ERROR
 import ssdlog
 
-
 progname = os.path.basename(sys.argv[0])
-    
-# class ImgRot(QtGui.QLabel): ''' state of the telescope in
-#     pointing/slewing/tracking/guiding ''' def __init__(self,
-#     parent=None, width=125, height=20, logger=None): super(ImgRot,
-#     self).__init__(parent)
-
-#         self.bg='white'
-#         self.alarm='red'
-#         self.normal='green'
-#         self.warn='orange'
-#         self.w=width
-#         self.h=height
-
-#         self.img_out='ImgRot Out'
-#         self.img_free='ImgRot Free'
-#         self.img_link='ImgRot Link'
-#         self.img_zenith='ImgRot Zenith'
-#         self.img_undef='ImgRot Undefined'
-#         self.logger=logger
-       
-#         self.__init_label()
-
-#     def __init_label(self):
-#         self.font = QtGui.QFont('UnDotum', 11.5) 
-#         self.setText('Initializing')
-#         self.setAlignment(QtCore.Qt.AlignCenter)
-#         self.setFont(self.font)
-
-#         self.setStyleSheet("QLabel {color :%s ; background-color:%s}" %(self.normal, self.bg))
-
-#     def minimumSizeHint(self):
-#         return QtCore.QSize(self.w, self.h)
-
-#     def sizeHint(self):
-#         return QtCore.QSize(self.w, self.h)
 
 
-class ImgRot(Canvas): 
+class ImgRot(Label): 
     ''' image rotatro  ''' 
     def __init__(self, parent=None, logger=None):
         super(ImgRot, self).__init__(parent=parent, fs=11.5, width=125, height=40, logger=logger )
 
-        self.img_out='ImgRot Out'
-        self.img_free='ImgRot Free'
-        self.img_link='ImgRot Link'
-        self.img_zenith='ImgRot Zenith'
-        self.img_undef='ImgRot Undefined'
-
+        self.img_out = 'ImgRot Out'
+        self.img_free = 'ImgRot Free'
+        self.img_link = 'ImgRot Link'
+        self.img_zenith = 'ImgRot Zenith'
+        self.img_undef = 'ImgRot Undefined'
  
     def update_imgrot(self, imgrot, mode, focus):
         ''' imgrot=TSCV.ImgRotRotation
@@ -68,14 +32,14 @@ class ImgRot(Canvas):
             focus=TSCV.FOCUSINFO
         ''' 
 
-        imgout=[0x10000000, 0x20000000,  0x00040000,  
-                0x00100000, 0x00200000,  0x00000400, 
-                0x00002000, 0x00004000,  0x00000008, 0x00000000]
+        imgout = [0x10000000, 0x20000000,  0x00040000,  
+                  0x00100000, 0x00200000,  0x00000400, 
+                  0x00002000, 0x00004000,  0x00000008, 0x00000000]
 
-        color=self.normal
+        color = self.normal
 
         if focus in imgout:
-            text=self.img_out
+            text = self.img_out
         elif imgrot == 0x02 or mode == 0x02:
             text = self.img_free
             color=self.warn
@@ -84,8 +48,8 @@ class ImgRot(Canvas):
         elif imgrot == 0x01 and mode == 0x40:
             text = self.img_zenith
         else:
-            text=self.img_undef
-            color=self.alarm
+            text = self.img_undef
+            color = self.alarm
         return (text, color)
 
     def tick(self):
@@ -93,34 +57,34 @@ class ImgRot(Canvas):
         import random  
         random.seed()
 
-        rindx=random.randrange(0, 7)
-        mindx=random.randrange(0, 8)
-        findx=random.randrange(0, 34)
-        iindx=random.randrange(0, 6)
+        rindx = random.randrange(0, 7)
+        mindx = random.randrange(0, 8)
+        findx = random.randrange(0, 34)
+        iindx = random.randrange(0, 6)
 
-        imgrot=[0x01, None, '##STATNONE##',  0x02, '##NODATA##', '##ERROR##']
-        mode=[0x01,  None, '##STATNONE##', 0x40, '##NODATA##', 0x02, '##ERROR##']
+        imgrot = [0x01, None, '##STATNONE##',  0x02, '##NODATA##', '##ERROR##']
+        mode = [0x01,  None, '##STATNONE##', 0x40, '##NODATA##', 0x02, '##ERROR##']
 
-        foci=[0x01000000, 0x11111111, 0x02000000, 0x00001000, 0x04000000,
-              0x08000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000L, 
-              0x00010000, 0x00020000, 0x00100000, 0x00200000, 0x00400000, 
-              0x00800000, 0x00000100, 0x00000200, 0x00002000, 0x00004000,
-              0x00008000, 0x00000001, 0x00000002, 0x00000004, 0x00040000,
-              0x00080000, 0x00000400, 0x00000800, 0x00000800, 0x00000008, 
-              0x00000010, 0x00000000]
+        foci = [0x01000000, 0x11111111, 0x02000000, 0x00001000, 0x04000000,
+                0x08000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000L, 
+                0x00010000, 0x00020000, 0x00100000, 0x00200000, 0x00400000, 
+                0x00800000, 0x00000100, 0x00000200, 0x00002000, 0x00004000,
+                0x00008000, 0x00000001, 0x00000002, 0x00000004, 0x00040000,
+                0x00080000, 0x00000400, 0x00000800, 0x00000800, 0x00000008, 
+                0x00000010, 0x00000000]
 
-        itype=[0x12, 0x10, 0x0C, 0x04, 0x14, None]
+        itype = [0x12, 0x10, 0x0C, 0x04, 0x14, None]
 
         try:
-            imgrot=imgrot[rindx]
-            mode=mode[mindx]
-            focus=foci[findx]
-            itype=itype[iindx]
+            imgrot = imgrot[rindx]
+            mode = mode[mindx]
+            focus = foci[findx]
+            itype = itype[iindx]
         except Exception as e:
-            imgrot=0x01
-            mode=0x01
-            focus=0x00000010
-            itype=0x12
+            imgrot = 0x01
+            mode = 0x01
+            focus = 0x00000010
+            itype = 0x12
             print e
         
         self.update_imgrot(imgrot, mode, focus, itype)
@@ -136,56 +100,34 @@ class ImgRotNsOpt(ImgRot):
         self.logger.debug('rot=%s mode=%s  focus=%s itype=%s' %(str(imgrot), str(mode), str(focus), str(itype)))
 
         # img-rot blue
-        imrb=[0x40000000, 0x80000000L, 0x00400000, 0x00800000, 0x00008000, 0x00000001]
+        imrb = [0x40000000, 0x80000000L, 0x00400000, 0x00800000, 0x00008000, 0x00000001]
         # img-rot red
-        imrr=[0x00010000, 0x00020000,  0x00000100, 0x00000200, 0x00000002, 0x00000004]         
+        imrr = [0x00010000, 0x00020000,  0x00000100, 0x00000200, 0x00000002, 0x00000004]         
 
         # image-rot type
-        itypes={0x12:imrb, 0x10:'(OnWay-Blue)', 0x0C:imrr, 0x04:'(OnWay-Red)', 0x14:'(none type)'}
+        itypes = {0x12:imrb, 0x10:'(OnWay-Blue)', 0x0C:imrr, 0x04:'(OnWay-Red)', 0x14:'(none type)'}
 
-        text, color=ImgRot.update_imgrot(self, imgrot, mode, focus)
+        text, color = ImgRot.update_imgrot(self, imgrot, mode, focus)
 
         if text in [self.img_free, self.img_link, self.img_zenith]:          
 
             try:    
-                res=itypes[itype]
+                res = itypes[itype]
                 self.logger.debug('res=%s' %res)
-                if type(res)==list:
-                    if focus in imrb:
-                        text+='\n(Blue)'
-                    elif focus in imrr:
-                        text+='\n(Red)'
-                    else:
-                        text+='\n(type undef)'
-                        color=self.warn
-                else:
-                    text+='\n'+res
             except KeyError:
-                text+='\n(type undef)'
-                color=self.warn 
-
-
-            # if itype ==0x12:
-            #     if focus in imrb:
-            #         text+='\n(Blue)' 
-            #     else:
-            #         text+='\n(Blue?)'
-            #         color=self.warn
-            # elif itype ==0x10:
-            #     text+='\n(OnWay-Blue)'
-            # elif itype ==0x0C:
-            #     if focus in imrr: 
-            #         text+='\n(Red)'
-            #     else:
-            #         text+='\n(Red?)'
-            #         color=self.warn
-            # elif itype ==0x04:
-            #     text+='\n(OnWay-Red)'
-            # elif itype ==0x14:
-            #     text+='\n(none type)'
-            # else:
-            #     text+='\n(type undef)'
-            #     color=self.warn 
+                text += '\n(type undef)'
+                color = self.warn 
+            else:
+                if type(res) == list:
+                    if focus in imrb:
+                        text += '\n(Blue)'
+                    elif focus in imrr:
+                        text += '\n(Red)'
+                    else:
+                        text += '\n(type undef)'
+                        color = self.warn
+                else:
+                    text += '\n'+res
 
         self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" %(color, self.bg))
@@ -200,15 +142,15 @@ class ImgRotNsIr(ImgRot):
      
         self.logger.debug('rot=%s mode=%s  focus=%s ' %(str(imgrot), str(mode), str(focus), ))
 
-        aoin= 0x00000000
-        text, color=ImgRot.update_imgrot(self, imgrot, mode, focus)
+        aoin = 0x00000000
+        text, color = ImgRot.update_imgrot(self, imgrot, mode, focus)
 
-        if text==self.img_out:
-            if focus==aoin:
+        if text == self.img_out:
+            if focus == aoin:
                 self.logger.debug('focus ao=%s' %str(focus))
-                text+='\n(AO In)'
+                text += '\n(AO In)'
             else:
-                text+='\n(AO Out)'  
+                text += '\n(AO Out)'  
         self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" %(color, self.bg))
 
@@ -287,7 +229,7 @@ if __name__ == '__main__':
                       help="Inverval for plotting(milli sec).")
     # note: there are sv/pir plotting, but mode ag uses the same code.  
     optprs.add_option("--mode", dest="mode",
-                      default='ag',
+                      default='nsir',
                       help="Specify a plotting mode [nsir |nsopt]")
 
     ssdlog.addlogopts(optprs)

@@ -12,11 +12,7 @@ import matplotlib.patches as mpatches
 from matplotlib.figure import SubplotParams
 from matplotlib.artist import Artist
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
-from Dummy import Dummy
-
 import ssdlog
-import PlBase
 from error import *
 
 

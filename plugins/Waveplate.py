@@ -3,18 +3,19 @@
 import sys
 import os
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
 
+from CustomLabel import Label, ERROR
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
 
-class Stage(Canvas):
+class Stage(Label):
     def __init__(self, parent=None, name=None, logger=None):
         super(Stage, self).__init__(parent=parent, fs=11.5, width=125, \
                                     height=20, logger=logger )
-        self.name=name   
+        self.name = name   
  
     def update_stage(self, stage):
 
@@ -24,22 +25,22 @@ class Stage(Canvas):
             stage = float(stage)
             assert -0.0001 < stage < 0.0001  # stage=0.0
             text = '%s Out' %self.name  
-            color=self.normal
-            bg=self.bg       
+            color = self.normal
+            bg = self.bg       
         except AssertionError:
             try:
                 assert 54.9999 < stage < 55.00001 # stage=55.0
                 text = '%s In' %self.name
-                color=self.bg
-                bg=self.normal       
+                color = self.bg
+                bg = self.normal       
             except AssertionError:
                 text = '%s Undef' %self.name
-                color=self.alarm
-                bg=self.bg   
+                color = self.alarm
+                bg = self.bg   
         except Exception as e:
             text = '%s Undef' %self.name
-            color=self.alarm
-            bg=self.bg   
+            color = self.alarm
+            bg = self.bg   
         finally:
             self.setText(text)
             self.setStyleSheet("QLabel {color: %s; background-color: %s}" \
@@ -51,14 +52,14 @@ class Waveplate(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(Waveplate, self).__init__(parent)
 
-        self.stage1=Stage(parent=parent, name='Polarizer', logger=logger)
-        self.stage2=Stage(parent=parent, name='1/2 WP', logger=logger)
-        self.stage3=Stage(parent=parent, name='1/4 WP', logger=logger)
-        self.logger=logger
+        self.stage1 = Stage(parent=parent, name='Polarizer', logger=logger)
+        self.stage2 = Stage(parent=parent, name='1/2 WP', logger=logger)
+        self.stage3 = Stage(parent=parent, name='1/4 WP', logger=logger)
+        self.logger = logger
 
-        self.__set_layout() 
+        self._set_layout() 
 
-    def __set_layout(self):
+    def _set_layout(self):
         wavelayout = QtGui.QVBoxLayout()
         wavelayout.setSpacing(1) 
         wavelayout.setMargin(0)
@@ -74,12 +75,6 @@ class Waveplate(QtGui.QWidget):
             #focus = TSCV.FOCUSINFO 
         '''
         self.logger.debug('s1=%s s2=%s s3=%s' %(str(stage1), str(stage2), str(stage3)))
-        # nsir=[0x00040000, 0x00080000, 0x00000400, 0x00000800, 
-        #       0x00000008, 0x00000010, 0x00000000]
-
-        # if not focus in nsir:
-        #     return 
-   
         self.stage1.update_stage(stage1)
         self.stage2.update_stage(stage2)
         self.stage3.update_stage(stage3)
@@ -89,10 +84,10 @@ class Waveplate(QtGui.QWidget):
         import random  
         random.seed()
 
-        findx=random.randrange(0, 35)
-        sindx=random.randrange(0, 3) 
+        findx = random.randrange(0, 35)
+        sindx = random.randrange(0, 3) 
 
-        foci=[0x01000000, 0x02000000, 0x04000000, 0x08000000,
+        foci = [0x01000000, 0x02000000, 0x04000000, 0x08000000,
               0x10000000, 0x20000000, 0x40000000, 0x80000000L,
               0x00010000, 0x00020000, 0x00040000, 0x00080000,
               0x00100000, 0x00200000, 0x00400000, 0x00800000,
@@ -102,14 +97,14 @@ class Waveplate(QtGui.QWidget):
               0x00000010, 0x00000000, 
               "Unknown", None, '##STATNONE##', '##NODATA##', '##ERROR##']
 
-        stage=[0.0, 55.0, None]
+        stage = [0.0, 55.0, None]
 
         try:
-            focus=foci[findx]
-            stage=stage[sindx]
+            focus = foci[findx]
+            stage = stage[sindx]
         except Exception as e:
-            focus=0x00000008
-            stage=0.0
+            focus = 0x00000008
+            stage = 0.0
             print e
         self.update_waveplate(stage1=stage, stage2=stage, stage3=stage)
 

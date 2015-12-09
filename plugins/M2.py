@@ -3,46 +3,15 @@
 import sys
 import os
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from PyQt4 import QtCore, QtGui
 
+from CustomLabel import Label, ERROR
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
-    
-# class M2(QtGui.QLabel):
-#     ''' state of the telescope in pointing/slewing/tracking/guiding  '''
-#     def __init__(self, parent=None, logger=None):
-#         super(M2, self).__init__(parent)
-
-#         self.bg='white'
-#         self.alarm='red'
-#         self.normal='green'
-
-#         self.w=250
-#         self.h=35
-
-#         self.logger=logger
-       
-#         self.__init_label()
-
-#     def __init_label(self):
-#         self.font = QtGui.QFont('UnDotum', 16) 
-#         self.setText('Initializing')
-#         self.setAlignment(QtCore.Qt.AlignCenter)
-#         self.setFont(self.font)
-
-#         #self.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Sunken)
-#         #self.setLineWidth(0.1)
-#         self.setStyleSheet("QLabel {color :%s ; background-color:%s}" %(self.normal, self.bg))
-
-#     def minimumSizeHint(self):
-#         return QtCore.QSize(self.w, self.h)
-
-#     def sizeHint(self):
-#         return QtCore.QSize(self.w, self.h)
 
 
-class M2(Canvas):
+class M2(Label):
     ''' telescope 2nd mirror   '''
     def __init__(self, parent=None, logger=None):
         super(M2, self).__init__(parent=parent, fs=16, width=250, \
@@ -68,14 +37,13 @@ class M2(Canvas):
             (0x00000000, 0x04): 'Ns Opt M2', 
             (0x00000000, 0x08): 'HSC at M2',}            
 
-
     def update_m2(self,focus, focus2):
         ''' focus = TSCV.FOCUSINFO 
             focus2= TSCV.FOCUSINFO2 '''
 
         self.logger.debug('focus=%s focus2=%s' %(str(focus), str(focus2)))
 
-        color=self.normal
+        color = self.normal
         try:
             text = M2.foci[focus]
         except KeyError:

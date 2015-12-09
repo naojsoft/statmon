@@ -84,6 +84,7 @@ plugins = [
     ('radec', 'RaDec', 'RaDec', 'top', ''),
     ('times', 'RaDec', 'Times', 'bottom', ''),
     ('envmon', 'EnvMonPlugin', 'EnvMonPlugin', 'right', 'EnvMon'),
+    ('statusable', 'StatusTablePlugin', 'StatusTablePlugin', 'right', 'StatTable'),
     ('debug', 'Debug', 'Debug', 'right', "Debug"), 
     ('state', 'StatePlugin', 'StatePlugin', 'left1', ''),
     ('plot', 'PlotPlugin', 'PlotPlugin', 'left2', ''),

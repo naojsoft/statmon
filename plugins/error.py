@@ -1,1 +1,1 @@
-ERROR=["Unknown", None, '##STATNONE##', '##NODATA##', '##ERROR##']
+ERROR = ["Unknown", None, '##STATNONE##', '##NODATA##', '##ERROR##', 'None']

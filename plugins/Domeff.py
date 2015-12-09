@@ -6,7 +6,7 @@ import sys
 
 from PyQt4 import QtGui, QtCore
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from CustomLabel import Label, ERROR
 from Dummy import Dummy
 from DomeffWatt import DomeffWatt
 from DomeffVolt import DomeffVolt
@@ -24,7 +24,7 @@ class DomeffDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(DomeffDisplay, self).__init__(parent)
    
-        self.domeff_label = Canvas(parent=parent, fs=13, width=175,\
+        self.domeff_label = Label(parent=parent, fs=13, width=175,\
                                    height=25, align='vcenter', \
                                    weight='normal', logger=logger)
 

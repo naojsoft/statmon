@@ -12,77 +12,101 @@ import ssdlog
 progname = os.path.basename(sys.argv[0])
 
 
-class Object(Label):
-    ''' Object  '''
+class Shutter(Label):
     def __init__(self, parent=None, logger=None):
-        super(Object, self).__init__(parent=parent, fs=13, width=200,\
-                                     height=25, align='vcenter', \
-                                     weight='bold', logger=logger)
+        super(Shutter, self).__init__(parent=parent, fs=11.5, width=70,\
+                                    height=20, logger=logger )
 
-    def update_object(self, obj):
-        ''' object = FITS.XXX.OBJECT '''
+        self.status = {'OPEN': self.alarm, 'CLOSE': self.normal} 
+              
+ 
+    def shutter(self, shutter):
 
-        self.logger.debug('obj=%s' %(str(obj)))
+        self.logger.debug('shutter=%s' %(str(shutter)))
 
-        color=self.normal
-
-        if not obj in ERROR:
-            #text = '%s %s' %(label.ljust(15), obj.rjust(20))            
-            text = '{0}'.format(obj)
-        else:
-            #text = '%s %s' %(label.ljust(15), 'Undefined'.rjust(20))
-            text = '{0}'.format('Undefined')
+        try:
+            color = self.status[shutter]
+            text = shutter
+        except Exception: 
             color = self.alarm
-            self.logger.error('error: object undef. object=%s' %(str(obj)))
+            text = 'Undef'
 
-        #self.setText('CalProbe: ')
         self.setText(text)
-        self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
-                           %(color, self.bg))
+        self.setStyleSheet("QLabel {color: %s; background-color: %s}" \
+                            %(color, self.bg))
 
 
-class ObjectDisplay(QtGui.QWidget):
+class AoShutter(QtGui.QWidget):
+    ''' AO Shutters  '''
     def __init__(self, parent=None, logger=None):
-        super(ObjectDisplay, self).__init__(parent)
-   
-        self.obj_label = Label(parent=parent, fs=13, width=175,\
-                                height=25, align='vcenter', \
-                                weight='normal', logger=logger)
+        super(AoShutter, self).__init__(parent)
 
-        self.obj_label.setText('Object')
-        self.obj_label.setIndent(15)
-        #self.obj_label.setAlignment(QtCore.Qt.AlignVCenter) 
+        self.lwsh_label = Label(parent=parent, fs=11.5, width=50,\
+                                 height=20, align='vcenter', weight='normal', \
+                                 logger=logger)
 
-        self.obj = Object(parent=parent, logger=logger)
+        self.hwsh_label = Label(parent=parent, fs=11.5, width=50,\
+                                 height=20, align='vcenter', weight='normal', \
+                                 logger=logger)
+
+
+        self.lwsh_label.setText('LWSH:')
+        self.lwsh_label.setIndent(2)
+        self.hwsh_label.setText('HWSH:')
+        self.hwsh_label.setIndent(2)
+
+        self.lwsh = Shutter(parent=parent, logger=logger)
+        self.hwsh = Shutter(parent=parent, logger=logger)
+        self.logger = logger
+
         self._set_layout() 
 
     def _set_layout(self):
-        objlayout = QtGui.QHBoxLayout()
-        objlayout.setSpacing(0) 
-        objlayout.setMargin(0)
-        objlayout.addWidget(self.obj_label)
-        objlayout.addWidget(self.obj)
-        self.setLayout(objlayout)
+        top = QtGui.QVBoxLayout()
 
-    def update_object(self, obj):
-        self.obj.update_object(obj)
+        lwshHbox = QtGui.QHBoxLayout()
+        lwshHbox.setSpacing(0) 
+        lwshHbox.setMargin(0)
+        lwshHbox.addWidget(self.lwsh_label)
+        lwshHbox.addWidget(self.lwsh)
+
+        hwshHbox = QtGui.QHBoxLayout()
+        hwshHbox.setSpacing(0) 
+        hwshHbox.setMargin(0)
+        hwshHbox.addWidget(self.hwsh_label)
+        hwshHbox.addWidget(self.hwsh)
+
+        top.setSpacing(1) 
+        top.setMargin(0)
+        top.addLayout(lwshHbox)
+        top.addLayout(hwshHbox)
+        self.setLayout(top)
+  
+    def update_aoshutter(self, lwsh, hwsh):
+        ''' lwsh = AON.LWFS.LASH
+            hwsh = AON.HWFS.LASH
+        '''
+
+        self.logger.debug('lwsh=%s hwsh=%s' %(str(lwsh), str(hwsh)))
+   
+        self.lwsh.shutter(lwsh)
+        self.hwsh.shutter(hwsh)
+
 
     def tick(self):
         ''' testing solo mode '''
         import random  
         random.seed()
 
-        indx = random.randrange(0, 9)
+        indx = random.randrange(0, 4) 
+        shutter = ['OPEN', 'CLOSE', '##NODATA##']
 
-        obj = ['FOFOSS', None, 'NAOJ1212', 'M78asfaf', "Unknown", \
-               '##STATNONE##', '##NODATA##', 'GINZA', '##ERROR##']
- 
         try:
-            obj = obj[indx]
+            shutter = shutter[indx]
         except Exception as e:
-            obj = 'SUBARU'
+            shutter = None
             print e
-        self.update_object(obj)
+        self.update_aoshutter(lwsh=shutter, hwsh=shutter)
 
 
 def main(options, args):
@@ -94,7 +118,7 @@ def main(options, args):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=450; self.h=25;
+            self.w=125; self.h=60;
             self.init_ui()
 
         def init_ui(self):
@@ -104,11 +128,11 @@ def main(options, args):
             l = QtGui.QVBoxLayout(self.main_widget)
             l.setMargin(0) 
             l.setSpacing(0)
-            obj = ObjectDisplay(parent=self.main_widget, logger=logger)
-            l.addWidget(obj)
+            a = AoShutter(parent=self.main_widget, logger=logger)
+            l.addWidget(a)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), obj.tick)
+            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), a.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()

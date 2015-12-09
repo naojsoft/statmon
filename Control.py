@@ -29,6 +29,7 @@ class Controller(Callback.Callbacks):
         self.settings = settings
         self.ev_quit = ev_quit
         self.model = model
+        self.last_update = None
 
         # For callbacks
         for name in ['change-config', ]:
@@ -67,10 +68,11 @@ class Controller(Callback.Callbacks):
     def update_status(self, model, statusInfo):
         self.logger.debug("status arrived: %s" % (str(statusInfo)))
 
+        start_time = time.time()
+        self.last_update = start_time
+
         if len(statusInfo) == 0:
             return
-
-        start_time = time.time()
 
         aliasset = set(statusInfo.keys())
 

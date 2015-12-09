@@ -3,17 +3,15 @@
 import sys
 import os
 
+from PyQt4 import QtCore, QtGui
 
-# This is only needed for Python v2 but is harmless for Python v3.
-#import sip
-#sip.setapi('QVariant', 2)
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from CustomLabel import Label, ERROR
 import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
     
-class Focus(Canvas):
+class Focus(Label):
     ''' telescope focus  '''
 
     def __init__(self, parent=None, logger=None):
@@ -48,28 +46,28 @@ class Focus(Canvas):
 
         self.logger.debug('focus=%s focus2=%s alarm=%s' %(str(focus), str(focus2), str(alarm)))
 
-        color=self.normal
+        color = self.normal
         try:
             text = Focus.foci[focus]
         except KeyError:
             try:
                 text = Focus.foci[(focus,focus2)]
             except KeyError:
-                text='Focus Undefined'
-                color=self.alarm
+                text = 'Focus Undefined'
+                color = self.alarm
                 self.logger.error('error: focus undef. focusinfo=%s focusinfo2=%s focusalarm=%s' %(str(focus), str(focus2), str(alarm)))
 
         try:
             if alarm & 0x40:        
-                text='Focus Changing'
-                color=self.alarm
+                text = 'Focus Changing'
+                color = self.alarm
             if alarm & 0x80:
-                text='Focus Conflict'
-                color=self.alarm
+                text = 'Focus Conflict'
+                color = self.alarm
                 self.logger.error('error: focus in conflict with rot/adc')
         except TypeError:
             text = 'Focus Undefined'
-            color=self.alarm
+            color = self.alarm
             self.logger.error('error: focusalarm undef. focusinfo=%s focusinfo2=%s focusalarm=%s' %(str(focus), str(focus2), str(alarm)))
 
 
@@ -82,9 +80,9 @@ class Focus(Canvas):
         import random  
         random.seed()
 
-        findx=random.randrange(0, 35)
+        findx = random.randrange(0, 35)
 
-        foci=[0x01000000, 0x02000000, 0x04000000, 0x08000000,
+        foci = [0x01000000, 0x02000000, 0x04000000, 0x08000000,
               0x10000000, 0x20000000, 0x40000000, 0x80000000L,
               0x00010000, 0x00020000, 0x00040000, 0x00080000,
               0x00100000, 0x00200000, 0x00400000, 0x00800000,
@@ -95,14 +93,14 @@ class Focus(Canvas):
               "Unknown", None, '##STATNONE##', '##NODATA##', '##ERROR##']
   
         
-        aindx=random.randrange(0, 6)
-        alarm=[0x40,  None, 0x00, 0x80, '##NODATA##', 0x00 ]
+        aindx = random.randrange(0, 6)
+        alarm = [0x40,  None, 0x00, 0x80, '##NODATA##', 0x00 ]
         try:
-            focus=foci[findx]
-            alarm=alarm[aindx]
+            focus = foci[findx]
+            alarm = alarm[aindx]
         except Exception as e:
-            focus=None
-            alarm=0x40
+            focus = None
+            alarm = 0x40
             print e
         #focus=0x04000000
         focus2=0x08
@@ -118,7 +116,7 @@ def main(options, args):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=250; self.h=25;
+            self.w = 250; self.h = 25;
             self.init_ui()
 
         def init_ui(self):
