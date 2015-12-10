@@ -26,6 +26,9 @@ sys.path.insert(0, pluginHome)
 import remoteObjects as ro
 import remoteObjects.Monitor as Monitor
 import Gen2.soundsink as SoundSink
+from ginga import toolkit
+toolkit.use('qt4')
+from ginga.gw import Widgets
 from ginga.misc import ModuleManager, Settings
 
 # Local application imports
@@ -110,7 +113,7 @@ class StatMon(Controller, Viewer):
 
         self.soundsink = soundsink
         
-        Viewer.__init__(self)
+        Viewer.__init__(self, logger, ev_quit)
         Controller.__init__(self, logger, threadPool, module_manager,
                             settings, ev_quit, model)
 
@@ -120,7 +123,7 @@ class StatMon(Controller, Viewer):
         
     def add_menus(self):
         menubar = QtGui.QMenuBar()
-        self.w.menubox.layout().addWidget(menubar, stretch=0)
+        self.w.menubox.add_widget(Widgets.wrap(menubar), stretch=0)
 
         # create a File pulldown menu, and add it to the menu bar
         filemenu = menubar.addMenu("File")
@@ -138,7 +141,7 @@ class StatMon(Controller, Viewer):
 
     def add_statusbar(self):
         self.w.status = QtGui.QStatusBar()
-        self.w.statusbox.layout().addWidget(self.w.status, stretch=1)
+        self.w.statusbox.add_widget(Widgets.wrap(self.w.status), stretch=1)
    
 def main(options, args):
     # Create top level logger.
@@ -199,7 +202,7 @@ def main(options, args):
     # Build desired layout
     statmon.build_toplevel(layout=default_layout)
     for w in statmon.ds.toplevels:
-        w.showNormal()
+        w.show()
 
     for pluginName, moduleName, className, wsName, tabName in plugins:
         statmon.load_plugin(pluginName, moduleName, className,
@@ -209,7 +212,7 @@ def main(options, args):
 
     # Did user specify geometry
     if options.geometry:
-        statmon.setGeometry(options.geometry)
+        statmon.set_geometry(options.geometry)
 
     server_started = False
 

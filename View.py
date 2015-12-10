@@ -2,7 +2,7 @@
 # Viewer.py -- Qt display handler for StatMon.
 #
 #[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Mon Jan 27 12:57:45 HST 2014
+#  Last edit: Wed Dec  9 15:20:06 HST 2015
 #]
 #
 # stdlib imports
@@ -11,7 +11,7 @@ import Queue
 import traceback
 
 # GUI imports
-from ginga.qtw import QtHelp
+from ginga.gw import Widgets, Desktop, GwMain
 from PyQt4 import QtGui, QtCore
 from ginga.misc import Bunch
 
@@ -24,32 +24,20 @@ class ViewError(Exception):
     """Exception raised for errors in this module."""
     pass
 
-class Viewer(object):
+class Viewer(GwMain.GwMain, Widgets.Application):
      
-    def __init__(self):
+    def __init__(self, logger, ev_quit):
         # Create the top level Qt app
-        #QtGui.QApplication.setGraphicsSystem('raster')
+        Widgets.Application.__init__(self, logger=logger)
+        GwMain.GwMain.__init__(self, logger=logger, ev_quit=ev_quit, app=self)
 
         QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
         QtGui.QApplication.setPalette(QtGui.QApplication.style().standardPalette())
 
-
-        app = QtGui.QApplication([])
-        app.connect(app, QtCore.SIGNAL('lastWindowClosed()'),
-                    self.quit)
-        self.app = app
         # read in any module-level style sheet
         if os.path.exists(rc_file):
             self.app.setStyleSheet(rc_file)
         
-        # Get screen size
-        desktop = app.desktop()
-        #rect = desktop.screenGeometry()
-        rect = desktop.availableGeometry()
-        size = rect.size()
-        self.screen_wd = size.width()
-        self.screen_ht = size.height()
-
         # defaults for height and width
         self.default_height = min(900, self.screen_ht - 100)
         self.default_width  = min(1600, self.screen_wd)
@@ -73,12 +61,14 @@ class Viewer(object):
 
     def build_toplevel(self, layout):
         # Dynamically create the desktop layout
-        self.ds = QtHelp.Desktop()
+        self.ds = Desktop.Desktop(self)
         self.ds.make_desktop(layout, widgetDict=self.w)
         self.ds.add_callback('all-closed', self.quit)
 
         root = self.ds.toplevels[0]
         self.w.root = root
+        # TEMP: temporarily needed until "all-closed" callback from Desktop is working
+        root.add_callback('close', self.quit)
 
         # Add menubar and menus, if desired
         self.add_menus()
@@ -113,7 +103,7 @@ class Viewer(object):
     def set_titlebar(self, text):
         """Sets the title of the top level window.
         """
-        self.w.root.setWindowTitle(text)
+        self.w.root.set_title(text)
         
     def load_plugin(self, pluginName, moduleName, className, wsName, tabName):
 
@@ -148,7 +138,7 @@ class Viewer(object):
 
             # Add the widget to a workspace and save the tab name in
             # case we need to delete the widget later on.
-            dsTabName = self.ds.add_tab(wsName, widget, 2, tabName)
+            dsTabName = self.ds.add_tab(wsName, Widgets.wrap(widget), 2, tabName)
             self.plugins[pluginName].setvals(wsTabName=dsTabName)
 
             # Start the plugin
@@ -178,7 +168,7 @@ class Viewer(object):
             textw.setReadOnly(True)
             vbox.addWidget(textw, stretch=1)
                 
-            self.ds.add_tab(wsName, widget, 2, tabName)
+            self.ds.add_tab(wsName, Widgets.wrap(widget), 2, tabName)
 
     def close_plugin(self, pluginName):
         bnch = self.plugins[pluginName]
@@ -232,7 +222,7 @@ class Viewer(object):
         """Set the size of the root window."""
         self.w.root.resize(w, h)
 
-    def setGeometry(self, geometry):
+    def set_geometry(self, geometry):
         """Set the geometry of the root window.  (geometry) is expected to
         be an X-style geometry string; e.g. 1000x900+100+200
         """
@@ -259,57 +249,57 @@ class Viewer(object):
             coords = map(int, coords)
             self.setPos(*coords)
 
-    def update_pending(self, timeout=0.0):
-        """Routine to process pending Qt events."""
-        try:
-            self.app.processEvents()
-        except Exception, e:
-            self.logger.error(str(e))
-            # TODO: traceback!
+    ## def update_pending(self, timeout=0.0):
+    ##     """Routine to process pending Qt events."""
+    ##     try:
+    ##         self.app.processEvents()
+    ##     except Exception, e:
+    ##         self.logger.error(str(e))
+    ##         # TODO: traceback!
         
-        done = False
-        while not done:
-            #print "PROCESSING IN-BAND"
-            # Process "in-band" Qt events
-            try:
-                future = self.gui_queue.get(block=True, 
-                                            timeout=timeout)
+    ##     done = False
+    ##     while not done:
+    ##         #print "PROCESSING IN-BAND"
+    ##         # Process "in-band" Qt events
+    ##         try:
+    ##             future = self.gui_queue.get(block=True, 
+    ##                                         timeout=timeout)
 
-                # Execute the GUI method
-                try:
-                    try:
-                        res = future.thaw(suppress_exception=False)
+    ##             # Execute the GUI method
+    ##             try:
+    ##                 try:
+    ##                     res = future.thaw(suppress_exception=False)
 
-                    except Exception, e:
-                        future.resolve(e)
+    ##                 except Exception, e:
+    ##                     future.resolve(e)
 
-                        self.logger.error("gui error: %s" % str(e))
-                        try:
-                            (type, value, tb) = sys.exc_info()
-                            tb_str = "".join(traceback.format_tb(tb))
-                            self.logger.error("Traceback:\n%s" % (tb_str))
+    ##                     self.logger.error("gui error: %s" % str(e))
+    ##                     try:
+    ##                         (type, value, tb) = sys.exc_info()
+    ##                         tb_str = "".join(traceback.format_tb(tb))
+    ##                         self.logger.error("Traceback:\n%s" % (tb_str))
 
-                        except Exception, e:
-                            self.logger.error("Traceback information unavailable.")
+    ##                     except Exception, e:
+    ##                         self.logger.error("Traceback information unavailable.")
 
-                finally:
-                    pass
+    ##             finally:
+    ##                 pass
 
                     
-            except Queue.Empty:
-                done = True
+    ##         except Queue.Empty:
+    ##             done = True
                 
-            except Exception, e:
-                self.logger.error("Main GUI loop error: %s" % str(e))
-                #pass
+    ##         except Exception, e:
+    ##             self.logger.error("Main GUI loop error: %s" % str(e))
+    ##             #pass
                 
-        # Process "out-of-band" events
-        #print "PROCESSING OUT-BAND"
-        try:
-            self.app.processEvents()
-        except Exception, e:
-            self.logger.error(str(e))
-            # TODO: traceback!
+    ##     # Process "out-of-band" events
+    ##     #print "PROCESSING OUT-BAND"
+    ##     try:
+    ##         self.app.processEvents()
+    ##     except Exception, e:
+    ##         self.logger.error(str(e))
+    ##         # TODO: traceback!
 
 
     ####################################################
