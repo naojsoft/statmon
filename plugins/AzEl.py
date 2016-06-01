@@ -71,7 +71,7 @@ class AzElCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        #FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         #FigureCanvas.updateGeometry(self)
 
         # width/hight of widget

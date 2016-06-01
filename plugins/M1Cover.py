@@ -44,6 +44,10 @@ class M1Canvas(FigureCanvas):
                                    QtGui.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
+        #FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Fixed, \
+        #                           QtGui.QSizePolicy.Fixed)
+        #FigureCanvas.updateGeometry(self)
+
         # width/hight of widget
         self.w=250
         self.h=70

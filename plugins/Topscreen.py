@@ -45,6 +45,12 @@ class TopscreenCanvas(FigureCanvas):
         #                           QtGui.QSizePolicy.Expanding)
         #FigureCanvas.updateGeometry(self)
 
+
+        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Fixed, \
+                                   QtGui.QSizePolicy.Fixed)
+        FigureCanvas.updateGeometry(self)
+
+
         # width/hight of widget
         self.w=500
         self.h=50

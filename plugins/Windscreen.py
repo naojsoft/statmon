@@ -57,8 +57,10 @@ class WindscreenCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        #FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
+
+        #FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
 
         # width/hight of widget
         self.w = 125
