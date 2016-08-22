@@ -36,7 +36,7 @@ class Controller(Callback.Callbacks):
             self.enable_callback(name)
 
         self.gui_queue = Queue.Queue()
-        self.gui_thread_id = None
+        self.gui_thread_id = thread.get_ident()
         # For asynchronous tasks on the thread pool
         self.tag = 'master'
         self.shares = ['threadPool', 'logger']
@@ -175,13 +175,13 @@ class Controller(Callback.Callbacks):
     def assert_gui_thread(self):
         my_id = thread.get_ident() 
         assert my_id == self.gui_thread_id, \
-               FitsViewError("Non-GUI thread (%d) is executing GUI code!" % (
+               ControlError("Non-GUI thread (%d) is executing GUI code!" % (
             my_id))
         
     def assert_nongui_thread(self):
         my_id = thread.get_ident() 
         assert my_id != self.gui_thread_id, \
-               FitsViewError("GUI thread (%d) is executing non-GUI code!" % (
+               ControlError("GUI thread (%d) is executing non-GUI code!" % (
             my_id))
         
     def mainloop(self, timeout=0.001):
