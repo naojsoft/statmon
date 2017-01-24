@@ -76,7 +76,7 @@ class RotLimitPlugin(PlBase.Plugin):
         # instrument on prime/cs/ns focus
         pf = ('SPCAM', 'HSC', 'FMOS')  
         cs = ('MOIRCS', 'FOCAS', 'COMICS')
-        ns = ('IRCS', 'HDS', 'HICIAO', 'K3D')
+        ns = ('IRCS', 'HDS', 'HICIAO', 'K3D', 'CHARIS')
 
         if obcp in pf:
             self.aliases = ['TSCS.INSROTPOS_PF', 'TSCS.INSROTCMD_PF']
@@ -96,6 +96,7 @@ class RotLimitPlugin(PlBase.Plugin):
                  'HDS': ('Rotator Ns Opt', (-175.0, 175.0), (-179.5, 179.5), (-180.0, 180.0)), 
                  'IRCS': ('Rotator Ns Ir', (-175.0, 175.0), (-179.5, 179.5), (-180.0, 180.0)), 
                  'HICIAO': ('Rotator Ns Ir', (-175.0, 175.0), (-179.5, 179.5), (-180.0, 180.0)), 
+                 'CHARIS': ('Rotator Ns Ir', (-175.0, 175.0), (-179.5, 179.5), (-180.0, 180.0)),  
                  'K3D': ('Rotator Ns Ir', (-175.0, 175.0), (-179.5, 179.5), (-180.0, 180.0)), 
                  'COMICS': ('Rotator Cs',  (-260.0, 260.0), (-269.5, 269.5), (-270.0, 270.0)),
                  'MOIRCS': ('Rotator Cs',  (-260.0, 260.0), (-269.5, 269.5), (-270.0, 270.0)),
@@ -218,7 +219,7 @@ class ProbeLimitPlugin(PlBase.Plugin):
         self.popt = 'SPCAM'  
         self.pir = 'FMOS'
         self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'HDS', 'SUKA')
-        self.ao = ('IRCS', 'HICIAO', 'K3D', )
+        self.ao = ('IRCS', 'HICIAO', 'K3D', 'CHARIS' )
         self.popt2 = 'HSC'
  
         self.root = container

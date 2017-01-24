@@ -138,7 +138,7 @@ class PlotPlugin(PlBase.Plugin):
         self.hscag = 'HSC'  
         self.fmosag = 'FMOS'
         self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'SPCAM', 'SUKA')
-        self.ao = ('IRCS', 'HICIAO', 'K3D', )
+        self.ao = ('IRCS', 'HICIAO', 'K3D', 'CHARIS')
         self.agsv = 'HDS'
 
         try:

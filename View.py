@@ -62,7 +62,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
     def build_toplevel(self, layout):
         # Dynamically create the desktop layout
         self.ds = Desktop.Desktop(self)
-        self.ds.make_desktop(layout, widgetDict=self.w)
+        self.ds.make_desktop(layout, widget_dict=self.w)
         self.ds.add_callback('all-closed', self.quit)
 
         root = self.ds.toplevels[0]

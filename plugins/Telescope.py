@@ -268,13 +268,14 @@ class TelescopeGui(QtGui.QWidget):
         ''' spcam/hsc: insrot,adc 
             fmos: insrot
             hds:  imgrot,adc
-            ircs/hiciao/k3d: imgrot,waveplate
+            ircs/hiciao/k3d/charis: imgrot,waveplate
             comics: insrot,tipchop
             focas: insrot,adc
             moircs insrot 
         ''' 
         focus = {'HDS': self.nsopt_layout, 'SPCAM': self.popt_layout, \
                  'HICIAO': self.nsir_layout, 'IRCS': self.nsir_layout, \
+                 'CHARIS': self.nsir_layout, \
                  'FMOS': self.pir_layout, 'HSC': self.popt_layout, \
                  'K3D': self.nsir_layout, 'MOIRCS': self.cs_layout, \
                  'FOCAS': self.csopt_layout, 'COMICS': self.csir_layout, \
@@ -361,6 +362,7 @@ class Telescope(TelescopeGui):
         
         focus = {'HDS': self.update_nsopt, 'SPCAM': self.update_popt, \
                  'HICIAO': self.update_nsir, 'IRCS': self.update_nsir, \
+                 'CHARIS': self.update_nsir, \
                  'FMOS': self.update_pir, 'HSC': self.update_popt, \
                  'K3D': self.update_nsir, 'MOIRCS': self.update_cs, \
                  'FOCAS': self.update_csopt, 'COMICS': self.update_csir, \
@@ -440,9 +442,9 @@ class Telescope(TelescopeGui):
 
         if self.obcp in ('MOIRCS', 'FOCAS', 'SPCAM', 'HSC', 'COMICS', 'FMOS', 'SUKA'):
             self.insrot.tick()
-        if self.obcp in ('HDS', 'HICIAO', 'IRCS', 'K3D'):
+        if self.obcp in ('HDS', 'HICIAO', 'IRCS', 'K3D', 'CHARIS'):
             self.imgrot.tick()
-        if self.obcp in ('HICIAO', 'IRCS', 'K3D'):
+        if self.obcp in ('HICIAO', 'IRCS', 'K3D', 'CHARIS'):
             self.waveplate.tick()
             self.aoshutter.tick()
         if self.obcp in ('HDS', 'FOCAS', 'SPCAM', 'HSC'): 
