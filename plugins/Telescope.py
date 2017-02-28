@@ -278,6 +278,7 @@ class TelescopeGui(QtGui.QWidget):
                  'CHARIS': self.nsir_layout, \
                  'FMOS': self.pir_layout, 'HSC': self.popt_layout, \
                  'K3D': self.nsir_layout, 'MOIRCS': self.cs_layout, \
+                 'SWIMS': self.csir_layout, 'MIMIZUKU' : self.csir_layout, \
                  'FOCAS': self.csopt_layout, 'COMICS': self.csir_layout, \
                  'SUKA': self.cs_layout}
 
@@ -365,6 +366,7 @@ class Telescope(TelescopeGui):
                  'CHARIS': self.update_nsir, \
                  'FMOS': self.update_pir, 'HSC': self.update_popt, \
                  'K3D': self.update_nsir, 'MOIRCS': self.update_cs, \
+                 'SWIMS':  self.update_cs, 'MIMIZUKU' :  self.update_cs, \
                  'FOCAS': self.update_csopt, 'COMICS': self.update_csir, \
                  'SUKA': self.update_cs}
 
@@ -440,7 +442,7 @@ class Telescope(TelescopeGui):
         self.m1.tick()
         self.cell.tick()
 
-        if self.obcp in ('MOIRCS', 'FOCAS', 'SPCAM', 'HSC', 'COMICS', 'FMOS', 'SUKA'):
+        if self.obcp in ('MOIRCS', 'FOCAS', 'SPCAM', 'HSC', 'COMICS', 'FMOS', 'SWIMS', 'MIMIZUKU', 'SUKA'):
             self.insrot.tick()
         if self.obcp in ('HDS', 'HICIAO', 'IRCS', 'K3D', 'CHARIS'):
             self.imgrot.tick()
