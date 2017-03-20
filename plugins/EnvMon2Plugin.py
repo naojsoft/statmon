@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import PlBase
 import EnvMon2
 from PyQt4 import QtGui, QtCore

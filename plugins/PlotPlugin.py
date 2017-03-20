@@ -2,6 +2,7 @@
 # Takeshi Inagaki
 # Eric Jeschke (eric@naoj.org)
 #
+from __future__ import absolute_import
 from PyQt4 import QtGui, QtCore
 import sip
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
@@ -10,7 +12,12 @@ import os
 from PyQt4 import QtCore, QtGui
 
 from CustomLabel import Label, ERROR
-import ssdlog
+from g2base import ssdlog
+
+import six
+
+if six.PY3:
+    long = int
 
 progname = os.path.basename(sys.argv[0])
 
@@ -66,7 +73,7 @@ class ImgRot(Label):
         mode = [0x01,  None, '##STATNONE##', 0x40, '##NODATA##', 0x02, '##ERROR##']
 
         foci = [0x01000000, 0x11111111, 0x02000000, 0x00001000, 0x04000000,
-                0x08000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000L, 
+                0x08000000, 0x10000000, 0x20000000, 0x40000000, long(0x80000000), 
                 0x00010000, 0x00020000, 0x00100000, 0x00200000, 0x00400000, 
                 0x00800000, 0x00000100, 0x00000200, 0x00002000, 0x00004000,
                 0x00008000, 0x00000001, 0x00000002, 0x00000004, 0x00040000,
@@ -85,7 +92,7 @@ class ImgRot(Label):
             mode = 0x01
             focus = 0x00000010
             itype = 0x12
-            print e
+            print(e)
         
         self.update_imgrot(imgrot, mode, focus, itype)
 
@@ -100,7 +107,7 @@ class ImgRotNsOpt(ImgRot):
         self.logger.debug('rot=%s mode=%s  focus=%s itype=%s' %(str(imgrot), str(mode), str(focus), str(itype)))
 
         # img-rot blue
-        imrb = [0x40000000, 0x80000000L, 0x00400000, 0x00800000, 0x00008000, 0x00000001]
+        imrb = [0x40000000, long(0x80000000), 0x00400000, 0x00800000, 0x00008000, 0x00000001]
         # img-rot red
         imrr = [0x00010000, 0x00020000,  0x00000100, 0x00000200, 0x00000002, 0x00000004]         
 
@@ -195,15 +202,15 @@ def main(options, args):
     try:
         qApp = QtGui.QApplication(sys.argv)
         aw = AppWindow()
-        print 'state'
+        print('state')
         #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
-        print 'show'
+        print('show')
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -252,7 +259,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

@@ -1,12 +1,20 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
 from PyQt4 import QtCore, QtGui
 
 from CustomLabel import Label, ERROR
-import ssdlog
+from g2base import ssdlog
+
+import six
+
+if six.PY3:
+    long = int
+
 
 progname = os.path.basename(sys.argv[0])
 
@@ -22,7 +30,7 @@ class Focus(Label):
             0x02000000: 'Prime IR', 0x00001000: 'Cassegrain IR',
             0x04000000: 'Cassegrain Optical', 0x08000000: 'Cassegrain Optical', 
             0x10000000: 'Nasmyth Optical', 0x20000000: 'Nasmyth Optical' , 
-            0x40000000: 'Nasmyth Optical', 0x80000000L: 'Nasmyth Optical',
+            0x40000000: 'Nasmyth Optical', long(0x80000000): 'Nasmyth Optical',
             0x00010000: 'Nasmyth Optical', 0x00020000: 'Nasmyth Optical', 
             0x00100000: 'Nasmyth Optical', 0x00200000: 'Nasmyth Optical',
             0x00400000: 'Nasmyth Optical', 0x00800000: 'Nasmyth Optical', 
@@ -83,7 +91,7 @@ class Focus(Label):
         findx = random.randrange(0, 35)
 
         foci = [0x01000000, 0x02000000, 0x04000000, 0x08000000,
-              0x10000000, 0x20000000, 0x40000000, 0x80000000L,
+              0x10000000, 0x20000000, 0x40000000, long(0x80000000),
               0x00010000, 0x00020000, 0x00040000, 0x00080000,
               0x00100000, 0x00200000, 0x00400000, 0x00800000,
               0x00000100, 0x00000200, 0x00000400, 0x00000800,
@@ -101,7 +109,7 @@ class Focus(Label):
         except Exception as e:
             focus = None
             alarm = 0x40
-            print e
+            print(e)
         #focus=0x04000000
         focus2=0x08
         self.update_focus(focus, focus2, alarm)
@@ -143,15 +151,15 @@ def main(options, args):
     try:
         qApp = QtGui.QApplication(sys.argv)
         aw = AppWindow()
-        print 'state'
+        print('state')
         #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
-        print 'show'
+        print('show')
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -200,7 +208,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

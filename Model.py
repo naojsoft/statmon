@@ -6,7 +6,7 @@
 import time
 import threading
 
-import remoteObjects.Monitor as Monitor
+from g2base.remoteObjects import Monitor
 from ginga.misc import Callback
 
 # import from SOSS.status ?

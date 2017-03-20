@@ -6,6 +6,8 @@
 #  Last edit: Fri Jun  8 14:56:15 HST 2012
 #]
 #
+from __future__ import absolute_import
+from __future__ import print_function
 import time
 import math
 import os
@@ -18,10 +20,11 @@ import Gen2.senvmon.statusGraph as StatusGraph
 import Gen2.senvmon.timeValueGraph as timeValueGraph
 # Needed for unpickling...ugh
 from Gen2.senvmon.timeValueGraph import Global
+from six.moves import range
 # Hack required by timeValueGraph
 timeValueGraph.Global.persistentData = {}
 
-import ssdlog
+from g2base import ssdlog
 
 winds_max = "STATL.CSCT_WINDS_MAX"
 
@@ -189,15 +192,15 @@ def main(options, args):
     try:
         qApp = QtGui.QApplication(sys.argv)
         aw = AppWindow()
-        print 'state'
+        print('state')
         #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
-        print 'show'
+        print('show')
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -242,7 +245,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

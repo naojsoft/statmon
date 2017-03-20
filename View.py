@@ -1,13 +1,15 @@
 #
 # Viewer.py -- Qt display handler for StatMon.
 #
-#[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Wed Dec  9 15:20:06 HST 2015
-#]
+# Eric Jeschke (eric@naoj.org)
 #
 # stdlib imports
 import sys, os
-import Queue
+import six
+if six.PY2:
+    import Queue
+else:
+    import queue as Queue
 import traceback
 
 # GUI imports
@@ -144,7 +146,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
             # Start the plugin
             pluginObj.start()
 
-        except Exception, e:
+        except Exception as e:
             errstr = "Plugin '%s' failed to initialize: %s" % (
                 className, str(e))
             self.logger.error(errstr)
@@ -153,7 +155,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
                 tb_str = "\n".join(traceback.format_tb(tb))
                 self.logger.error("Traceback:\n%s" % (tb_str))
                 
-            except Exception, e:
+            except Exception as e:
                 tb_str = "Traceback information unavailable."
                 self.logger.error(tb_str)
                 
@@ -253,7 +255,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
     ##     """Routine to process pending Qt events."""
     ##     try:
     ##         self.app.processEvents()
-    ##     except Exception, e:
+    ##     except Exception as e:
     ##         self.logger.error(str(e))
     ##         # TODO: traceback!
         
@@ -270,7 +272,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
     ##                 try:
     ##                     res = future.thaw(suppress_exception=False)
 
-    ##                 except Exception, e:
+    ##                 except Exception as e:
     ##                     future.resolve(e)
 
     ##                     self.logger.error("gui error: %s" % str(e))
@@ -279,7 +281,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
     ##                         tb_str = "".join(traceback.format_tb(tb))
     ##                         self.logger.error("Traceback:\n%s" % (tb_str))
 
-    ##                     except Exception, e:
+    ##                     except Exception as e:
     ##                         self.logger.error("Traceback information unavailable.")
 
     ##             finally:
@@ -289,7 +291,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
     ##         except Queue.Empty:
     ##             done = True
                 
-    ##         except Exception, e:
+    ##         except Exception as e:
     ##             self.logger.error("Main GUI loop error: %s" % str(e))
     ##             #pass
                 
@@ -297,7 +299,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
     ##     #print "PROCESSING OUT-BAND"
     ##     try:
     ##         self.app.processEvents()
-    ##     except Exception, e:
+    ##     except Exception as e:
     ##         self.logger.error(str(e))
     ##         # TODO: traceback!
 

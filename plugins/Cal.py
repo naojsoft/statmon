@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import sys
 
@@ -11,9 +13,10 @@ import matplotlib.patches as mpatches
 from matplotlib.figure import SubplotParams
 from matplotlib.artist import Artist
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
-import ssdlog
-from Bunch import Bunch
+from CustomLabel import Label, ERROR
+#from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from g2base import ssdlog
+from g2base.Bunch import Bunch
 import PlBase
 from error import *
 
@@ -154,7 +157,7 @@ class Cal(CalCanvas):
         CalCanvas.__init__(self, *args, **kwargs)
 
         # display milliampere(mA)
-        self.ma = Canvas(parent=kwargs['parent'], fs=10, width=175,\
+        self.ma = Label(parent=kwargs['parent'], fs=10, width=175,\
                              height=25, align='vcenter', \
                              logger=kwargs['logger'])
 
@@ -311,7 +314,7 @@ class CalDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(CalDisplay, self).__init__(parent)
    
-        self.cal_label = Canvas(parent=parent, fs=13, width=175,\
+        self.cal_label = Label(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', weight='normal', \
                                 logger=logger)
 
@@ -412,7 +415,7 @@ def main(options, args):
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as  e:
-        print 'key...board'
+        print('key...board')
         logger.info('keyboard interruption....')
         sys.exit(0)
 
@@ -456,7 +459,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

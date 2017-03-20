@@ -3,12 +3,14 @@
 # This is only needed for Python v2 but is harmless for Python v3.
 #import sip
 #sip.setapi('QVariant', 2)
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import sys
 
 from PyQt4 import QtCore, QtGui
 
-import ssdlog
+from g2base import ssdlog
 from Propid import PropIdDisplay
 from Object import ObjectDisplay
 from Airmass import AirmassDisplay
@@ -135,7 +137,7 @@ def main(options, args):
         tel.show()
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -188,7 +190,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import sys
 import math
@@ -12,8 +14,9 @@ from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
 from matplotlib.lines import Line2D
 
-import ssdlog
+from g2base import ssdlog
 import PlBase
+from six.moves import zip
 
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
@@ -361,7 +364,7 @@ def main(options, args):
         aw.show()
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -404,7 +407,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

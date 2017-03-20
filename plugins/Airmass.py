@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import math
+from PyQt4 import QtCore, QtGui
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from CustomLabel import Label, ERROR
 
-import ssdlog
+from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
     
-class Airmass(Canvas):
+class Airmass(Label):
     ''' Air mass   '''
     def __init__(self, parent=None, logger=None):
         super(Airmass, self).__init__(parent=parent, fs=10, width=275,\
@@ -61,7 +64,7 @@ class AirmassDisplay(QtGui.QWidget):
     def __init__(self, parent=None, logger=None):
         super(AirmassDisplay, self).__init__(parent)
    
-        self.airmass_label = Canvas(parent=parent, fs=10, width=175,\
+        self.airmass_label = Label(parent=parent, fs=10, width=175,\
                                 height=25, align='vcenter', weight='bold', \
                                 logger=logger)
 
@@ -129,15 +132,15 @@ def main(options, args):
     try:
         qApp = QtGui.QApplication(sys.argv)
         aw = AppWindow()
-        print 'state'
+        print('state')
         #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
-        print 'show'
+        print('show')
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -186,7 +189,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

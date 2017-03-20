@@ -8,10 +8,16 @@
 #  Last edit: Mon Jun 24 16:02:13 HST 2013
 #]
 #
+
+from __future__ import absolute_import
+from __future__ import print_function
+
 import os
 import threading
-from PyQt4 import QtGui, QtCore
-import remoteObjects as ro
+from PyQt4 import QtCore, QtGui
+
+from g2base.remoteObjects import remoteObjects as ro
+
 import Gen2.alarm.alarm_gui as AlarmGui
 import Gen2.alarm.StatusVar as StatusVar
 import Gen2.alarm.StatusValHistory as StatusValHistory
@@ -56,7 +62,7 @@ class Alarm(PlBase.Plugin):
         # StatusVarConfig reads in the configuration files
         try:
             self.svConfig = StatusVar.StatusVarConfig(alarm_cfg_file, persistDatafileLock, self.logger)
-        except Exception, e:
+        except Exception as e:
             self.logger.error('Error opening configuration file(s): %s' % str(e))
 
         # Create a list of all the Gen2 aliases we want to monitor

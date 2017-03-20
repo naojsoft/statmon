@@ -1,10 +1,9 @@
 #
 # RaDec.py -- RA/DEC plugin for StatMon
 # 
-#[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Mon Apr 15 17:12:48 HST 2013
-#]
+# Eric Jeschke (eric@naoj.org)
 #
+from __future__ import absolute_import
 import time
 import math
 import astro.radec as radec
@@ -12,11 +11,11 @@ import astro.wcs as wcs
 from datetime import datetime
 from pytz import timezone
 
-import PlBase
-import Bunch
-
-from PyQt4 import QtGui, QtCore
 from ginga.qtw import QtHelp
+from ginga.misc import Bunch
+from PyQt4 import QtGui, QtCore
+
+import PlBase
 
 # For "RaDec" plugin
 al_ra = 'FITS.SBR.RA'
@@ -142,7 +141,7 @@ class RaDec(PlBase.Plugin):
             az = float(statusDict[al_az])
             # Mitsubishi says 
             az_str = "%+5.2f" % (az)
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Error displaying azimuth: %s" % (str(e)))
             az_str = "ERROR"
         self.w.az.lm.setText(az_str)
@@ -152,7 +151,7 @@ class RaDec(PlBase.Plugin):
             az = float(statusDict[al_az_cmd])
             # Mitsubishi says 
             az_str = "%+5.2f" % (az)
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Error displaying azimuth: %s" % (str(e)))
             az_str = "ERROR"
         self.w.az.lb.setText(az_str)
@@ -160,7 +159,7 @@ class RaDec(PlBase.Plugin):
         # Elevation, actual
         try:
             el_str = "%+5.2f" % (float(statusDict[al_el]))
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Error displaying elevation: %s" % (str(e)))
             el_str = "ERROR"
         self.w.el.lm.setText(el_str)
@@ -168,7 +167,7 @@ class RaDec(PlBase.Plugin):
         # Elevation, commanded
         try:
             el_str = "%+5.2f" % (float(statusDict[al_el_cmd]))
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Error displaying elevation: %s" % (str(e)))
             el_str = "ERROR"
         self.w.el.lb.setText(el_str)
@@ -176,7 +175,7 @@ class RaDec(PlBase.Plugin):
         # Rotator, actual
         try:
             rot_str = "%+5.2f" % (float(statusDict[al_rot]))
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Error displaying rotation: %s" % (str(e)))
             rot_str = "ERROR"
         self.w.rot.lm.setText(rot_str)
@@ -184,7 +183,7 @@ class RaDec(PlBase.Plugin):
         # Rotator, commanded
         try:
             rot_str = "%+5.2f" % (float(statusDict[al_rot_cmd]))
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Error displaying rotation: %s" % (str(e)))
             rot_str = "ERROR"
         self.w.rot.lb.setText(rot_str)

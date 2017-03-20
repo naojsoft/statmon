@@ -8,11 +8,10 @@
 Usage:
     statmon.py --monport=NNNNN --plugins=X,Y,Z
 """
-
+from __future__ import print_function
 # stdlib imports
 import sys, os
 import threading
-import ssdlog
 
 from ginga.qtw import QtHelp
 from PyQt4 import QtGui, QtCore
@@ -22,14 +21,16 @@ sys.path.insert(0, moduleHome)
 pluginHome = os.path.join(moduleHome, 'plugins')
 sys.path.insert(0, pluginHome)
 
+from g2base.remoteObjects import remoteObjects as ro
+from g2base.remoteObjects import Monitor
+
 # Subaru python stdlib imports
-import remoteObjects as ro
-import remoteObjects.Monitor as Monitor
 import Gen2.soundsink as SoundSink
+
 from ginga import toolkit
 toolkit.use('qt4')
 from ginga.gw import Widgets
-from ginga.misc import ModuleManager, Settings
+from ginga.misc import ModuleManager, Settings, log
 
 # Local application imports
 import Model
@@ -149,13 +150,13 @@ class StatMon(Controller, Viewer):
 def main(options, args):
     # Create top level logger.
     svcname = options.svcname
-    logger = ssdlog.make_logger(svcname, options)
+    logger = log.get_logger(svcname, options=options)
 
     # Initialize remote objects subsystem.
     try:
         ro.init()
 
-    except ro.remoteObjectError, e:
+    except ro.remoteObjectError as e:
         logger.error("Error initializing remote objects subsystem: %s" % \
                      str(e))
         sys.exit(1)
@@ -179,7 +180,7 @@ def main(options, args):
                                     channels=['sound'])
     
     # Get settings folder
-    if os.environ.has_key('CONFHOME'):
+    if 'CONFHOME' in os.environ:
         basedir = os.path.join(os.environ['CONFHOME'], svcname)
     else:
         basedir = os.path.join(os.environ['HOME'], '.' + svcname)
@@ -308,7 +309,7 @@ if __name__ == "__main__":
     optprs.add_option("--svcname", dest="svcname", metavar="NAME",
                       default=defaultServiceName,
                       help="Register using NAME as service name")
-    ssdlog.addlogopts(optprs)
+    log.addlogopts(optprs)
 
     (options, args) = optprs.parse_args(sys.argv[1:])
 
@@ -325,7 +326,7 @@ if __name__ == "__main__":
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
 

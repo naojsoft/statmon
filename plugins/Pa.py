@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import math
@@ -7,7 +9,7 @@ import math
 from PyQt4 import QtCore, QtGui
 
 from CustomLabel import Label, ERROR
-import ssdlog
+from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
@@ -147,15 +149,15 @@ def main(options, args):
     try:
         qApp = QtGui.QApplication(sys.argv)
         aw = AppWindow()
-        print 'state'
+        print('state')
         #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
-        print 'show'
+        print('show')
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -204,7 +206,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

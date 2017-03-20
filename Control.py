@@ -7,10 +7,17 @@
 import sys, os
 import traceback
 import time
-import thread, threading
-import Queue
+import threading
+import six
+if six.PY2:
+    import Queue
+    import thread
+else:
+    import queue as Queue
+    import _thread as thread
 
-import remoteObjects as ro
+from g2base.remoteObjects import remoteObjects as ro
+
 from ginga.misc import Bunch, Callback, Future, Task
 
 class ControlError(Exception):
@@ -86,7 +93,7 @@ class Controller(Callback.Callbacks):
                 try:
                     self.gui_do(cb_fn, statusDict)
                     
-                except Exception, e:
+                except Exception as e:
                     self.logger.error("Error making callback to '%s': %s" % (
                         cbkey, str(e)))
                     # TODO: log traceback
@@ -113,7 +120,7 @@ class Controller(Callback.Callbacks):
 
             self.model.update_statusInfo(statusInfo)
 
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Error fetching needed status items: %s" % (
                 str(e)))
 
@@ -168,7 +175,7 @@ class Controller(Callback.Callbacks):
         try:
             task.init_and_start(self)
             return task
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Error starting task: %s" % (str(e)))
             raise(e)
 

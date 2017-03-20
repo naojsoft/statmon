@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
@@ -11,12 +13,11 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4.Qt import QMutex, QMutexLocker
 
-import Bunch
 from CustomLabel import Label, ERROR
 from Dummy import Dummy
-import remoteObjects as ro
+from g2base.remoteObjects import remoteObjects as ro
 from cfg.INS import INSdata
-import ssdlog
+from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
@@ -169,15 +170,13 @@ def main(options, args):
     try:
         qApp = QtGui.QApplication(sys.argv)
         aw = AppWindow()
-        print 'state'
-        #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
-        print 'show'
+        print('show')
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -228,7 +227,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

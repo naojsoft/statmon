@@ -5,6 +5,7 @@
 #  Last edit: Thu Apr  5 14:18:45 HST 2012
 #]
 #
+from __future__ import absolute_import
 import PlBase
 
 from PyQt4 import QtGui, QtCore
@@ -60,7 +61,7 @@ class Debug(PlBase.Plugin):
         try:
             result = eval(cmdstr)
 
-        except Exception, e:
+        except Exception as e:
             result = str(e)
             # TODO: add traceback
 

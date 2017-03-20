@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
 from PyQt4 import QtCore, QtGui
 
 from CustomLabel import Label, ERROR
-import ssdlog
+from g2base import ssdlog
+
+import six
+
+if six.PY3:
+    long = int
 
 progname = os.path.basename(sys.argv[0])
 
@@ -21,7 +28,7 @@ class M2(Label):
             0x02000000: 'FMOS at M2', 0x00001000: 'IR M2',
             0x04000000: 'Cs Opt M2' , 0x08000000: 'Cs Opt M2', 
             0x10000000: 'Cs Opt M2' , 0x20000000: 'Cs Opt M2' , 
-            0x40000000: 'Cs Opt M2' , 0x80000000L: 'Cs Opt M2' ,
+            0x40000000: 'Cs Opt M2' , long(0x80000000): 'Cs Opt M2' ,
             0x00010000: 'Cs Opt M2' , 0x00020000: 'Cs Opt M2' , 
             0x00100000: 'Ns Opt M2' , 0x00200000: 'Ns Opt M2' ,
             0x00400000: 'Ns Opt M2' , 0x00800000: 'Ns Opt M2' , 
@@ -67,7 +74,7 @@ class M2(Label):
         indx2 = random.randrange(0, 5) 
 
         foci = [0x01000000, 0x02000000, 0x04000000, 0x08000000,
-                0x10000000, 0x20000000, 0x40000000, 0x80000000L,
+                0x10000000, 0x20000000, 0x40000000, long(0x80000000),
                 0x00010000, 0x00020000, 0x00040000, 0x00080000,
                 0x00100000, 0x00200000, 0x00400000, 0x00800000,
                 0x00000100, 0x00000200, 0x00000400, 0x00000800,
@@ -84,7 +91,7 @@ class M2(Label):
         except Exception as e:
             focus = None
             focus2 = None
-            print e
+            print(e)
         self.update_m2(focus, focus2)
 
 
@@ -124,15 +131,15 @@ def main(options, args):
     try:
         qApp = QtGui.QApplication(sys.argv)
         aw = AppWindow()
-        print 'state'
+        print('state')
         #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
-        print 'show'
+        print('show')
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -181,7 +188,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

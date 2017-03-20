@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from PyQt4 import QtCore, QtGui, Qt
 from error import ERROR
     

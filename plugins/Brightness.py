@@ -6,13 +6,14 @@
 #  Last edit: Mon Apr 15 17:12:48 HST 2013
 #]
 #
+from __future__ import absolute_import
 import time
 import math
 import os
 import shelve
 
 import PlBase
-import Bunch
+#import Bunch
 # TODO: I think eventually most of these should be migrated over to
 # statmon, or else redone....EJ
 import Gen2.senvmon.statusGraph as StatusGraph
@@ -20,6 +21,7 @@ import Gen2.senvmon.timeValueGraph as timeValueGraph
 # Needed for unpickling...ugh
 from Gen2.senvmon.timeValueGraph import Global
 import Gen2.senvmon.TVData as TVData
+from six.moves import range
 # Hack required by timeValueGraph
 timeValueGraph.Global.persistentData = {}
 import Gen2.senvmon.resourceMon as rmon
@@ -56,7 +58,7 @@ class Brightness(PlBase.Plugin):
 
         try:
             load_data(envi_file, key, 3600, self.logger)
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Error loading persistent data: %s" % (str(e)))
 
         self.sc = timeValueGraph.TVCoordinator(self.statusDict, 10, envi_file,
@@ -98,7 +100,7 @@ class Brightness(PlBase.Plugin):
         self.statusDict.update(statusDict)
         try:
             self.sc.timerEvent(True)
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Error updating status: %s" % (str(e)))
             
     def __str__(self):
@@ -113,7 +115,7 @@ def __set_data(envi_data, key, logger):
         #print 'GETDATA:%s' % Global.persistentData 
         logger.debug('getting data for key %s' %key)
         #print envi_data[key_str]
-    except KeyError,e:
+    except KeyError as e:
         Global.persistentData = {}
         logger.debug('getting data for no key')
 
@@ -121,7 +123,7 @@ def __set_data(envi_data, key, logger):
 def __restore_data(envi_data, key, logger):
     try:
         envi_data[key]=Global.persistentData
-    except Exception,e:
+    except Exception as e:
         logger.warn('no key found...  %s' %e)
 
 
@@ -141,7 +143,7 @@ def load_data(envi_file,  key, datapoint, logger):
  
         envi_data.close()
   
-    except IOError,e:
+    except IOError as e:
         logger.warn('warn  opening envi_data %s' %str(e))
         Global.persistentData = {}
         #envi_data.close()

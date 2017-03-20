@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
 from PyQt4 import QtCore, QtGui
 
 from CustomLabel import Label, ERROR
-import ssdlog
+from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
@@ -69,7 +71,7 @@ class TipChop(Label):
         daindx = random.randrange(0, 2) 
         sindx = random.randrange(0,3) 
        
-        print findx, f2indx, mindx, dindx, daindx, sindx
+        print(findx, f2indx, mindx, dindx, daindx, sindx)
  
         mode = [0x04, 0x02, 0x01, None]
         drive = [0x02, 0x01]
@@ -95,7 +97,7 @@ class TipChop(Label):
             drive=0x01
             data=0x02
             state=0x02
-            print e
+            print(e)
         self.update_tipchop(mode, drive, data, state, focus, focus2)
 
 
@@ -135,15 +137,13 @@ def main(options, args):
     try:
         qApp = QtGui.QApplication(sys.argv)
         aw = AppWindow()
-        print 'state'
-        #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
-        print 'show'
+        print('show')
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -189,7 +189,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:
