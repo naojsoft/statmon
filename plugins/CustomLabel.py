@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from PyQt4 import QtCore, QtGui, Qt
 from error import ERROR
     
@@ -6,7 +7,7 @@ class Label(QtGui.QLabel):
     def __init__(self, parent=None, font='UnDotum', fs=27, weight='normal', \
                  frame=False, linewidth=1, midlinewidth=2, \
                  width=350, height=75, fg='green', bg='white', \
-                 align='center', logger=None):
+                 align='center', fixsize=False, logger=None):
         super(Label, self).__init__(parent)
 
         self.warn='orange'
@@ -28,6 +29,12 @@ class Label(QtGui.QLabel):
                  'vcenter': QtCore.Qt.AlignVCenter}[align]
         self.setAlignment(align)
         self.setFont(self.font)
+
+        if fixsize:
+            self.setFixedSize(self.width, self.height)
+            #self.setFixedWidth(self.width)
+            #self.setFixedHeight(self.height)
+  
 
         if frame:
             #self.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Raised)

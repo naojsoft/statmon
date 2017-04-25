@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys, os
 import math
 import threading
@@ -22,11 +24,13 @@ from matplotlib.widgets import Button
 #import matplotlib.lines as lines
 from matplotlib.figure import SubplotParams
 
-import Bunch
-import ssdlog
+from g2base.Bunch import Bunch
+from g2base import ssdlog
 from Exptime import Exptime
 from Threshold import Threshold
 from Dummy import Dummy
+from six.moves import range
+from six.moves import zip
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
@@ -47,7 +51,8 @@ class PlotCanvas(FigureCanvas):
         self.center_y=center_y    
         self.w=350
         self.h=350
-      
+        #self.setFixedSize(w, h)     
+
         self.plot_color='blue'
         self.record_color='black'
         self.alarm_color='red'
@@ -56,9 +61,14 @@ class PlotCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        FigureCanvas.setSizePolicy(self,
-                                   QtGui.QSizePolicy.Expanding,
-                                   QtGui.QSizePolicy.Expanding)
+        #FigureCanvas.setSizePolicy(self,
+        #                           QtGui.QSizePolicy.Expanding,
+        #                           QtGui.QSizePolicy.Expanding)
+        #FigureCanvas.setSizePolicy(self,
+        #                           QtGui.QSizePolicy.Fixed,
+        #                           QtGui.QSizePolicy.Fixed)
+
+
         FigureCanvas.updateGeometry(self)
 
         self.logger=logger
@@ -359,7 +369,8 @@ class Plot(PlotCanvas):
     def clear(self):
         ''' clear all plottings '''   
         with self.rlock: 
-            for num in xrange(len(self.plot_record)):
+            #for num in xrange(len(self.plot_record)):
+            for num in list(range(len(self.plot_record))):
                 self.delete_oldest_record()
             self.arrow.xy=(0, 0)
             self.arrow.xytext=(0, 0) 
@@ -371,7 +382,7 @@ class Plot(PlotCanvas):
             p=self.plot_record.pop(0)
             Artist.remove(p.point)
         except Exception as e:
-            print e
+            print(e)
             pass            
 
 
@@ -426,9 +437,9 @@ class Plot(PlotCanvas):
         
         self.axes.add_patch(circle)  
 
-        print self.c
+        print(self.c)
  
-        plot=Bunch.Bunch(point=circle, x=x, y=y, color=color)
+        plot = Bunch(point=circle, x=x, y=y, color=color)
 
         #print 'PLOT=%s' %plot         
         with self.rlock:
@@ -493,7 +504,7 @@ class Ao1Plot(Plot):
         
         self.axes.add_patch(circle)  
  
-        plot=Bunch.Bunch(point=circle, x=x, y=y, color=color)
+        plot = Bunch(point=circle, x=x, y=y, color=color)
 
         with self.rlock:
             self.plot_record.append(plot)
@@ -551,7 +562,7 @@ class Ao2Plot(Plot):
         
         self.axes.add_patch(circle)  
  
-        plot=Bunch.Bunch(point=circle, x=x, y=y, color=color)
+        plot = Bunch(point=circle, x=x, y=y, color=color)
 
         with self.rlock:
             self.plot_record.append(plot)
@@ -631,6 +642,10 @@ class FmosPlot(QtGui.QWidget):
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
         
         self.logger=logger
+
+        w, h = (350, 400)   
+        self.setFixedSize(w, h)
+
         self.set_gui()
 
     def tick(self):
@@ -691,6 +706,11 @@ class NsIrPlot(QtGui.QWidget):
 
   
         self.logger=logger
+
+        w, h = (350, 750)   
+        self.setFixedSize(w, h)
+
+
         self.set_gui()
 
     def tick(self):
@@ -751,6 +771,10 @@ class AgPlot(QtGui.QWidget):
         #self.empty = Dummy(width=60, height=25,  logger=logger)
         #self.empty1 = Dummy(width=1, height=25,  logger=logger)
         self.logger = logger
+
+        w, h = (350, 400)   
+        self.setFixedSize(w, h)
+
         self.set_gui()
 
     def tick(self):
@@ -810,6 +834,8 @@ class TwoGuidingPlot(QtGui.QWidget):
         self.threshold = Threshold(parent=parent, logger=logger) 
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)  
         self.logger = logger
+        w, h = (350, 400)   
+        self.setFixedSize(w, h)
         self.set_gui()
 
     def set_gui(self):
@@ -1009,7 +1035,7 @@ def main(options, args):
         aw.show()
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -1057,7 +1083,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

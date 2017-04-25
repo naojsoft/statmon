@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
-import ssdlog
+from g2base import ssdlog
 
 from PyQt4 import QtCore, QtGui
 
 from CustomLabel import Label, ERROR
-import ssdlog
+from g2base import ssdlog
 
 
 progname = os.path.basename(sys.argv[0])
@@ -21,7 +23,7 @@ class State(Label):
         self.bg='green'
         super(State, self).__init__(parent=parent, fs=23, width=350, \
                                     height=75, fg='white', \
-                                    bg='green', logger=logger )
+                                    bg='green', fixsize=True, logger=logger )
 
     def update_state(self, state, intensity, valerr, calc_mode=None):
         ''' state=STATL.TELDRIVE, 
@@ -154,15 +156,15 @@ def main(options, args):
     try:
         qApp = QtGui.QApplication(sys.argv)
         aw = AppWindow()
-        print 'state'
+        print('state')
         #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
-        print 'show'
+        print('show')
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -211,7 +213,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:

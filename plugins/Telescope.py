@@ -3,12 +3,14 @@
 # This is only needed for Python v2 but is harmless for Python v3.
 #import sip
 #sip.setapi('QVariant', 2)
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import sys
 
 from PyQt4 import QtCore, QtGui
 
-import ssdlog
+from g2base import ssdlog
 from DomeShutter import DomeShutter
 from Topscreen import Topscreen
 from Windscreen import Windscreen
@@ -44,8 +46,11 @@ class TelescopeGui(QtGui.QWidget):
         self.azel = AzEl(logger=logger) 
         self.m2 = M2(logger=logger)   
         self.m1 = M1Cover(logger=logger) 
-        self.cell = CellCover(logger=logger)   
-        self.resize(500, 500)
+        self.cell = CellCover(logger=logger)
+
+        w, h = (500, 500)   
+        #self.resize(500, 500)
+        self.setFixedSize(w, h)
         self.set_layout()
 
     def set_layout(self):
@@ -471,7 +476,7 @@ def main(options, args):
         tel.show()
         sys.exit(qApp.exec_())
 
-    except KeyboardInterrupt, e:
+    except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
@@ -524,7 +529,7 @@ if __name__ == '__main__':
     elif options.profile:
         import profile
 
-        print "%s profile:" % sys.argv[0]
+        print("%s profile:" % sys.argv[0])
         profile.run('main(options, args)')
 
     else:
