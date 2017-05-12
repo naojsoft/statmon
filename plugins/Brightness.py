@@ -27,7 +27,7 @@ timeValueGraph.Global.persistentData = {}
 import Gen2.senvmon.resourceMon as rmon
 import Gen2.senvmon.direction as dr
 
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 from ginga.qtw import QtHelp
 
 al_ag_bright = 'TSCL.AG1Intensity'
@@ -41,15 +41,15 @@ class Brightness(PlBase.Plugin):
 
         self.statusDict = {}
 
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(4)
         container.setLayout(layout)
 
-        split = QtGui.QSplitter()
+        split = QtWidgets.QSplitter()
         split.setOrientation(QtCore.Qt.Vertical)
-        ## split.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored,
-        ##                                       QtGui.QSizePolicy.Ignored))
+        ## split.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored,
+        ##                                       QtWidgets.QSizePolicy.Ignored))
         
         #self.w = Bunch.Bunch()
 
@@ -76,7 +76,7 @@ class Brightness(PlBase.Plugin):
                                     alarmValues = (0, 999999),
                                     warningValues = (0,0),
                                     displayTime=True,
-                                    backgroundColor=QtGui.QColor(245,255,252),
+                                    backgroundColor=QtWidgets.QColor(245,255,252),
                                     logger=self.logger)
 
         coordinator.addGraph(b)

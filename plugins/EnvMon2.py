@@ -14,7 +14,7 @@ import os
 import sys
 import shelve
 
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 
 import Gen2.senvmon.statusGraph as StatusGraph
 import Gen2.senvmon.timeValueGraph as timeValueGraph
@@ -36,7 +36,8 @@ def __set_data(envi_data, key, logger):
         #print 'GETDATA:%s' % Global.persistentData 
         logger.debug('getting data for key %s' %key)
         #print envi_data[key_str]
-    except KeyError as e:
+    # except KeyError as e:
+    except Exception as e:
         Global.persistentData = {}
         logger.error('error: setting data. %s' %e)
 
@@ -78,7 +79,7 @@ def load_data(data_file, datakey, datapoint, logger):
 progname = os.path.basename(sys.argv[0])
 
 
-class EnvMon(QtGui.QWidget):
+class EnvMon(QtWidgets.QWidget):
 
     def __init__(self, parent=None, obcp=None,  logger=None):
         super(EnvMon, self).__init__(parent)
@@ -87,12 +88,16 @@ class EnvMon(QtGui.QWidget):
         self.statusDict = {}
         self.envi_file = None
         self.datakey = 'envmon2'
-        self.data_file =  'envi2.shelve'
+        #self.data_file =  'envi2.shelve'
 
-        self.__load_data() 
+        filename =  'envi2.shelve'
+        shelve_path = os.path.join(self._get_shelve_path(), filename)
+
+
+        self.__load_data(shelve_path) 
 
         self.sc = timeValueGraph.TVCoordinator(self.statusDict, 10, \
-                      self.data_file, self.datakey, self.logger)
+                      shelve_path, self.datakey, self.logger)
 
         self.widgets = []
 
@@ -109,24 +114,29 @@ class EnvMon(QtGui.QWidget):
 
         self.__set_layout()
  
-    def __load_data(self):
-
-        datapoint=3600
+    def _get_shelve_path(self):
         try:
             g2comm = os.environ['GEN2COMMON']
-            self.data_file = os.path.join(g2comm, 'db', self.data_file)  
+            path = os.path.join(g2comm, 'db')  
         except OSError as e:
             logger.error('error: %s' %e)
-            self.data_file = '/gen2/share/db/%s' %self.data_file   
-        finally:
-            load_data(self.data_file, self.datakey, \
-                      datapoint, logger=self.logger)
+            path = os.path.join('/gen2/share/db')   
+
+        return path
+  
+
+    def __load_data(self, shelve_path):
+
+        datapoint=3600
+        load_data(shelve_path, self.datakey, \
+                  datapoint, logger=self.logger)
+
 
     def __set_layout(self):
 
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(0) 
-        layout.setMargin(0)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         for widget in self.widgets: 
             self.sc.addGraph(widget)
@@ -160,7 +170,7 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -171,15 +181,15 @@ def main(options, args):
         def init_ui(self):
             self.resize(self.w, self.h)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             em = EnvMon(parent=self.main_widget, logger=logger)
             l.addWidget(em)
             em.start()
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), em.tick)
+            timer.timeout.connect(em.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
@@ -190,7 +200,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
         #state = State(logger=logger)  

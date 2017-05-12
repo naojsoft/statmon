@@ -5,9 +5,7 @@ from __future__ import print_function
 import sys
 import os
 
-from PyQt4 import QtCore, QtGui
-
-from CustomLabel import Label, ERROR
+from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
@@ -106,7 +104,7 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -116,15 +114,15 @@ def main(options, args):
         def init_ui(self):
             self.resize(self.w, self.h)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             tc = TipChop(parent=self.main_widget, logger=logger)
             l.addWidget(tc)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), tc.tick)
+            timer.timeout.connect(tc.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
@@ -135,7 +133,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()

@@ -8,34 +8,34 @@
 from __future__ import absolute_import
 import PlBase
 
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtGui, QtCore
 
 class Debug(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
 
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(2)
         container.setLayout(layout)
         
         self.msgFont = QtGui.QFont("Fixed", 14)
-        tw = QtGui.QTextEdit()
+        tw = QtWidgets.QTextEdit()
         tw.setReadOnly(True)
         tw.setCurrentFont(self.msgFont)
         self.tw = tw
         self.history = []
         self.histmax = 10
          
-        sw = QtGui.QScrollArea()
+        sw = QtWidgets.QScrollArea()
         sw.setWidgetResizable(True)
         sw.setWidget(self.tw)
 
         layout.addWidget(sw, stretch=1)
         sw.show()
 
-        self.entry = QtGui.QLineEdit()
+        self.entry = QtWidgets.QLineEdit()
         layout.addWidget(self.entry, stretch=0)
         self.entry.returnPressed.connect(lambda: self.command_cb(self.entry))
 

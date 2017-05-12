@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 import sip
 
 import PlBase
@@ -28,12 +28,12 @@ class TelescopePlugin(PlBase.Plugin):
     def set_layout(self, obcp):
 
         self.logger.debug('telescope setlayout ins=%s' %(obcp))
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
 
         self.telescope = Telescope.Telescope(qtwidget, obcp=obcp, \
                                            logger=self.logger)
 
-        self.vlayout = QtGui.QVBoxLayout()
+        self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)
         self.vlayout.setSpacing(0)
         self.vlayout.addWidget(self.telescope, stretch=1)

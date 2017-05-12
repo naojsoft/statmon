@@ -8,7 +8,7 @@ from __future__ import print_function
 import os
 import sys
 
-from PyQt4 import QtCore, QtGui
+from qtpy import QtCore, QtWidgets
 
 from g2base import ssdlog
 from Propid import PropIdDisplay
@@ -21,7 +21,7 @@ from TimeRot import TimeRotLimitDisplay
 
 progname = os.path.basename(sys.argv[0])
 
-class TargetGui(QtGui.QWidget):
+class TargetGui(QtWidgets.QWidget):
     def __init__(self, parent=None, obcp=None, logger=None):
         super(TargetGui, self).__init__(parent)
 
@@ -37,10 +37,9 @@ class TargetGui(QtGui.QWidget):
         self.set_layout()
 
     def set_layout(self):
-
-        mainlayout = QtGui.QVBoxLayout()
+        mainlayout = QtWidgets.QVBoxLayout()
         mainlayout.setSpacing(1)
-        mainlayout.setMargin(0)
+        mainlayout.setContentsMargins(0, 0, 0, 0)
 
         mainlayout.addWidget(self.propid)
         mainlayout.addWidget(self.object)
@@ -128,10 +127,10 @@ def main(options, args):
 
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         tel = Target(obcp=options.ins, logger=logger)
         timer = QtCore.QTimer()
-        QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), tel.tick)
+        timer.timeout.connect(tel.tick)
         timer.start(options.interval)
         tel.setWindowTitle("%s" % progname)
         tel.show()

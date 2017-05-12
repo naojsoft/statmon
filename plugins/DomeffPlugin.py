@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 import PlBase
 import Domeff
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
+
 
 class DomeffPlugin(PlBase.Plugin):
     """ Domeff """
@@ -14,11 +15,11 @@ class DomeffPlugin(PlBase.Plugin):
     def build_gui(self, container):
         self.root = container
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
 
         self.domeff=Domeff.DomeffDisplay(qtwidget, logger=self.logger)
        
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(self.domeff,stretch=1)

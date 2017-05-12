@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 import sip
 
 import PlBase
@@ -54,10 +54,10 @@ class StatePlugin(PlBase.Plugin):
 
         self.__set_aliases(obcp)
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
         self.state = State.State(parent=qtwidget, logger=self.logger)
        
-        self.vlayout = QtGui.QVBoxLayout()
+        self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)
         self.vlayout.setSpacing(0)
         self.vlayout.addWidget(self.state,stretch=1)

@@ -6,8 +6,11 @@ import sys, os
 import math
 import threading
 
-from PyQt4 import QtGui, QtCore
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from qtpy import QtWidgets, QtCore, QtGui, QT_VERSION
+if QT_VERSION.startswith('5'):
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+else:
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from matplotlib.axes import Axes
@@ -591,7 +594,7 @@ class Ao2Plot(Plot):
     #     self.update_plot(x,y)
 
 
-class Buttons(QtGui.QWidget):
+class Buttons(QtWidgets.QWidget):
     def __init__(self, parent=None, plot=None, logger=None):
         super(Buttons, self).__init__(parent)
         self.plot=plot
@@ -599,12 +602,12 @@ class Buttons(QtGui.QWidget):
 
     @property
     def ao_layout(self):
-        buttonlayout = QtGui.QHBoxLayout()
+        buttonlayout = QtWidgets.QHBoxLayout()
         buttonlayout.setSpacing(0)
-        buttonlayout.setMargin(0)
-        spacer = QtGui.QWidget()
-        spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding) 
-        refresh = QtGui.QPushButton(QtGui.QIcon.fromTheme('view-refresh'), 'Clear')
+        buttonlayout.setContentsMargins(0, 0, 0, 0)
+        spacer = QtWidgets.QWidget()
+        spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding) 
+        refresh = QtWidgets.QPushButton(QtWidgets.QIcon.fromTheme('view-refresh'), 'Clear')
         refresh.clicked.connect(self.plot.refresh) 
         buttonlayout.addWidget(spacer)
         buttonlayout.addWidget(refresh)
@@ -613,27 +616,27 @@ class Buttons(QtGui.QWidget):
 
     @property
     def layout(self):
-        buttonlayout = QtGui.QHBoxLayout()
+        buttonlayout = QtWidgets.QHBoxLayout()
         buttonlayout.setSpacing(0)
-        buttonlayout.setMargin(0)
-        zoomin = QtGui.QPushButton(QtGui.QIcon.fromTheme('zoom-in'), 'Zoom In')
+        buttonlayout.setContentsMargins(0, 0, 0, 0)
+
+        zoomin = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('zoom-in'), 'Zoom In')
         zoomin.clicked.connect(self.plot.zoomin)
         #zoomin.setStyleSheet('QPushButton {color: white;  background-color: lightgrey }')
-        zoomout = QtGui.QPushButton(QtGui.QIcon.fromTheme('zoom-out'), 'Zoom Out')
+        zoomout = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('zoom-out'), 'Zoom Out')
         zoomout.clicked.connect(self.plot.zoomout)
-        spacer = QtGui.QWidget()
-        spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding) 
-        refresh = QtGui.QPushButton(QtGui.QIcon.fromTheme('view-refresh'), 'Clear')
-        refresh.clicked.connect(self.plot.refresh) 
+        spacer = QtWidgets.QWidget()
+        spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding) 
+        refresh = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('view-refresh'), 'Clear')
+        refresh.clicked.connect(self.plot.refresh)
         buttonlayout.addWidget(zoomin)
         buttonlayout.addWidget(zoomout) 
         buttonlayout.addWidget(spacer)
         buttonlayout.addWidget(refresh)
- 
         return buttonlayout
       
   
-class FmosPlot(QtGui.QWidget):
+class FmosPlot(QtWidgets.QWidget):
     ''' Fmos Guiding '''
     def __init__(self, parent=None, logger=None):
         super(FmosPlot, self).__init__(parent)
@@ -666,9 +669,9 @@ class FmosPlot(QtGui.QWidget):
 
     def set_gui(self):
 
-        layout = QtGui.QVBoxLayout()        
+        layout = QtWidgets.QVBoxLayout()        
         layout.setSpacing(0) 
-        layout.setMargin(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.plot)
 
 
@@ -693,7 +696,7 @@ class FmosPlot(QtGui.QWidget):
                 self.plot.clear()              
 
 
-class NsIrPlot(QtGui.QWidget):
+class NsIrPlot(QtWidgets.QWidget):
     '''  NsIr AO188 Plotting  '''
     def __init__(self, parent=None, logger=None):
         super(NsIrPlot, self).__init__(parent)
@@ -728,9 +731,9 @@ class NsIrPlot(QtGui.QWidget):
 
     def set_gui(self):
 
-        layout = QtGui.QVBoxLayout()        
+        layout = QtWidgets.QVBoxLayout()        
         layout.setSpacing(0)
-        layout.setMargin(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.ao1)
         layout.addLayout(self.buttons1.ao_layout)
         layout.addWidget(self.ao2)
@@ -759,7 +762,7 @@ class NsIrPlot(QtGui.QWidget):
             self.ao2.update_plot(ao2x , ao2y)
  
 
-class AgPlot(QtGui.QWidget):
+class AgPlot(QtWidgets.QWidget):
     '''  Ag Guiding  '''
     def __init__(self, parent=None, logger=None):
         super(AgPlot, self).__init__(parent)
@@ -793,12 +796,12 @@ class AgPlot(QtGui.QWidget):
 
     def set_gui(self):
 
-        layout = QtGui.QVBoxLayout()        
+        layout = QtWidgets.QVBoxLayout()        
         layout.setSpacing(1) 
-        layout.setMargin(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.plot)
 
-        hlayout = QtGui.QHBoxLayout()   
+        hlayout = QtWidgets.QHBoxLayout()   
         hlayout.setSpacing(2)
         hlayout.addWidget(self.exptime)
         hlayout.addWidget(self.threshold)
@@ -824,7 +827,7 @@ class AgPlot(QtGui.QWidget):
             self.threshold.clear()           
 
 
-class TwoGuidingPlot(QtGui.QWidget):
+class TwoGuidingPlot(QtWidgets.QWidget):
     ''' Ns-Opt AG/SV, HSCSC/SHAG Guiding  '''
     def __init__(self, parent=None, logger=None):
         super(TwoGuidingPlot, self).__init__(parent)
@@ -840,12 +843,12 @@ class TwoGuidingPlot(QtGui.QWidget):
 
     def set_gui(self):
 
-        layout = QtGui.QVBoxLayout()        
+        layout = QtWidgets.QVBoxLayout()        
         layout.setSpacing(1) 
-        layout.setMargin(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.plot)
 
-        hlayout = QtGui.QHBoxLayout()   
+        hlayout = QtWidgets.QHBoxLayout()   
         hlayout.setSpacing(2)
         hlayout.addWidget(self.exptime)
         hlayout.addWidget(self.threshold)
@@ -908,7 +911,7 @@ class TwoGuidingPlot(QtGui.QWidget):
                     guiding2_bottom, guiding2_ceil)
 
 
-# class NsOptPlot(QtGui.QWidget):
+# class NsOptPlot(QtWidgets.QWidget):
 #     ''' Ns Opt AG/SV Guiding  '''
 #     def __init__(self, parent=None, logger=None):
 #         super(NsOptPlot, self).__init__(parent)
@@ -941,12 +944,11 @@ class TwoGuidingPlot(QtGui.QWidget):
 
 #     def set_gui(self):
 
-#         layout = QtGui.QVBoxLayout()        
+#         layout = QtWidgets.QVBoxLayout()        
 #         layout.setSpacing(1) 
 #         layout.setMargin(0)
 #         layout.addWidget(self.plot)
-
-#         hlayout = QtGui.QHBoxLayout()   
+#         hlayout = QtWidgets.QHBoxLayout()   
 #         hlayout.setSpacing(2)
 #         hlayout.addWidget(self.exptime)
 #         hlayout.addWidget(self.threshold)
@@ -984,16 +986,16 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('plot', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
-            QtGui.QMainWindow.__init__(self)
+            QtWidgets.QMainWindow.__init__(self)
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
             self.resize(350, 350)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             
             #sc = MyStaticMplCanvas(self.main_widget, width=5, height=5, dpi=None)
@@ -1011,12 +1013,12 @@ def main(options, args):
                 logger.error('error: mode=%s' %options.mode)
                 sys.exit(1)
             #l.addWidget(sc)
-            #zoomin = QtGui.QPushButton(QtGui.QIcon.fromTheme('zoom-in'), 'Zoom In')
+            #zoomin = QtWidgets.QPushButton(QtWidgets.QIcon.fromTheme('zoom-in'), 'Zoom In')
             l.addWidget(plot)
             ##l.addWidget(aplot)
             ##l.addWidget(zoomin)
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), plot.tick)
+            timer.timeout.connect(plot.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
@@ -1029,7 +1031,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()

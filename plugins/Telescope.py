@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 
-# This is only needed for Python v2 but is harmless for Python v3.
-#import sip
-#sip.setapi('QVariant', 2)
 from __future__ import absolute_import
 from __future__ import print_function
 import os
 import sys
 
-from PyQt4 import QtCore, QtGui
+from qtpy import QtCore, QtWidgets
 
 from g2base import ssdlog
 from DomeShutter import DomeShutter
@@ -31,7 +28,7 @@ from Dummy import Dummy
 
 progname = os.path.basename(sys.argv[0])
 
-class TelescopeGui(QtGui.QWidget):
+class TelescopeGui(QtWidgets.QWidget):
     def __init__(self, parent=None, obcp=None, logger=None):
         super(TelescopeGui, self).__init__(parent)
 
@@ -55,27 +52,27 @@ class TelescopeGui(QtGui.QWidget):
 
     def set_layout(self):
 
-        mainlayout = QtGui.QVBoxLayout()
+        mainlayout = QtWidgets.QVBoxLayout()
         mainlayout.setSpacing(0)
-        mainlayout.setMargin(0)
+        mainlayout.setContentsMargins(0, 0, 0, 0)
 
         # dome part of telescope
-        toplayout = QtGui.QVBoxLayout()
+        toplayout = QtWidgets.QVBoxLayout()
         toplayout.setSpacing(0)
         toplayout.addWidget(self.dome_shutter)
         toplayout.addWidget(self.topscreen)
 
         # middle part of telescope
-        middlelayout = QtGui.QVBoxLayout()
+        middlelayout = QtWidgets.QVBoxLayout()
 
         # focusing part of telescope
-        telfocuslayout=QtGui.QVBoxLayout()
+        telfocuslayout=QtWidgets.QVBoxLayout()
         telfocuslayout.addWidget(self.z)
         telfocuslayout.addWidget(self.m2)
         telfocuslayout.addWidget(self.focus)
 
-        # telesocpe body
-        telbodylayout=QtGui.QVBoxLayout()
+        # telescope body
+        telbodylayout=QtWidgets.QVBoxLayout()
         telbodylayout.setSpacing(0)
         #telbodylayout.addWidget(self.el)
         telbodylayout.addWidget(self.azel)
@@ -87,11 +84,11 @@ class TelescopeGui(QtGui.QWidget):
 
         # right layout will be combination of following components:
         # ins/img-rot, adc, tiptilt, wavepalte
-        rightlayout=QtGui.QVBoxLayout()
+        rightlayout=QtWidgets.QVBoxLayout()
         self.set_focus_layout(rlayout=rightlayout)
 
         # combine right, middle, left layout
-        telhlayout=QtGui.QHBoxLayout()
+        telhlayout=QtWidgets.QHBoxLayout()
         telhlayout.setSpacing(0)
         telhlayout.addWidget(self.windscreen)
         telhlayout.addLayout(middlelayout)
@@ -103,12 +100,12 @@ class TelescopeGui(QtGui.QWidget):
 
     def popt_layout(self, rlayout):
         ''' prime focus optical'''
-        r1layout=QtGui.QVBoxLayout()
+        r1layout=QtWidgets.QVBoxLayout()
         #r1layout.addWidget(self.d1)
         empty_shell=Dummy(height=95, logger=self.logger)
         r1layout.addWidget(empty_shell)
 
-        r2layout=QtGui.QVBoxLayout()
+        r2layout=QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
         empty_shell=Dummy(height=1, logger=self.logger)
         r2layout.addWidget(empty_shell)
@@ -124,12 +121,12 @@ class TelescopeGui(QtGui.QWidget):
 
     def pir_layout(self, rlayout):
         ''' prime focus infrared'''
-        r1layout=QtGui.QVBoxLayout()
+        r1layout=QtWidgets.QVBoxLayout()
         #r1layout.addWidget(self.d1)
         empty_shell=Dummy(height=95, logger=self.logger)
         r1layout.addWidget(empty_shell)
 
-        r2layout=QtGui.QVBoxLayout()
+        r2layout=QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
 
         empty_shell=Dummy(height=1, logger=self.logger)
@@ -146,12 +143,12 @@ class TelescopeGui(QtGui.QWidget):
 
     def nsopt_layout(self, rlayout):
         ''' nasmyth focus optical'''
-        r1layout=QtGui.QVBoxLayout()
+        r1layout=QtWidgets.QVBoxLayout()
         #r1layout.addWidget(self.d1)
         empty_shell=Dummy(height=95, logger=self.logger)
         r1layout.addWidget(empty_shell)
 
-        r2layout=QtGui.QVBoxLayout()
+        r2layout=QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
         empty_shell=Dummy(height=1, logger=self.logger)
         r2layout.addWidget(empty_shell)
@@ -168,12 +165,12 @@ class TelescopeGui(QtGui.QWidget):
     def nsir_layout(self, rlayout):
         ''' nasmyth focus infrared'''
 
-        r1layout = QtGui.QVBoxLayout()
+        r1layout = QtWidgets.QVBoxLayout()
         #r1layout.addWidget(self.d1)
         empty_shell = Dummy(height=95, logger=self.logger)
         r1layout.addWidget(empty_shell)
 
-        r2layout = QtGui.QVBoxLayout()
+        r2layout = QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
         empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.addWidget(empty_shell)
@@ -197,12 +194,12 @@ class TelescopeGui(QtGui.QWidget):
 
     def cs_layout(self, rlayout):
         ''' cassegrain focus '''
-        r1layout = QtGui.QVBoxLayout()
+        r1layout = QtWidgets.QVBoxLayout()
         #r1layout.addWidget(self.d1)
         empty_shell = Dummy(height=95, logger=self.logger)
         r1layout.addWidget(empty_shell)
 
-        r2layout = QtGui.QVBoxLayout()
+        r2layout = QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
         empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.addWidget(empty_shell)
@@ -219,7 +216,7 @@ class TelescopeGui(QtGui.QWidget):
     def csir_layout(self, rlayout):
         ''' cassegrain focus infrared '''
 
-        r1layout = QtGui.QVBoxLayout()
+        r1layout = QtWidgets.QVBoxLayout()
         #r1layout.addWidget(self.d1)
         empty_shell = Dummy(height=25, logger=self.logger)
         r1layout.addWidget(empty_shell)
@@ -230,7 +227,7 @@ class TelescopeGui(QtGui.QWidget):
         empty_shell = Dummy(height=35, logger=self.logger)
         r1layout.addWidget(empty_shell)
 
-        r2layout = QtGui.QVBoxLayout()
+        r2layout = QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
 
         empty_shell = Dummy(height=1, logger=self.logger)
@@ -248,12 +245,12 @@ class TelescopeGui(QtGui.QWidget):
     def csopt_layout(self, rlayout):
         ''' cassegrain focus optical '''
 
-        r1layout=QtGui.QVBoxLayout()
+        r1layout=QtWidgets.QVBoxLayout()
         #r1layout.addWidget(self.d1)
         empty_shell = Dummy(height=95, logger=self.logger)
         r1layout.addWidget(empty_shell)
 
-        r2layout = QtGui.QVBoxLayout()
+        r2layout = QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
         empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.addWidget(empty_shell)
@@ -467,10 +464,10 @@ def main(options, args):
 
     try:
 
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         tel = Telescope(obcp=options.ins, logger=logger)
         timer = QtCore.QTimer()
-        QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), tel.tick)
+        timer.timeout.connect(tel.tick)
         timer.start(options.interval)
         tel.setWindowTitle("%s" % progname)
         tel.show()

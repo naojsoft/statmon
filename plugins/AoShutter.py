@@ -5,9 +5,7 @@ from __future__ import print_function
 import sys
 import os
 
-from PyQt4 import QtCore, QtGui
-
-from CustomLabel import Label, ERROR
+from CustomLabel import Label, QtCore, QtWidgets, ERROR
 
 from g2base import ssdlog
 
@@ -38,7 +36,7 @@ class Shutter(Label):
                             %(color, self.bg))
 
 
-class AoShutter(QtGui.QWidget):
+class AoShutter(QtWidgets.QWidget):
     ''' AO Shutters  '''
     def __init__(self, parent=None, logger=None):
         super(AoShutter, self).__init__(parent)
@@ -64,22 +62,22 @@ class AoShutter(QtGui.QWidget):
         self._set_layout() 
 
     def _set_layout(self):
-        top = QtGui.QVBoxLayout()
+        top = QtWidgets.QVBoxLayout()
 
-        lwshHbox = QtGui.QHBoxLayout()
+        lwshHbox = QtWidgets.QHBoxLayout()
         lwshHbox.setSpacing(0) 
-        lwshHbox.setMargin(0)
+        lwshHbox.setContentsMargins(0, 0, 0, 0)
         lwshHbox.addWidget(self.lwsh_label)
         lwshHbox.addWidget(self.lwsh)
 
-        hwshHbox = QtGui.QHBoxLayout()
+        hwshHbox = QtWidgets.QHBoxLayout()
         hwshHbox.setSpacing(0) 
-        hwshHbox.setMargin(0)
+        hwshHbox.setContentsMargins(0, 0, 0, 0)
         hwshHbox.addWidget(self.hwsh_label)
         hwshHbox.addWidget(self.hwsh)
 
         top.setSpacing(1) 
-        top.setMargin(0)
+        top.setContentsMargins(0, 0, 0, 0)
         top.addLayout(lwshHbox)
         top.addLayout(hwshHbox)
         self.setLayout(top)
@@ -116,7 +114,7 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -126,15 +124,15 @@ def main(options, args):
         def init_ui(self):
             self.resize(self.w, self.h)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             a = AoShutter(parent=self.main_widget, logger=logger)
             l.addWidget(a)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), a.tick)
+            timer.timeout.connect(a.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
@@ -145,7 +143,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
         #state = State(logger=logger)  

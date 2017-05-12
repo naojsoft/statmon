@@ -14,7 +14,8 @@ import sys, os
 import threading
 
 from ginga.qtw import QtHelp
-from PyQt4 import QtGui, QtCore
+#from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 
 moduleHome = os.path.split(sys.modules[__name__].__file__)[0]
 sys.path.insert(0, moduleHome)
@@ -126,17 +127,17 @@ class StatMon(Controller, Viewer):
                                 priority=priority)
         
     def add_menus(self):
-        menubar = QtGui.QMenuBar()
+        menubar = QtWidgets.QMenuBar()
         self.w.menubox.add_widget(Widgets.wrap(menubar), stretch=0)
 
         # create a File pulldown menu, and add it to the menu bar
         filemenu = menubar.addMenu("File")
 
-        sep = QtGui.QAction(menubar)
+        sep = QtWidgets.QAction(menubar)
         sep.setSeparator(True)
         filemenu.addAction(sep)
         
-        item = QtGui.QAction("Quit", menubar)
+        item = QtWidgets.QAction("Quit", menubar)
         item.triggered.connect(self.quit)
         filemenu.addAction(item)
 
@@ -144,7 +145,7 @@ class StatMon(Controller, Viewer):
         ## optionmenu = menubar.addMenu("Option")
 
     def add_statusbar(self):
-        self.w.status = QtGui.QStatusBar()
+        self.w.status = QtWidgets.QStatusBar()
         self.w.statusbox.add_widget(Widgets.wrap(self.w.status), stretch=1)
    
 def main(options, args):

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import PlBase
 import Calprobe
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 
 class CalprobePlugin(PlBase.Plugin):
     """ Cal Source Probe Plugin """
@@ -10,11 +10,11 @@ class CalprobePlugin(PlBase.Plugin):
     def build_gui(self, container):
         self.root = container
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
 
         self.calprobe = Calprobe.CalProbeDisplay(qtwidget, logger=self.logger)
        
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(self.calprobe, stretch=1)

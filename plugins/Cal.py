@@ -5,8 +5,12 @@ from __future__ import print_function
 import os
 import sys
 
-from PyQt4 import QtGui, QtCore
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from qtpy import QtWidgets, QtCore, QT_VERSION
+
+if QT_VERSION.startswith('5'):
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+else:
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
@@ -14,7 +18,7 @@ from matplotlib.figure import SubplotParams
 from matplotlib.artist import Artist
 
 from CustomLabel import Label, ERROR
-#from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+#from CanvasLabel import Canvas, QtCore, QtWidgets, Qt, ERROR
 from g2base import ssdlog
 from g2base.Bunch import Bunch
 import PlBase
@@ -62,7 +66,7 @@ class CalCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        #FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        #FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         #FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
@@ -310,7 +314,7 @@ class Cal(CalCanvas):
         self.draw()
 
 
-class CalDisplay(QtGui.QWidget):
+class CalDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(CalDisplay, self).__init__(parent)
    
@@ -326,13 +330,13 @@ class CalDisplay(QtGui.QWidget):
 
     def __set_layout(self):
  
-        hlayout = QtGui.QHBoxLayout()
+        hlayout = QtWidgets.QHBoxLayout()
         hlayout.setSpacing(0) 
-        hlayout.setMargin(0)  
+        hlayout.setContentsMargins(0, 0, 0, 0)  
 
-        vlayout = QtGui.QVBoxLayout()
+        vlayout = QtWidgets.QVBoxLayout()
         vlayout.setSpacing(0) 
-        vlayout.setMargin(0)
+        vlayout.setContentsMargins(0, 0, 0, 0) 
         vlayout.addWidget(self.cal_label)
         vlayout.addWidget(self.cal.ma)
        
@@ -379,36 +383,36 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('el', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
-            QtGui.QMainWindow.__init__(self)
+            QtWidgets.QMainWindow.__init__(self)
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
             self.w=275; self.h=40;
             self.setup()
 
         def setup(self):
             self.resize(self.w, self.h)
-            self.main_widget = QtGui.QWidget(self)
+            self.main_widget = QtWidgets.QWidget(self)
 
-            l = QtGui.QVBoxLayout(self.main_widget)
+            l = QtWidgets.QVBoxLayout(self.main_widget)
             cal = CalDisplay(self.main_widget, logger=logger)
             l.addWidget(cal)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), cal.tick)
+            timer.timeout.connect(cal.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget)
 
-            self.statusBar().showMessage("windscreen starting..."  ,5000)
+            self.statusBar().showMessage("Cal starting..."  ,5000)
             #print options
 
         def closeEvent(self, ce):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()

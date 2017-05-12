@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 import PlBase
 import Resource
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
+
 
 class ResourcePlugin(PlBase.Plugin):
     """ Resource water, oil """
@@ -10,11 +11,11 @@ class ResourcePlugin(PlBase.Plugin):
     def build_gui(self, container):
         self.root = container
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
 
         self.resource = Resource.ResourceDisplay(qtwidget, logger=self.logger)
        
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(self.resource, stretch=1)

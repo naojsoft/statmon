@@ -13,7 +13,7 @@ from pytz import timezone
 
 from ginga.qtw import QtHelp
 from ginga.misc import Bunch
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore, QtGui
 
 import PlBase
 
@@ -42,13 +42,13 @@ class RaDec(PlBase.Plugin):
     def _build_cluster(self):
         vbox = QtHelp.VBox()
         layout = vbox.layout()
-        lt = QtGui.QLabel()
+        lt = QtWidgets.QLabel()
         lt.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         layout.addWidget(lt, stretch=0, alignment=QtCore.Qt.AlignTop)
-        lm = QtGui.QLabel()
+        lm = QtWidgets.QLabel()
         lm.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         layout.addWidget(lm, stretch=0, alignment=QtCore.Qt.AlignTop)
-        lb = QtGui.QLabel()
+        lb = QtWidgets.QLabel()
         lb.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         layout.addWidget(lb, stretch=0, alignment=QtCore.Qt.AlignTop)
 
@@ -62,12 +62,12 @@ class RaDec(PlBase.Plugin):
                        ('az', al_az, al_az_cmd), ('el', al_el, al_el_cmd),
                        ('rot', al_rot, al_rot_cmd), ('airmass', al_el, al_el))
         
-        layout = QtGui.QHBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(2)
         container.setLayout(layout)
 
-        #self.bigfont = QtGui.QFont("Arial Black", 28)
+        #self.bigfont = QtWidgets.QFont("Arial Black", 28)
         #fontfamily = "DejaVu Sans Mono"
         fontfamily = "Monospace"
         self.biggerfont = QtGui.QFont(fontfamily, 36, QtGui.QFont.Bold)
@@ -201,7 +201,7 @@ class Times(PlBase.Plugin):
 
         self.labels = [ 'ut', 'hst', 'lst', 'ha' ]
 
-        layout = QtGui.QHBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(0)
         container.setLayout(layout)
@@ -213,7 +213,7 @@ class Times(PlBase.Plugin):
 
         layout.addStretch(stretch=1)
         for name in self.labels:
-            w = QtGui.QLabel()
+            w = QtWidgets.QLabel()
             w.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
             w.setFont(self.bigfont)
             layout.addWidget(w, stretch=0, alignment=QtCore.Qt.AlignCenter)

@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 import sip
 
 import PlBase
@@ -13,13 +13,13 @@ class AzLimitPlugin(PlBase.Plugin):
     def build_gui(self, container):
         self.root = container
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
         title = 'AZ'
         alarm = [-269.5, 269.5]
         warn = [-260.0, 260.0 ]
         limit = [-270.0, 270.0]
         self.limit = Limit.Limit(parent=qtwidget, title=title, alarm=alarm, warn=warn, limit=limit, logger=self.logger)
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(self.limit, stretch=1)
@@ -42,7 +42,7 @@ class ElLimitPlugin(PlBase.Plugin):
     def build_gui(self, container):
         self.root = container
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
         title = 'EL'
         marker = 15.0
         marker_txt = 15.0
@@ -51,7 +51,7 @@ class ElLimitPlugin(PlBase.Plugin):
         limit = [10.0, 90.0]
 
         self.limit = Limit.Limit(parent=qtwidget, title=title, alarm=alarm, warn=warn, limit=limit, marker=marker, marker_txt=marker_txt, logger=self.logger)
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(self.limit,stretch=1)
@@ -121,12 +121,12 @@ class RotLimitPlugin(PlBase.Plugin):
 
         self.logger.debug('rotator-limit setlayout. obcp=%s aliases=%s  title=%s' %(obcp, self.aliases, self.title))
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
 
         self.limit_rot = Limit.Limit(parent=qtwidget, title=self.title, alarm=self.alarm, \
                                  warn=self.warn, limit=self.limit, logger=self.logger)
 
-        self.vlayout = QtGui.QVBoxLayout()
+        self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)
         self.vlayout.setSpacing(0)
         self.vlayout.addWidget(self.limit_rot, stretch=1)
@@ -183,14 +183,14 @@ class ProbeLimitPlugin(PlBase.Plugin):
 
         self.logger.debug('probe-limit obcp=%s aliases=%s title=%s' %(obcp, self.aliases, self.title))
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
 
         width = 350
         self.limit_probe = Limit.Limit(parent=qtwidget, title=self.title, \
                                         alarm=self.alarm, warn=self.warn, \
                                         limit=self.limit, width=width, logger=self.logger)
 
-        self.vlayout = QtGui.QVBoxLayout()
+        self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)
         self.vlayout.setSpacing(0)
         self.vlayout.addWidget(self.limit_probe, stretch=1)
@@ -365,14 +365,14 @@ class Probe2LimitPlugin(ProbeLimitPlugin):
 
 #         self.logger.debug('probe-limit r/x. obcp=%s aliases=%s  title=%s' %(obcp, self.aliases, self.title))
 
-#         qtwidget = QtGui.QWidget()
+#         qtwidget = QtWidgets.QWidget()
 
 #         width = 350
 #         self.limit_probe1 = Limit.Limit(parent=qtwidget, title=self.title, \
 #                                         alarm=self.alarm, warn=self.warn, \
 #                                         limit=self.limit, width=width, logger=self.logger)
 
-#         self.vlayout = QtGui.QVBoxLayout()
+#         self.vlayout = QtWidgets.QVBoxLayout()
 #         self.vlayout.setContentsMargins(0, 0, 0, 0)
 #         self.vlayout.setSpacing(0)
 #         self.vlayout.addWidget(self.limit_probe1, stretch=1)
@@ -466,14 +466,14 @@ class Probe2LimitPlugin(ProbeLimitPlugin):
 
 #         self.logger.debug('probe-limit theta/y. obcp=%s aliases=%s  title=%s' %(obcp, self.aliases, self.title))
 
-#         qtwidget = QtGui.QWidget()
+#         qtwidget = QtWidgets.QWidget()
 
 #         width = 350
 #         self.limit_probe2 = Limit.Limit(parent=qtwidget, title=self.title, \
 #                                         alarm=self.alarm, warn=self.warn, \
 #                                         limit=self.limit, width=width, logger=self.logger)
 
-#         self.vlayout = QtGui.QVBoxLayout()
+#         self.vlayout = QtWidgets.QVBoxLayout()
 #         self.vlayout.setContentsMargins(0, 0, 0, 0)
 #         self.vlayout.setSpacing(0)
 #         self.vlayout.addWidget(self.limit_probe2, stretch=1)

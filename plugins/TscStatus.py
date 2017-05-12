@@ -9,11 +9,10 @@ import time
 import datetime
 import collections
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4.Qt import QMutex, QMutexLocker
+from qtpy.QtCore import QMutex
+from qtpy.QtCore import QMutexLocker
 
-from CustomLabel import Label, ERROR
+from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from Dummy import Dummy
 from g2base.remoteObjects import remoteObjects as ro
 from cfg.INS import INSdata
@@ -83,7 +82,7 @@ class StatusTime(Label):
         #self.mutex.unlock()
 
 
-class TscDisplay(QtGui.QWidget):
+class TscDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, monitortime=None, timedelta=None, label=None, logger=None):
         super(TscDisplay, self).__init__(parent)
    
@@ -104,9 +103,9 @@ class TscDisplay(QtGui.QWidget):
         timer.start(monitortime)
 
     def _set_layout(self):
-        objlayout = QtGui.QHBoxLayout()
+        objlayout = QtWidgets.QHBoxLayout()
         objlayout.setSpacing(0) 
-        objlayout.setMargin(0)
+        objlayout.setContentsMargins(0, 0, 0, 0)
         objlayout.addWidget(self.tsc_label)
         objlayout.addWidget(self.tsc)
         self.setLayout(objlayout)
@@ -137,7 +136,7 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -147,9 +146,9 @@ def main(options, args):
         def init_ui(self):
             self.resize(self.w, self.h)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             t = TscDisplay(parent=self.main_widget, monitortime=options.monitortime,\
                            timedelta=options.timedelta,  label='TSCS', logger=logger)
@@ -168,7 +167,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()

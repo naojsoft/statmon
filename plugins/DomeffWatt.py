@@ -5,9 +5,13 @@ from __future__ import print_function
 import os
 import sys
 
+from qtpy import QtWidgets, QtCore, QT_VERSION
 
-from PyQt4 import QtGui, QtCore
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+if QT_VERSION.startswith('5'):
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+else:
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+    
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
@@ -53,7 +57,7 @@ class DomeffCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        #FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        #FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         #FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
@@ -204,7 +208,7 @@ class DomeffWatt(DomeffCanvas):
                 self.set_600W(status=self.bg, alpha=1)
 
 
-class DomeffWattDisplay(QtGui.QWidget):
+class DomeffWattDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(DomeffWattDisplay, self).__init__(parent)
    
@@ -212,9 +216,9 @@ class DomeffWattDisplay(QtGui.QWidget):
         self._set_layout() 
 
     def _set_layout(self):
-        hlayout = QtGui.QHBoxLayout()
+        hlayout = QtWidgets.QHBoxLayout()
         hlayout.setSpacing(0) 
-        hlayout.setMargin(0)
+        hlayout.setContentsMargins(0, 0, 0, 0)
 
         hlayout.addWidget(self.domeffwatt)
         self.setLayout(hlayout)
@@ -246,36 +250,36 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('el', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
-            QtGui.QMainWindow.__init__(self)
+            QtWidgets.QMainWindow.__init__(self)
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
             self.w=450; self.h=55;
             self.setup()
 
         def setup(self):
             self.resize(self.w, self.h)
-            self.main_widget = QtGui.QWidget(self)
+            self.main_widget = QtWidgets.QWidget(self)
 
-            l = QtGui.QVBoxLayout(self.main_widget)
-            el = DomeffWattDisplay(self.main_widget, logger=logger)
-            l.addWidget(el)
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            dw = DomeffWattDisplay(self.main_widget, logger=logger)
+            l.addWidget(dw)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), el.tick)
+            timer.timeout.connect(dw.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget)
 
-            self.statusBar().showMessage("windscreen starting..."  ,5000)
+            self.statusBar().showMessage("DomeffWatt starting..."  ,5000)
             #print options
 
         def closeEvent(self, ce):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()

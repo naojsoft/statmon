@@ -1,9 +1,10 @@
 from __future__ import absolute_import
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 import sip
 
 import PlBase
 import GuidingImage
+
 
 class GuidingImagePlugin(PlBase.Plugin):
     """ Guiding Image Brightness/Seeing  """
@@ -26,11 +27,11 @@ class GuidingImagePlugin(PlBase.Plugin):
         self.__set_aliases(obcp)
         self.logger.debug('guidingimage obcp=%s  aliases=%s' %(obcp, self.aliases)) 
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
 
         self.gi = GuidingImage.GuidingImage(qtwidget, obcp=obcp, logger=self.logger)
        
-        self.vlayout = QtGui.QVBoxLayout()
+        self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)
         self.vlayout.setSpacing(0)
         self.vlayout.addWidget(self.gi, stretch=1)

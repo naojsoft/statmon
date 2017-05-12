@@ -5,10 +5,7 @@ from __future__ import print_function
 import os
 import sys
 
-
-from PyQt4 import QtGui, QtCore
-
-from CustomLabel import Label, ERROR
+from CustomLabel import Label, QtWidgets, QtCore, ERROR
 from Dummy import Dummy
 from DomeffWatt import DomeffWatt
 from DomeffVolt import DomeffVolt
@@ -22,7 +19,7 @@ progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
 
-class DomeffDisplay(QtGui.QWidget):
+class DomeffDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(DomeffDisplay, self).__init__(parent)
    
@@ -43,19 +40,19 @@ class DomeffDisplay(QtGui.QWidget):
         self.__set_layout() 
 
     def __set_layout(self):
-        hlayout = QtGui.QHBoxLayout()
+        hlayout = QtWidgets.QHBoxLayout()
         hlayout.setSpacing(0) 
-        hlayout.setMargin(0)
+        hlayout.setContentsMargins(0, 0, 0, 0)
 
-        vlayout1 = QtGui.QVBoxLayout()
+        vlayout1 = QtWidgets.QVBoxLayout()
         vlayout1.setSpacing(0) 
-        vlayout1.setMargin(0)
+        vlayout1.setContentsMargins(0, 0, 0, 0)
         vlayout1.addWidget(self.domeff_label)
         vlayout1.addWidget(self.empty_label)
 
-        vlayout2 = QtGui.QVBoxLayout()
+        vlayout2 = QtWidgets.QVBoxLayout()
         vlayout2.setSpacing(0) 
-        vlayout2.setMargin(0)
+        vlayout2.setContentsMargins(0, 0, 0, 0)
         vlayout2.addWidget(self.domeffwatt)
         vlayout2.addWidget(self.domeffvolt)
 
@@ -108,36 +105,36 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('el', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
-            QtGui.QMainWindow.__init__(self)
+            QtWidgets.QMainWindow.__init__(self)
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
             self.w=450; self.h=55;
             self.setup()
 
         def setup(self):
             self.resize(self.w, self.h)
-            self.main_widget = QtGui.QWidget(self)
+            self.main_widget = QtWidgets.QWidget(self)
 
-            l = QtGui.QVBoxLayout(self.main_widget)
-            el = DomeffDisplay(self.main_widget, logger=logger)
-            l.addWidget(el)
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            df = DomeffDisplay(self.main_widget, logger=logger)
+            l.addWidget(df)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), el.tick)
+            timer.timeout.connect(df.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget)
 
-            self.statusBar().showMessage("windscreen starting..."  ,5000)
+            self.statusBar().showMessage("Domeff starting..."  ,5000)
             #print options
 
         def closeEvent(self, ce):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()

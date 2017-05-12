@@ -7,9 +7,12 @@ import sys
 import math
 import numpy as np
 
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore, QT_VERSION 
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+if QT_VERSION.startswith('5'):
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+else:
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
 from matplotlib.lines import Line2D
@@ -42,12 +45,12 @@ class CellCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        # FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, \
-        #                            QtGui.QSizePolicy.Expanding)
+        # FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, \
+        #                            QtWidgets.QSizePolicy.Expanding)
         # FigureCanvas.updateGeometry(self)
 
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Fixed, \
-                                   QtGui.QSizePolicy.Fixed)
+        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, \
+                                   QtWidgets.QSizePolicy.Fixed)
 
         # width/hight of widget
         self.w=250
@@ -126,9 +129,9 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('plot', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
-            QtGui.QMainWindow.__init__(self)
+            QtWidgets.QMainWindow.__init__(self)
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
             self.w=250
             self.h=20
@@ -136,28 +139,28 @@ def main(options, args):
 
         def setup(self):
             self.resize(self.w, self.h)
-            self.main_widget = QtGui.QWidget(self)
+            self.main_widget = QtWidgets.QWidget(self)
 
-            l = QtGui.QVBoxLayout(self.main_widget)
+            l = QtWidgets.QVBoxLayout(self.main_widget)
             cell =  CellCover(self.main_widget, logger=logger)
 
             l.addWidget(cell)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), cell.tick)
+            timer.timeout.connect(cell.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget)
 
-            self.statusBar().showMessage("%s starting..." %options.mode, 5000)
+            self.statusBar().showMessage("Cellcover starting..." , 5000)
             #print options
 
         def closeEvent(self, ce):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()
@@ -186,10 +189,6 @@ if __name__ == '__main__':
     optprs.add_option("--interval", dest="interval", type='int',
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--mode", dest="mode",
-                      default='az',
-                      help="Specify a plotting mode [az | rot | ag ]")
 
     ssdlog.addlogopts(optprs)
     

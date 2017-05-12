@@ -7,9 +7,12 @@ import sys
 import math
 import numpy as np
 
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore, QT_VERSION
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+if QT_VERSION.startswith('5'):
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+else:
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
 from matplotlib.lines import Line2D
@@ -43,13 +46,13 @@ class TopscreenCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        #FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, \
-        #                           QtGui.QSizePolicy.Expanding)
+        #FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, \
+        #                           QtWidgets.QSizePolicy.Expanding)
         #FigureCanvas.updateGeometry(self)
 
 
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Fixed, \
-                                   QtGui.QSizePolicy.Fixed)
+        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, \
+                                   QtWidgets.QSizePolicy.Fixed)
         FigureCanvas.updateGeometry(self)
 
 
@@ -205,23 +208,23 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('plot', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
-            QtGui.QMainWindow.__init__(self)
+            QtWidgets.QMainWindow.__init__(self)
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
             self.w=500; self.h=40;
             self.setup()
 
         def setup(self):
             self.resize(self.w, self.h)
-            self.main_widget = QtGui.QWidget(self)
+            self.main_widget = QtWidgets.QWidget(self)
 
-            l = QtGui.QVBoxLayout(self.main_widget)
+            l = QtWidgets.QVBoxLayout(self.main_widget)
             topscreen = Topscreen(self.main_widget, logger=logger)
             l.addWidget(topscreen)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), topscreen.tick)
+            timer.timeout.connect(topscreen.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
@@ -234,7 +237,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()

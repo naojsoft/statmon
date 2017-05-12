@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 import PlBase
 import EnvMon2
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
+
 
 class EnvMon2Plugin(PlBase.Plugin):
     """ EnvMon """
@@ -10,11 +11,11 @@ class EnvMon2Plugin(PlBase.Plugin):
     def build_gui(self, container):
         self.root = container
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
 
         self.em = EnvMon2.EnvMon(qtwidget, logger=self.logger)
        
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(self.em, stretch=1)

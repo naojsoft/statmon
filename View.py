@@ -14,7 +14,8 @@ import traceback
 
 # GUI imports
 from ginga.gw import Widgets, Desktop, GwMain
-from PyQt4 import QtGui, QtCore
+#from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore, QtGui
 from ginga.misc import Bunch
 
 moduleHome = os.path.split(sys.modules[__name__].__file__)[0]
@@ -33,8 +34,8 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         Widgets.Application.__init__(self, logger=logger)
         GwMain.GwMain.__init__(self, logger=logger, ev_quit=ev_quit, app=self)
 
-        QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
-        QtGui.QApplication.setPalette(QtGui.QApplication.style().standardPalette())
+        QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
+        QtWidgets.QApplication.setPalette(QtWidgets.QApplication.style().standardPalette())
 
         # read in any module-level style sheet
         if os.path.exists(rc_file):
@@ -52,7 +53,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         self.font = Bunch.Bunch(mono12=QtGui.QFont('Monospace', 12),
                                 mono11=QtGui.QFont('Monospace', 11))
 
-        QtGui.QToolTip.setFont(self.font.mono11)
+        QtWidgets.QToolTip.setFont(self.font.mono11)
 
         # For now...
         self.controller = self
@@ -109,7 +110,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         
     def load_plugin(self, pluginName, moduleName, className, wsName, tabName):
 
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
 
         # Record plugin info
         canonicalName = pluginName.lower()
@@ -159,12 +160,12 @@ class Viewer(GwMain.GwMain, Widgets.Application):
                 tb_str = "Traceback information unavailable."
                 self.logger.error(tb_str)
                 
-            vbox = QtGui.QVBoxLayout()
+            vbox = QtWidgets.QVBoxLayout()
             vbox.setContentsMargins(4, 4, 4, 4)
             vbox.setSpacing(0)
             widget.setLayout(vbox)
             
-            textw = QtGui.QTextEdit()
+            textw = QtWidgets.QTextEdit()
             textw.append(str(e) + '\n')
             textw.append(tb_str)
             textw.setReadOnly(True)

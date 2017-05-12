@@ -3,7 +3,8 @@
 # Eric Jeschke (eric@naoj.org)
 #
 from __future__ import absolute_import
-from PyQt4 import QtGui, QtCore
+
+from qtpy import QtWidgets, QtGui, QtCore
 import sip
 
 import PlBase
@@ -117,7 +118,7 @@ class PlotPlugin(PlBase.Plugin):
         self.__set_aliases(obcp)
         self.logger.debug('plot update=%s  aliases=%s' %(self.update, self.aliases)) 
     
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
 
         if obcp in self.ag:
             self.plot = Plot.AgPlot(qtwidget, logger=self.logger)
@@ -128,7 +129,7 @@ class PlotPlugin(PlBase.Plugin):
         elif obcp == self.fmosag:
             self.plot = Plot.FmosPlot(qtwidget, logger=self.logger)
 
-        self.vlayout = QtGui.QVBoxLayout()
+        self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)
         self.vlayout.setSpacing(0)
         self.vlayout.addWidget(self.plot, stretch=1)

@@ -5,14 +5,14 @@ from __future__ import print_function
 import sys
 import os
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from CustomLabel import Label, QtCore, QtWidgets, ERROR
 
 from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
     
-class Exptime(Canvas):
+class Exptime(Label):
     ''' Exposure Time  '''
     def __init__(self, parent=None, logger=None):
         super(Exptime, self).__init__(parent=parent, fs=10, width=110,\
@@ -59,7 +59,7 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -69,15 +69,15 @@ def main(options, args):
         def init_ui(self):
             self.resize(self.w, self.h)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             e = Exptime(parent=self.main_widget, logger=logger)
             l.addWidget(e)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), e.tick)
+            timer.timeout.connect(e.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
@@ -88,7 +88,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
         #state = State(logger=logger)  

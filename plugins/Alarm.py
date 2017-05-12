@@ -14,7 +14,7 @@ from __future__ import print_function
 
 import os
 import threading
-from PyQt4 import QtCore, QtGui
+from qtpy import QtWidgets, QtCore, QtGui
 
 from g2base.remoteObjects import remoteObjects as ro
 
@@ -36,7 +36,7 @@ class Alarm(PlBase.Plugin):
         # send messages to it
         self.alhProxy = ro.remoteObjectProxy('alarm_handler')
 
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(4)
         container.setLayout(layout)

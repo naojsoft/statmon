@@ -18,7 +18,7 @@ import Gen2.senvmon.TVData as TVData
 # Hack required by timeValueGraph
 timeValueGraph.Global.persistentData = {}
 
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 #from Gen2.Fitsview.qtw import QtHelp
 
 from g2base import ssdlog
@@ -40,7 +40,7 @@ shag_bright = 'TSCL.HSC.SHAG.Intensity'
 shag_seeing = 'TSCL.HSC.SHAG.StarSize'
 
 
-class GuidingImage(QtGui.QWidget):
+class GuidingImage(QtWidgets.QWidget):
 
     def __init__(self, parent=None, obcp=None,  logger=None):
         super(GuidingImage, self).__init__(parent)
@@ -48,15 +48,18 @@ class GuidingImage(QtGui.QWidget):
 
         self.statusDict = {}
         self.datakey = 'guidingimage'
-        self.data_file = 'guidingimage.shelve'
+        #self.data_file = 'guidingimage.shelve'
+
+        filename =  'guidingimage.shelve'
+        shelve_path = os.path.join(self._get_shelve_path(), filename)
 
         bright, bright_format = self.__status_bright_format(obcp)
         seeing, seeing_format = self.__status_seeing_format(obcp) 
 
-        self.__load_data() 
+        self.__load_data(shelve_path) 
 
         self.sc = timeValueGraph.TVCoordinator(self.statusDict, 10, \
-                      self.data_file, self.datakey, self.logger)
+                                               shelve_path, self.datakey, self.logger)
 
         self.bright = StatusGraph.StatusGraph(title="Brightness",
                           key='brightness',
@@ -66,7 +69,7 @@ class GuidingImage(QtGui.QWidget):
                           alarmValues = (999999, 999999),
 #                      warningValues = (0,0),
                           displayTime=False,
-                          #backgroundColor=QtGui.QColor(255,255,255),
+                          #backgroundColor=QtWidgets.QColor(255,255,255),
                           logger=self.logger)
 
         self.seeing = StatusGraph.StatusGraph(title="Seeing",
@@ -80,18 +83,23 @@ class GuidingImage(QtGui.QWidget):
 
         self.__set_layout()
 
-    def __load_data(self):
 
-        datapoint=3600
+    def _get_shelve_path(self):
         try:
             g2comm = os.environ['GEN2COMMON']
-            self.data_file = os.path.join(g2comm, 'db', self.data_file)  
+            path = os.path.join(g2comm, 'db')  
         except OSError as e:
             logger.error('error: %s' %e)
-            self.data_file = '/gen2/share/db/%s' %self.data_file   
-        finally:
-            load_data(self.data_file, self.datakey, \
-                      datapoint, logger=self.logger)
+            path = os.path.join('/gen2/share/db')   
+
+        return path
+  
+
+    def __load_data(self, shelve_path):
+
+        datapoint=3600
+        load_data(shelve_path, self.datakey, \
+                  datapoint, logger=self.logger)
 
     def __status_bright_format(self, obcp):
 
@@ -137,11 +145,12 @@ class GuidingImage(QtGui.QWidget):
 
     def __set_layout(self):
 
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(0) 
-        layout.setMargin(0)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         for w in [self.bright, self.seeing]:
+        #for w in [self.bright]:
             self.sc.addGraph(w)
             layout.addWidget(w, stretch=1)
         self.setLayout(layout)
@@ -181,7 +190,7 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -191,15 +200,15 @@ def main(options, args):
         def init_ui(self):
             self.resize(self.w, self.h)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             gi = GuidingImage(parent=self.main_widget, obcp=options.ins, logger=logger)
             l.addWidget(gi)
             gi.start()
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), gi.tick)
+            timer.timeout.connect(gi.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
@@ -210,7 +219,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
         #state = State(logger=logger)  

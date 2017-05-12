@@ -5,13 +5,7 @@ from __future__ import print_function
 import sys
 import os
 
-# This is only needed for Python v2 but is harmless for Python v3.
-#import sip
-#sip.setapi('QVariant', 2)
-
-from PyQt4 import QtCore, QtGui
-
-from CustomLabel import Label, ERROR
+from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
@@ -121,7 +115,7 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('insrot', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -131,9 +125,9 @@ def main(options, args):
         def init_ui(self):
             self.resize(self.w, self.h)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
 
             if options.mode=='pf':
@@ -143,7 +137,7 @@ def main(options, args):
             l.addWidget(ins)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), ins.tick)
+            timer.timeout.connect(ins.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
@@ -154,7 +148,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
         #state = State(logger=logger)  

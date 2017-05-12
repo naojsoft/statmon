@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import sip
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 
 import PlBase
 import Target
@@ -30,11 +30,11 @@ class TargetPlugin(PlBase.Plugin):
         ins_code = ins.getCodeByName(obcp)
         self.__set_aliases(ins_code)
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
         self.target = Target.Target(qtwidget, obcp=ins_code, \
                                   logger=self.logger)
        
-        self.vlayout = QtGui.QVBoxLayout()
+        self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)
         self.vlayout.setSpacing(0)
         self.vlayout.addWidget(self.target,stretch=1)

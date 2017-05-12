@@ -5,14 +5,14 @@ from __future__ import print_function
 import sys
 import os
 
-from CanvasLabel import Canvas, QtCore, QtGui, Qt, ERROR
+from CustomLabel import Label, QtCore, QtWidgets, ERROR
 
 from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
     
-class Resource(Canvas):
+class Resource(Label):
     ''' Water/Oil Storage'''
     def __init__(self, parent=None, logger=None):
         super( Resource, self).__init__(parent=parent, fs=10, width=275,\
@@ -44,12 +44,12 @@ class Resource(Canvas):
                            %(color, self.bg))
 
 
-class WaterStorageDisplay(QtGui.QWidget):
+class WaterStorageDisplay(QtWidgets.QWidget):
     ''' WaterStorage  '''
     def __init__(self, parent=None, logger=None):
         super(WaterStorageDisplay, self).__init__(parent)
    
-        self.water_label = Canvas(parent=parent, fs=10, width=175,\
+        self.water_label = Label(parent=parent, fs=10, width=175,\
                                 height=25, align='vcenter', weight='bold', \
                                 logger=logger)
 
@@ -60,9 +60,9 @@ class WaterStorageDisplay(QtGui.QWidget):
         self.__set_layout() 
 
     def __set_layout(self):
-        objlayout = QtGui.QHBoxLayout()
+        objlayout = QtWidgets.QHBoxLayout()
         objlayout.setSpacing(0) 
-        objlayout.setMargin(0)
+        objlayout.setContentsMargins(0, 0, 0, 0)
         objlayout.addWidget(self.water_label)
         objlayout.addWidget(self.water)
         self.setLayout(objlayout)
@@ -79,11 +79,11 @@ class WaterStorageDisplay(QtGui.QWidget):
         self.update_water(water)
 
 
-class OilStorageDisplay(QtGui.QWidget):
+class OilStorageDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(OilStorageDisplay, self).__init__(parent)
    
-        self.oil_label = Canvas(parent=parent, fs=10, width=175,\
+        self.oil_label = Label(parent=parent, fs=10, width=175,\
                                 height=25, align='vcenter', weight='bold', \
                                 logger=logger)
 
@@ -94,9 +94,9 @@ class OilStorageDisplay(QtGui.QWidget):
         self.__set_layout() 
 
     def __set_layout(self):
-        objlayout = QtGui.QHBoxLayout()
+        objlayout = QtWidgets.QHBoxLayout()
         objlayout.setSpacing(0) 
-        objlayout.setMargin(0)
+        objlayout.setContentsMargins(0, 0, 0, 0)
         objlayout.addWidget(self.oil_label)
         objlayout.addWidget(self.oil)
         self.setLayout(objlayout)
@@ -113,7 +113,7 @@ class OilStorageDisplay(QtGui.QWidget):
         self.update_oil(oil)
 
 
-class ResourceDisplay(QtGui.QWidget):
+class ResourceDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(ResourceDisplay, self).__init__(parent)
    
@@ -123,9 +123,9 @@ class ResourceDisplay(QtGui.QWidget):
         self.__set_layout() 
 
     def __set_layout(self):
-        objlayout = QtGui.QVBoxLayout()
+        objlayout = QtWidgets.QVBoxLayout()
         objlayout.setSpacing(1) 
-        objlayout.setMargin(0)
+        objlayout.setContentsMargins(0, 0, 0, 0)
         objlayout.addWidget(self.water)
         objlayout.addWidget(self.oil)
         self.setLayout(objlayout)
@@ -150,7 +150,7 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('resource', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -160,9 +160,9 @@ def main(options, args):
         def init_ui(self):
             self.resize(self.w, self.h)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
  
             if options.mode == 'water':
@@ -175,7 +175,7 @@ def main(options, args):
             l.addWidget(r)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), r.tick)
+            timer.timeout.connect(r.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
@@ -186,7 +186,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
         #state = State(logger=logger)  

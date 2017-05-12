@@ -5,9 +5,7 @@ from __future__ import print_function
 import sys
 import os
 
-from PyQt4 import QtCore, QtGui
-
-from CustomLabel import Label, ERROR
+from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
@@ -84,7 +82,7 @@ class TimeElLimit(Label):
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                             %(color, self.bg))
 
-class TimeElLimitDisplay(QtGui.QWidget):
+class TimeElLimitDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(TimeElLimitDisplay, self).__init__(parent)
    
@@ -99,9 +97,9 @@ class TimeElLimitDisplay(QtGui.QWidget):
         self._set_layout() 
 
     def _set_layout(self):
-        ellayout = QtGui.QHBoxLayout()
+        ellayout = QtWidgets.QHBoxLayout()
         ellayout.setSpacing(0) 
-        ellayout.setMargin(0)
+        ellayout.setContentsMargins(0, 0, 0, 0)
         ellayout.addWidget(self.timelimit_label)
         ellayout.addWidget(self.ellimit)
         self.setLayout(ellayout)
@@ -131,7 +129,7 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -141,15 +139,15 @@ def main(options, args):
         def init_ui(self):
             self.resize(self.w, self.h)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             t = TimeElLimitDisplay(parent=self.main_widget, logger=logger)
             l.addWidget(t)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), t.tick)
+            timer.timeout.connect(t.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
@@ -160,7 +158,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()

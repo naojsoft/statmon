@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import PlBase
 import Cal
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtGui, QtCore
 
 class CalPlugin(PlBase.Plugin):
     """ Cal Source Plugin """
@@ -15,11 +15,11 @@ class CalPlugin(PlBase.Plugin):
     def build_gui(self, container):
         self.root = container
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
 
         self.cal=Cal.CalDisplay(qtwidget, logger=self.logger)
        
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(self.cal, stretch=1)

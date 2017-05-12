@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 import sip
 
 import PlBase
@@ -14,11 +14,11 @@ class StatusTablePlugin(PlBase.Plugin):
 
     def set_layout(self):
 
-        qtwidget = QtGui.QWidget()
+        qtwidget = QtWidgets.QWidget()
 
         self.statustable = StatusTable(parent=qtwidget, logger=self.logger)
 
-        self.vlayout = QtGui.QVBoxLayout()
+        self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)
         self.vlayout.setSpacing(0)
         self.vlayout.addWidget(self.statustable, stretch=1)

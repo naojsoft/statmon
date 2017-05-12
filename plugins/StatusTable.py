@@ -8,7 +8,7 @@ from __future__ import print_function
 import os
 import sys
 
-from PyQt4 import QtCore, QtGui
+from qtpy import QtCore, QtWidgets
 
 from g2base import ssdlog
 
@@ -21,7 +21,7 @@ from Dummy import Dummy
 progname = os.path.basename(sys.argv[0])
 
 
-class StatusTable(QtGui.QWidget):
+class StatusTable(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(StatusTable, self).__init__(parent) 
         
@@ -46,9 +46,9 @@ class StatusTable(QtGui.QWidget):
 
     def _set_layout(self):
    
-        mainlayout = QtGui.QVBoxLayout()        
+        mainlayout = QtWidgets.QVBoxLayout()        
         mainlayout.setSpacing(1) 
-        mainlayout.setMargin(0)
+        mainlayout.setContentsMargins(0, 0, 0, 0)
 
         mainlayout.addWidget(self.obcp)        
         mainlayout.addWidget(self.tscs)        
@@ -91,10 +91,10 @@ def main(options, args):
 
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         tel =  StatusTable(logger=logger)  
         timer = QtCore.QTimer()
-        QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), tel.tick)
+        timer.timeout.connect(tel.tick)
         timer.start(options.interval)
         tel.setWindowTitle("%s" % progname)
         tel.show()

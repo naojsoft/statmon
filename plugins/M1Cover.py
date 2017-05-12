@@ -7,9 +7,12 @@ import sys
 import math
 import numpy as np
 
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore, QT_VERSION
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+if QT_VERSION.startswith('5'):
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+else:
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
 from matplotlib.lines import Line2D
@@ -24,7 +27,7 @@ progversion = "0.1"
 
  
 class M1Canvas(FigureCanvas):
-    """ AG/SV/FMOS/AO188 Plotting """
+    """ M1 Mirror """
     def __init__(self, parent=None, width=3, height=3,  logger=None):
 
         sub=SubplotParams(left=0.0, right=1, bottom=0, top=1, wspace=0, hspace=0)
@@ -42,12 +45,12 @@ class M1Canvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding, \
-                                   QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, \
+                                   QtWidgets.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-        #FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Fixed, \
-        #                           QtGui.QSizePolicy.Fixed)
+        #FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, \
+        #                           QtWidgets.QSizePolicy.Fixed)
         #FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
@@ -93,29 +96,34 @@ class M1Cover(M1Canvas):
             m1cover_onway = TSCV.M1CoverOnway ''' 
 
         self.logger.debug('updating m1cover=%s m1_onway=%s' %(str(m1cover), str(m1cover_onway)))  
+        self.logger.debug('m1cover type={}'.format(type(m1cover)))  
 
-        if m1cover in ERROR:
-            self.m1.set_facecolor(self.alarm_color)
-            self.text.set_text('M1 Cover Undef') 
-        elif m1cover_onway in ERROR:
-            self.m1.set_facecolor(self.alarm_color)
-            self.text.set_text('M1 Cover OnWay Undef') 
-        elif m1cover_onway == 0x01: # m1 cover onway-open
-            self.m1.set_facecolor(self.onway_color)
-            self.text.set_text('M1 Cover OnWay-Open') 
-        elif m1cover_onway == 0x02: # m1 cover onway-close
-            self.m1.set_facecolor(self.onway_color)
-            self.text.set_text('M1 Cover OnWay-Closed') 
-        elif (m1cover & 0x5555555555555555555555) == 0x1111111111111111111111:
-            self.m1.set_facecolor(self.open_color)
-            self.text.set_text('M1 Cover Open') 
-        elif (m1cover & 0x5555555555555555555555) == 0x4444444444444444444444:
-            self.m1.set_facecolor(self.closed_color)
-            self.text.set_text('M1 Cover Closed') 
-        else:
-            self.m1.set_facecolor(self.onway_color)
-            self.text.set_text('M1 Cover Partial') 
 
+        try:
+            if m1cover in ERROR:
+                self.m1.set_facecolor(self.alarm_color)
+                self.text.set_text('M1 Cover Undef') 
+            elif m1cover_onway in ERROR:
+                self.m1.set_facecolor(self.alarm_color)
+                self.text.set_text('M1 Cover OnWay Undef') 
+            elif m1cover_onway == 0x01: # m1 cover onway-open
+                self.m1.set_facecolor(self.onway_color)
+                self.text.set_text('M1 Cover OnWay-Open') 
+            elif m1cover_onway == 0x02: # m1 cover onway-close
+                self.m1.set_facecolor(self.onway_color)
+                self.text.set_text('M1 Cover OnWay-Closed') 
+            elif (m1cover & 0x5555555555555555555555) == 0x1111111111111111111111:
+                self.m1.set_facecolor(self.open_color)
+                self.text.set_text('M1 Cover Open') 
+            elif (m1cover & 0x5555555555555555555555) == 0x4444444444444444444444:
+                self.m1.set_facecolor(self.closed_color)
+                self.text.set_text('M1 Cover Closed') 
+            else:
+                self.m1.set_facecolor(self.onway_color)
+                self.text.set_text('M1 Cover Partial') 
+        except Exception as e:
+            self.logger.error('Error: M1 cover. {}'.format(e))
+        
         self.draw()
 
     def tick(self):
@@ -142,9 +150,9 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('plot', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
-            QtGui.QMainWindow.__init__(self)
+            QtWidgets.QMainWindow.__init__(self)
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
             self.w=250
             self.h=20
@@ -152,28 +160,28 @@ def main(options, args):
 
         def setup(self):
             self.resize(self.w, self.h)
-            self.main_widget = QtGui.QWidget(self)
+            self.main_widget = QtWidgets.QWidget(self)
 
-            l = QtGui.QVBoxLayout(self.main_widget)
+            l = QtWidgets.QVBoxLayout(self.main_widget)
             m1 =  M1Cover(self.main_widget, logger=logger)
 
             l.addWidget(m1)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), m1.tick)
+            timer.timeout.connect(m1.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget)
 
-            self.statusBar().showMessage("%s starting..." %options.mode, 5000)
+            self.statusBar().showMessage("M1 starting..." , 5000)
             #print options
 
         def closeEvent(self, ce):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()
@@ -202,10 +210,6 @@ if __name__ == '__main__':
     optprs.add_option("--interval", dest="interval", type='int',
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--mode", dest="mode",
-                      default='az',
-                      help="Specify a plotting mode [az | rot | ag ]")
 
     ssdlog.addlogopts(optprs)
     

@@ -1,8 +1,13 @@
 from __future__ import absolute_import
-from PyQt4 import QtCore, QtGui, Qt
+
+from qtpy import QtCore
+from qtpy import QtWidgets
+from qtpy import QtGui
+
 from error import ERROR
-    
-class Label(QtGui.QLabel):
+
+
+class Label(QtWidgets.QLabel):
     ''' draw a label on a canvas  '''
     def __init__(self, parent=None, font='UnDotum', fs=27, weight='normal', \
                  frame=False, linewidth=1, midlinewidth=2, \
@@ -37,8 +42,8 @@ class Label(QtGui.QLabel):
   
 
         if frame:
-            #self.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Raised)
-            self.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised) 
+            #self.setFrameStyle(QtWidgets.QFrame.StyledPanel | QtWidgets.QFrame.Raised)
+            self.setFrameStyle(QtWidgets.QFrame.Box | QtWidgets.QFrame.Raised) 
             self.setLineWidth(linewidth)
             self.setMidLineWidth(midlinewidth)
         self.setStyleSheet("QLabel {color :%s; background-color:%s }" %(self.fg, self.bg))

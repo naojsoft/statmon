@@ -5,9 +5,7 @@ from __future__ import print_function
 import sys
 import os
 
-from PyQt4 import QtCore, QtGui
-
-from CustomLabel import Label, ERROR
+from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
 
 import six
@@ -54,7 +52,7 @@ class Stage(Label):
                                %(color, bg))
 
 
-class Waveplate(QtGui.QWidget):
+class Waveplate(QtWidgets.QWidget):
     ''' Waveplate Stage   '''
     def __init__(self, parent=None, logger=None):
         super(Waveplate, self).__init__(parent)
@@ -67,9 +65,9 @@ class Waveplate(QtGui.QWidget):
         self._set_layout() 
 
     def _set_layout(self):
-        wavelayout = QtGui.QVBoxLayout()
+        wavelayout = QtWidgets.QVBoxLayout()
         wavelayout.setSpacing(1) 
-        wavelayout.setMargin(0)
+        wavelayout.setContentsMargins(0, 0, 0, 0)
         wavelayout.addWidget(self.stage1)
         wavelayout.addWidget(self.stage2)
         wavelayout.addWidget(self.stage3) 
@@ -121,7 +119,7 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -131,26 +129,26 @@ def main(options, args):
         def init_ui(self):
             self.resize(self.w, self.h)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             w = Waveplate(parent=self.main_widget, logger=logger)
             l.addWidget(w)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), w.tick)
+            timer.timeout.connect(w.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget) 
-            self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
+            self.statusBar().showMessage("Waveplate starting..." , options.interval)
 
         def closeEvent(self, ce):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()
@@ -182,10 +180,6 @@ if __name__ == '__main__':
     optprs.add_option("--interval", dest="interval", type='int',
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--mode", dest="mode",
-                      default='ag',
-                      help="Specify a plotting mode [ag | sv | pir | fmos]")
 
     ssdlog.addlogopts(optprs)
     

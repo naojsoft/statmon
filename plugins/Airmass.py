@@ -5,9 +5,8 @@ from __future__ import print_function
 import sys
 import os
 import math
-from PyQt4 import QtCore, QtGui
 
-from CustomLabel import Label, ERROR
+from CustomLabel import Label, QtCore, QtWidgets,  ERROR
 
 from g2base import ssdlog
 
@@ -60,7 +59,7 @@ class Airmass(Label):
                            %(color, self.bg))
 
 
-class AirmassDisplay(QtGui.QWidget):
+class AirmassDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(AirmassDisplay, self).__init__(parent)
    
@@ -75,9 +74,9 @@ class AirmassDisplay(QtGui.QWidget):
         self.__set_layout() 
 
     def __set_layout(self):
-        layout = QtGui.QHBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(0) 
-        layout.setMargin(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.airmass_label)
         layout.addWidget(self.airmass)
         self.setLayout(layout)
@@ -101,7 +100,7 @@ def main(options, args):
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
  
-    class AppWindow(QtGui.QMainWindow):
+    class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -111,15 +110,16 @@ def main(options, args):
         def init_ui(self):
             self.resize(self.w, self.h)
 
-            self.main_widget = QtGui.QWidget()
-            l = QtGui.QVBoxLayout(self.main_widget)
-            l.setMargin(0) 
+            self.main_widget = QtWidgets.QWidget()
+            l = QtWidgets.QVBoxLayout(self.main_widget)
+            #l.setMargin(0)
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             p = AirmassDisplay(parent=self.main_widget, logger=logger)
             l.addWidget(p)
 
             timer = QtCore.QTimer(self)
-            QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), p.tick)
+            timer.timeout.connect(p.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
@@ -130,7 +130,7 @@ def main(options, args):
             self.close()
 
     try:
-        qApp = QtGui.QApplication(sys.argv)
+        qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
         #state = State(logger=logger)  
