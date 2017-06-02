@@ -65,7 +65,7 @@ class GuidingImagePlugin(PlBase.Plugin):
         self.fmosag = 'FMOS'
         self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'SPCAM', 'SWIMS', 'MIMIZUKU', 'SUKA')
         self.agsv = 'HDS'
-        self.ao = ('IRCS', 'HICIAO', 'K3D', 'CHARIS')
+        self.ao = ('IRCS', 'HICIAO', 'K3D', 'CHARIS', 'IRD')
 
         self.root = container
 
