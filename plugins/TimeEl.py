@@ -37,9 +37,13 @@ class TimeElLimit(Label):
             high = TSCL.LIMIT_EL_HIGH '''
 
         self.logger.debug('flag=%s low=%s high=%s' %(str(flag), str(low), str(high)))
-        low_limit = 1
-        high_limit = 2
-        high_limit2 = 3 
+        #low_limit = 1
+        #high_limit = 2
+        #high_limit2 = 3
+
+        low_limit = 0x01
+        high_limit = 0x02
+ 
         limit = 721 # in minute
         color = self.normal
         el_txt = ''
@@ -48,11 +52,12 @@ class TimeElLimit(Label):
             text = 'Undifined'
             color = self.alarm
         else:
-            if flag is low_limit:
+            if flag & low_limit:
                 if low < limit:
                     el_txt = "(Low)"
                     limit = low
-            elif flag is high_limit or flag is high_limit2: 
+            #elif flag is high_limit or flag is high_limit2: 
+            elif flag & high_limit: 
                 # high limit seems to be either flag=2 or flag=3
                 # need to confirm it. 
                 if high < limit:
