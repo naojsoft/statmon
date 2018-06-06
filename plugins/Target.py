@@ -21,38 +21,38 @@ progname = os.path.basename(sys.argv[0])
 
 class TargetGui(QtGui.QWidget):
     def __init__(self, parent=None, obcp=None, logger=None):
-        super(TargetGui, self).__init__(parent) 
-        
+        super(TargetGui, self).__init__(parent)
+
         self.obcp = obcp  # instrument 3 letter code
         self.logger = logger
         self.propid = PropIdDisplay(logger=logger)
         self.object = ObjectDisplay(logger=logger)
         #self.airmass = AirmassDisplay(logger=logger)
-        self.pa = PaDisplay(logger=logger) 
-        self.time_az = TimeAzLimitDisplay(logger=logger)  
+        self.pa = PaDisplay(logger=logger)
+        self.time_az = TimeAzLimitDisplay(logger=logger)
         self.time_el = TimeElLimitDisplay(logger=logger)
-        self.time_rot = TimeRotLimitDisplay(logger=logger)   
+        self.time_rot = TimeRotLimitDisplay(logger=logger)
         self.set_layout()
 
     def set_layout(self):
-   
-        mainlayout = QtGui.QVBoxLayout()        
-        mainlayout.setSpacing(1) 
+
+        mainlayout = QtGui.QVBoxLayout()
+        mainlayout.setSpacing(1)
         mainlayout.setMargin(0)
 
-        mainlayout.addWidget(self.propid)        
-        mainlayout.addWidget(self.object)        
-        #mainlayout.addWidget(self.airmass)        
-        mainlayout.addWidget(self.pa)        
-        mainlayout.addWidget(self.time_az)        
-        mainlayout.addWidget(self.time_el)        
-        mainlayout.addWidget(self.time_rot)        
+        mainlayout.addWidget(self.propid)
+        mainlayout.addWidget(self.object)
+        #mainlayout.addWidget(self.airmass)
+        mainlayout.addWidget(self.pa)
+        mainlayout.addWidget(self.time_az)
+        mainlayout.addWidget(self.time_el)
+        mainlayout.addWidget(self.time_rot)
         self.setLayout(mainlayout)
 
 
 class Target(TargetGui):
     def __init__(self, parent=None, obcp=None, logger=None):
-        super(Target, self).__init__(parent=parent, obcp=obcp, logger=logger) 
+        super(Target, self).__init__(parent=parent, obcp=obcp, logger=logger)
 
     def get_pa_status(self):
 
@@ -67,21 +67,23 @@ class Target(TargetGui):
                 'MCS': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
                 'FCS': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
                 'SUK': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
+                'SWS': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
+                'MMZ': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
                 'COM': ('TSCL.InsRotPA', 'STATS.ROTDIF')}[self.obcp]
         except Exception:
-            pa = cmd_diff = None 
-        finally:   
-            return (pa, cmd_diff)    
- 
+            pa = cmd_diff = None
+        finally:
+            return (pa, cmd_diff)
+
     def update_target(self, **kargs):
 
-        self.logger.debug('updating telescope. %s' %str(kargs)) 
+        self.logger.debug('updating telescope. %s' %str(kargs))
 
         try:
             propid = 'FITS.{0}.PROP_ID'.format(self.obcp)
-            self.propid.update_propid(propid=kargs.get(propid)) 
+            self.propid.update_propid(propid=kargs.get(propid))
 
-            obj = 'FITS.{0}.OBJECT'.format(self.obcp) 
+            obj = 'FITS.{0}.OBJECT'.format(self.obcp)
             self.object.update_object(obj=kargs.get(obj))
 
             #self.airmass.update_airmass(el=kargs.get('TSCS.EL'))
@@ -105,7 +107,7 @@ class Target(TargetGui):
                                           focus=kargs.get('TSCV.FOCUSINFO'), \
                                           focus2=kargs.get('TSCV.FOCUSINFO2'))
         except Exception as e:
-            self.logger.error('error: target update. %s' %str(e))  
+            self.logger.error('error: target update. %s' %str(e))
 
     def tick(self):
 
@@ -125,7 +127,7 @@ def main(options, args):
 
     try:
         qApp = QtGui.QApplication(sys.argv)
-        tel = Target(obcp=options.ins, logger=logger)  
+        tel = Target(obcp=options.ins, logger=logger)
         timer = QtCore.QTimer()
         QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), tel.tick)
         timer.start(options.interval)
@@ -142,10 +144,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -156,7 +158,7 @@ if __name__ == '__main__':
     optprs.add_option("--interval", dest="interval", type='int',
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
+    # note: there are sv/pir plotting, but mode ag uses the same code.
     optprs.add_option("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
@@ -167,7 +169,7 @@ if __name__ == '__main__':
 
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
@@ -191,4 +193,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-
