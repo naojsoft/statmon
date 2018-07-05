@@ -222,7 +222,7 @@ class ProbeLimitPlugin(PlBase.Plugin):
 
         self.popt = 'SPCAM'
         self.pir = 'FMOS'
-        self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'HDS', 'SWIMS', 'MIMIZUKU' 'SUKA')
+        self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'HDS', 'SWIMS', 'MIMIZUKU', 'SUKA')
         self.ao = ('IRCS', 'HICIAO', 'K3D', 'CHARIS', 'IRD' )
         self.popt2 = ('HSC', 'PFS')
 
@@ -247,8 +247,11 @@ class Probe1LimitPlugin(ProbeLimitPlugin):
 
     def set_aliases(self, obcp):
 
+        #self.logger.info('Probe1LimitPlugin obcp <%s>' %obcp)
+
         if obcp in self.ag:
             self.aliases = ['TSCV.AGR', 'TSCL.AG_R_CMD']
+            #self.aliases = ['TSCL.AG_R', 'TSCL.AG_R_CMD']
         elif obcp == self.popt:
             self.aliases = ['TSCL.AGPF_X', 'TSCL.AGPF_X_CMD']
         elif obcp == self.pir:
@@ -267,7 +270,8 @@ class Probe1LimitPlugin(ProbeLimitPlugin):
                  'FOCAS': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),
                  'SUKA': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),
                  'SWIMS': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),
-                 'MIMIZUKU': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),}
+                 'MIMIZUKU': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0))
+                 }
 
         try:
             self.title, self.warn, self.alarm, self.limit = limit[obcp]
