@@ -73,8 +73,8 @@ class WindscreenCanvas(FigureCanvas):
         #FigureCanvas.resize(self, self.w, self.h)
         
         # top screen lenght/width
-        self.len = 6
-        self.width = 0.1
+        self.ts_len = 6
+        self.ts_width = 0.1
 
         self.logger=logger
    
@@ -119,18 +119,18 @@ class WindscreenCanvas(FigureCanvas):
 
 
 
-        ts_kwargs=dict(alpha=0.7, fc=self.wind, ec=self.wind, lw=1.5) 
+        ts_kwargs = dict(alpha=0.7, fc=self.wind, ec=self.wind, lw=1.5) 
 
-        self.windscreen = mpatches.Rectangle((self.center_x-(self.width/2.0)+0.425, 0.0), \
-                                           self.width, 0, \
+        self.windscreen = mpatches.Rectangle((self.center_x-(self.ts_width/2.0)+0.425, 0.0), \
+                                           self.ts_width, 0, \
                                            **ts_kwargs)
 
         self.axes.add_patch(self.windscreen)
 
         # draw text
-        self.msg=self.axes.text(0.9, 0.48, 'Init', \
-                                color=self.normal,  va='top', ha='right', \
-                                transform=self.axes.transAxes, fontsize=13)
+        self.msg = self.axes.text(0.9, 0.48, 'Init', \
+                                  color=self.normal,  va='top', ha='right', \
+                                  transform=self.axes.transAxes, fontsize=13)
 
         # set x,y limit values  
         self.axes.set_ylim(min(self.limit),  max(self.limit))
@@ -161,39 +161,39 @@ class Windscreen(WindscreenCanvas):
 
     def __msg(self,  drv, windscreen, cmd, pos):
       
-        color=self.normal
+        color = self.normal
 
         if windscreen == 0x02: # windscreen free
-            msg='Windscreen\nFree'
+            msg = 'Windscreen\nFree'
         elif windscreen == 0x01: # windscreen link
-            msg='Windscreen\nLink'
+            msg = 'Windscreen\nLink'
         else:# windscreen undefined
-            msg='WindScreen\nMode Undef'
-            color=self.alarm
+            msg = 'WindScreen\nMode Undef'
+            color = self.alarm
             
         if pos in ERROR:
-            color=self.alarm
-            msg+='\nNo Pos Data'
+            color = self.alarm
+            msg += '\nNo Pos Data'
         elif cmd in ERROR:
-            color=self.alarm
-            msg+='\nNo Cmd Data'
-        elif not drv==0x04 and pos <= 5.0: # drive not on  
+            color = self.alarm
+            msg += '\nNo Cmd Data'
+        elif not drv == 0x04 and pos <= 5.0: # drive not on  
             pass #msg+='\n'
-        elif not drv==0x04 and pos > 5.0: # drive not on
+        elif not drv == 0x04 and pos > 5.0: # drive not on
             color=self.alarm
             msg += '\nDrvOff/PosHigh'
-        elif  drv==0x04 and windscreen==0x02:# drive on and Free
-            color=self.alarm
+        elif  drv == 0x04 and windscreen == 0x02:# drive on and Free
+            color = self.alarm
             msg += '\nDriveOn'
         # drive on/link/cmd==pos
-        elif drv==0x04 and windscreen == 0x01 and math.fabs(cmd-pos) <= 1.0:  
+        elif drv == 0x04 and windscreen == 0x01 and math.fabs(cmd-pos) <= 1.0:  
             pass #msg+='\n'   # GREEN, no alerts
         # drive on/link/ cmd!=pos
-        elif  drv==0x04 and windscreen == 0x01 and (cmd-pos > 1.0):  
-            color=self.warn
+        elif  drv == 0x04 and windscreen == 0x01 and (cmd-pos > 1.0):  
+            color = self.warn
             msg += '\nPos!=Cmd' 
         #drive on/link/ cmd-pos < -1
-        elif  drv==0x04 and windscreen == 0x01: 
+        elif  drv == 0x04 and windscreen == 0x01: 
             color = self.alarm
             msg += '\nWS OBSTRUCT'
         else:
@@ -252,20 +252,20 @@ class Windscreen(WindscreenCanvas):
         import random  
         random.seed()
  
-        drv=[0x08, "Unknown",  None, 0x04, '##STATNONE##', '##NODATA##', '##ERROR##']
-        windscreen=["Unknown", 0x01,  None, '##STATNONE##', 0x02, \
-                    '##NODATA##', '##ERROR##']
+        drv = [0x08, "Unknown",  None, 0x04, '##STATNONE##', '##NODATA##', '##ERROR##']
+        windscreen = ["Unknown", 0x01,  None, '##STATNONE##', 0x02, \
+                      '##NODATA##', '##ERROR##']
 
-        indx=random.randrange(0, 7)
+        indx = random.randrange(0, 7)
         #  0 ~ 14.9m 
-        pos=random.random()*random.randrange(0, 16)
-        cmd=random.random()*random.randrange(0, 16)
+        pos = random.random()*random.randrange(0, 16)
+        cmd = random.random()*random.randrange(0, 16)
   
         if el is None:
             el = random.random()*random.randrange(0,100)
              
-        drv=drv[indx]
-        windscreen=windscreen[indx]
+        drv = drv[indx]
+        windscreen = windscreen[indx]
 
         self.update_windscreen(drv, windscreen, cmd, pos, el)
 
@@ -279,24 +279,24 @@ def main(options, args):
         def __init__(self):
             QtWidgets.QMainWindow.__init__(self)
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=125; self.h=500;
+            self.w = 125; self.h = 500;
             self.setup()
 
         def setup(self):
             self.resize(self.w, self.h)
             self.main_widget = QtWidgets.QWidget(self)
-
+            
             l = QtWidgets.QVBoxLayout(self.main_widget)
             windscreen = Windscreen(self.main_widget, logger=logger)
+
             l.addWidget(windscreen)
 
             timer = QtCore.QTimer(self)
             timer.timeout.connect(windscreen.tick)
             timer.start(options.interval)
-
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget)
-
+            
             self.statusBar().showMessage("windscreen starting..."  ,5000)
             #print options
 
@@ -311,7 +311,7 @@ def main(options, args):
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as  e:
-        print('key...board')
+        print('keyboard interruption...')
         logger.info('keyboard interruption....')
         sys.exit(0)
 

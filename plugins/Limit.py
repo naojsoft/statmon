@@ -30,7 +30,7 @@ class LimitCanvas(FigureCanvas):
     def __init__(self, parent=None, title='Limit', width=5, height=5,
                  alarm=[0,0], warn=[0,0], limit=[0,0], marker=0.0, marker_txt='',logger=None):
 
-        sub=SubplotParams(left=0.05,  right=0.95, wspace=0, hspace=0)
+        sub = SubplotParams(left=0.05,  right=0.95, wspace=0, hspace=0)
         self.fig = Figure(figsize=(width, height),  facecolor='white', subplotpars=sub )
         self.axes = self.fig.add_subplot(111)
         # We want the axes cleared every time plot() is called
@@ -149,7 +149,7 @@ class Limit(LimitCanvas):
         #super(AGPlot, self).__init__(*args, **kwargs)
         LimitCanvas.__init__(self, *args, **kwargs)
 
-    def get_val_state(self,val, state=None):
+    def get_val_state(self, val, state=None):
 
         color = self.cur_color
         try:
@@ -158,7 +158,7 @@ class Limit(LimitCanvas):
             self.logger.error('error: value not number=%s %s' %(str(val), str(e)))
             text = 'No Data'
             color = self.alarm_color
-            val=0
+            val = 0
         else:
             if val > self.limit_high:
                 color = self.alarm_color
@@ -177,48 +177,31 @@ class Limit(LimitCanvas):
 
         self.logger.debug('updating cur=%s cmd=%s state=%s' %(current, cmd, state))
 
-        text,val,color = self.get_val_state(current, state)
-
         # ignore alarm/warning if el in pointing
         if state and state.strip()=='Pointing':
             color=self.cur_color
 
-        # old matplotlib version
-        # try:
-        #     self.cur_anno.set_text(text)
-        #     self.cur_anno.xy=(val, self.center_y)
-        #     self.cur_anno.xytext=(val, self.y_curoffset)
-        #     self.bbox['facecolor']=color
-        #     self.cur_anno.set_bbox(self.bbox)
-        # except Exception as e:
-        #     self.logger.error('error: setting current value. %s' %e)
-        #     pass
-
-        # text, val,color=self.get_val_state(cmd)
-        # try:
-        #     self.cmd_anno.xytext=(val, self.y_cmdoffset)
-        #     self.cmd_anno.set_text(text)
-        #     self.cmd_anno.xy=(val, self.center_y)
-        # except Exception as e:
-        #     self.logger.error('error: setting cmd value. %s' %e)
-        #     pass
-
-        # python3 qt5 matplotlib 1.5.1
+        text, val, color = self.get_val_state(current, state)
+           
         try:
             self.cur_anno.set_text(text)
             self.cur_anno.xy = (val, self.center_y)
-            self.cur_anno.xytext = (val, self.y_curoffset)
+            #self.cur_anno.xytext = (val, self.y_curoffset)
+            self.cur_anno.set_x(val)
+            #self.cur_anno.set_y(self.y_curoffset)
             self.bbox['facecolor'] = color
             self.cur_anno.set_bbox(self.bbox)
         except Exception as e:
             self.logger.error('error: setting current value. %s' %e)
             pass
 
-        text, val,color = self.get_val_state(cmd)
+        text, val, color = self.get_val_state(cmd)
         try:
-            self.cmd_anno.xytext = (val, self.y_cmdoffset)
+            #self.cmd_anno.xytext=(val, self.y_cmdoffset)
             self.cmd_anno.set_text(text)
             self.cmd_anno.xy = (val, self.center_y)
+            self.cmd_anno.set_x(val)
+            #self.cmd_anno.set_y(self.y_cmdoffset)
         except Exception as e:
             self.logger.error('error: setting cmd value. %s' %e)
             pass
@@ -231,8 +214,8 @@ class Limit(LimitCanvas):
         random.seed()
 
         #  range is limit+-100,
-        current=random.random()*random.randrange(self.limit_low-200, self.limit_high+100)
-        cmd=random.random()*random.randrange(self.limit_low-100, self.limit_high+100)
+        current = random.random()*random.randrange(self.limit_low-200, self.limit_high+100)
+        cmd = random.random()*random.randrange(self.limit_low-100, self.limit_high+100)
         self.update_limit(current, cmd)
 
 
@@ -277,68 +260,64 @@ def main(options, args):
 
             l = QtWidgets.QVBoxLayout(self.main_widget)
 
-            if options.mode=='az':
-                title='AZ'
-                alarm=[-269.5, 269.5]
-                warn=[-260.0, 260.0 ]
-                limit=[-270.0, 270.0]
-                limit =  Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=limit, logger=logger)
-            if options.mode=='el':
-                title='EL'
-                marker=15.0
-                marker_txt=15.0
-                warn=[15.0, 89.0]
-                alarm=[10.0,89.5]
-                limit=[0.0, 90.0]
-                limit =  ElLimit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=limit, marker=marker, marker_txt=marker_txt,logger=logger)
+            mode = options.mode.upper()
 
-            elif options.mode=='popt':
-                title='Rotator Popt'
-                alarm=[-249.5, 249.5]
-                warn=[-240.0, 240.0 ]
-                limit=[-250.0, 250.0]
-                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=limit,logger=logger)
-            elif options.mode=='popt2' or options.mode=='cs':
-                if options.mode=='popt2':
-                    title='Rotator Popt2'
-                else:
-                    title='Rotator Cs'
-                warn=[-260.0, 260.0]
-                alarm=[-269.5, 269.5]
-                limit=[-270.0, 270.0]
-                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=limit, logger=logger)
-            elif options.mode=='pir':
-                title='Rotator Pir'
-                warn=[-175.0,175.0]
-                alarm=[-179.5,179.5]
-                limit=[-180.0, 180.0]
-                limit =  Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=limit, logger=logger)
-            elif options.mode=='nsir' or  options.mode=='nsopt':
-                if options.mode=='nsir':
-                    title='Rotator Ns Ir'
-                else:
-                    title='Rotator Ns Opt'
-                warn=[-175.0,175.0]
-                alarm=[-179.5,179.5]
-                limit=[-180.0, 180.0]
-                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=limit, logger=logger)
+            titles = {'AZ': 'AZ', 'EL': 'EL', 'POPT': 'Rotator Popt',
+                      'POPT2': 'Rotator Popt2', 'CS': 'Rotator Cs',
+                      'PIR': 'Rotator Pir', 'NSIR': 'Rotator Ns Ir',
+                      'NSOPT': 'Rotator Ns Opt', 'NSIRAG': 'AgProbe Ns Ir',
+                      'NSOPTAG': 'AgProbe Ns Opt', 'CSAG': 'AgProbe Cs'}
+            
+            title = titles.get(mode)
 
-            elif options.mode=='nsirag' or options.mode=='nsoptag':
-                if options.mode=='nsirag':
-                    title='AgProbe Ns Ir'
-                else:
-                    title='AgProbe Ns Opt'
-                warn=[-270.0, 270.0]
-                alarm=[-270.0, 270.0]
-                limit=[-270.0, 270.0]
-                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=limit, logger=logger)
+            print('mode, title, ', mode, title)
 
-            elif options.mode=='csag':
-                title='AgProbe Cs'
-                warn=[-185.0, 185.0]
-                alarm=[-185.0, 185.0]
-                limit=[-185.0, 185.0]
+            
+            if mode == 'AZ':
+                alarm = [-269.5, 269.5]
+                warn = [-260.0, 260.0 ]
+                az_limit = [-270.0, 270.0]
+                limit =  Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=az_limit, logger=logger)
+            if mode == 'EL':
+                marker = 15.0
+                marker_txt = 15.0
+                warn = [15.0, 89.0]
+                alarm = [10.0,89.5]
+                el_limit = [0.0, 90.0]
+                limit =  ElLimit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=el_limit, marker=marker, marker_txt=marker_txt,logger=logger)
+
+            elif mode == 'POPT':
+                alarm = [-249.5, 249.5]
+                warn = [-240.0, 240.0 ]
+                popt_limit = [-250.0, 250.0]
+                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=popt_limit,logger=logger)
+            elif mode in ['POPT2', 'CS']:
+                warn = [-260.0, 260.0]
+                alarm = [-269.5, 269.5]
+                limit = [-270.0, 270.0]
                 limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=limit, logger=logger)
+            elif mode == 'PIR':
+                warn = [-175.0,175.0]
+                alarm = [-179.5,179.5]
+                pir_limit = [-180.0, 180.0]
+                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=pir_limit, logger=logger)
+            elif mode in ['NSIR', 'NSOPT']:
+                warn = [-175.0,175.0]
+                alarm = [-179.5,179.5]
+                ns_limit = [-180.0, 180.0]
+                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=ns_limit, logger=logger)
+
+            elif mode in ['NSIRAG', 'NSOPTAG']:
+                warn = [-270.0, 270.0]
+                alarm = [-270.0, 270.0]
+                ns_limit = [-270.0, 270.0]
+                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=ns_limit, logger=logger)
+
+            elif mode == 'CSAG':
+                warn = [-185.0, 185.0]
+                alarm = [-185.0, 185.0]
+                csag_limit = [-185.0, 185.0]
+                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=csag_limit, logger=logger)
 
             l.addWidget(limit)
 
