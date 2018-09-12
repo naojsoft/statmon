@@ -25,7 +25,7 @@ class ControlError(Exception):
     pass
 
 class Controller(Callback.Callbacks):
-     
+
     def __init__(self, logger, threadPool, module_manager, settings,
                  ev_quit, model):
         Callback.Callbacks.__init__(self)
@@ -65,7 +65,7 @@ class Controller(Callback.Callbacks):
 
     def get_model(self):
         return self.model
-    
+
     def stop(self):
         self.ev_quit.set()
 
@@ -89,15 +89,16 @@ class Controller(Callback.Callbacks):
             if len(s) > 0:
                 statusDict = {}.fromkeys(aliases)
                 model.fetch(statusDict)
-                
+
                 try:
-                    self.gui_do(cb_fn, statusDict)
-                    
+                    self.logger.debug("updating '%s'" % (cbkey))
+                    self.gui_do(self.error_wrap, cb_fn, statusDict)
+
                 except Exception as e:
                     self.logger.error("Error making callback to '%s': %s" % (
                         cbkey, str(e)))
                     # TODO: log traceback
-        
+
         end_time = time.time()
         elapsed = end_time - start_time
         if elapsed > self.update_limit:
@@ -130,7 +131,7 @@ class Controller(Callback.Callbacks):
               'inst': statusDict['FITS.SBR.MAINOBCP'],
               }
         self.make_callback('change-config', d)
-            
+
 
     def play_soundfile(self, filepath, format=None, priority=20):
         self.logger.debug("Subclass could override this to play sound file '%s'" % (
@@ -146,18 +147,18 @@ class Controller(Callback.Callbacks):
         future.freeze(method, *args, **kwdargs)
         self.gui_queue.put(future)
 
-        my_id = thread.get_ident() 
+        my_id = thread.get_ident()
         if my_id != self.gui_thread_id:
             return future
-   
+
     def gui_call(self, method, *args, **kwdargs):
-        my_id = thread.get_ident() 
+        my_id = thread.get_ident()
         if my_id == self.gui_thread_id:
             return method(*args, **kwdargs)
         else:
             future = self.gui_do(method, *args, **kwdargs)
             return future.wait()
-   
+
     def gui_do_future(self, future):
         self.gui_queue.put(future)
         return future
@@ -165,12 +166,12 @@ class Controller(Callback.Callbacks):
     def nongui_do(self, method, *args, **kwdargs):
         task = Task.FuncTask(method, args, kwdargs, logger=self.logger)
         return self.nongui_do_task(task)
-   
+
     def nongui_do_cb(self, tup, method, *args, **kwdargs):
         task = Task.FuncTask(method, args, kwdargs, logger=self.logger)
         task.register_callback(tup[0], args=tup[1:])
         return self.nongui_do_task(task)
-   
+
     def nongui_do_task(self, task):
         try:
             task.init_and_start(self)
@@ -180,17 +181,31 @@ class Controller(Callback.Callbacks):
             raise(e)
 
     def assert_gui_thread(self):
-        my_id = thread.get_ident() 
+        my_id = thread.get_ident()
         assert my_id == self.gui_thread_id, \
                ControlError("Non-GUI thread (%d) is executing GUI code!" % (
             my_id))
-        
+
     def assert_nongui_thread(self):
-        my_id = thread.get_ident() 
+        my_id = thread.get_ident()
         assert my_id != self.gui_thread_id, \
                ControlError("GUI thread (%d) is executing non-GUI code!" % (
             my_id))
-        
+
+    def error_wrap(self, method, *args, **kwargs):
+        try:
+            return method(*args, **kwargs)
+
+        except Exception as e:
+            errmsg = "\n".join([e.__class__.__name__, str(e)])
+            try:
+                (type, value, tb) = sys.exc_info()
+                tb_str = "\n".join(traceback.format_tb(tb))
+            except Exception as e:
+                tb_str = "Traceback information unavailable."
+                errmsg += tb_str
+                self.logger.error(errmsg)
+
     def mainloop(self, timeout=0.001):
         # Mark our thread id
         self.gui_thread_id = thread.get_ident()

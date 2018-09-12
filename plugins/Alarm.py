@@ -3,7 +3,7 @@
 #
 # Uses the MainWindow class from alarm_gui.py to create an Alarm GUI
 # that can be "plugged in" to statmon.
-# 
+#
 #[ Russell Kackley (rkackley@naoj.org) --
 #  Last edit: Mon Jun 24 16:02:13 HST 2013
 #]
@@ -73,7 +73,7 @@ class Alarm(PlBase.Plugin):
         self.aliases.append('STS.TIME1')
 
         # Default persistent data file
-        default_persist_data_filename = 'alarm_handler.shelve'
+        default_persist_data_filename = 'alarm_handler3.shelve'
         try:
             pyhome = os.environ['GEN2COMMON']
             persist_data_dir = os.path.join(pyhome, 'db')
