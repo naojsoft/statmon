@@ -26,7 +26,7 @@ from g2base.remoteObjects import remoteObjects as ro
 from g2base.remoteObjects import Monitor
 
 # Subaru python stdlib imports
-import Gen2.soundsink as SoundSink
+import g2client.soundsink as SoundSink
 
 from ginga import toolkit
 toolkit.use('qt4')
@@ -45,7 +45,7 @@ default_layout = ['seq', {},
                   ['vbox', dict(name='top', width=1850, height=1100),
                    dict(row=['hbox', dict(name='menubox')],
                         stretch=0),
-                   
+
                    dict(row=['vpanel', {},
                              ['ws', dict(name='top', height=120, show_tabs=False), ],
                              ['hpanel', dict(height=1000),
@@ -56,7 +56,7 @@ default_layout = ['seq', {},
                                ['ws', dict(name='left3', height=250, show_tabs=False),],
                                ['ws', dict(name='left4', height=60, show_tabs=False),],
                                ['ws', dict(name='left5', height=60, show_tabs=False),],
-                               #['ws', dict(name='left6', height=80, show_tabs=False),], 
+                               #['ws', dict(name='left6', height=80, show_tabs=False),],
                                ],
                               ['vpanel', dict(width=350),
                                ['ws', dict(name='middle11', height=500, show_tabs=False), ],
@@ -75,7 +75,7 @@ default_layout = ['seq', {},
                                ['ws', dict(name='middle25', height=350, show_tabs=False), ],
                                ['ws', dict(name='middle26', height=125, show_tabs=False), ],
                                ],
-                              
+
                               ['vpanel', dict(width=400),
                                ['ws', dict(name='right1', width=800), ],
                                ['ws', dict(name='right2', height=100, show_tabs=False), ],
@@ -86,21 +86,21 @@ default_layout = ['seq', {},
                    dict(row=['hbox', dict(name='statusbox')], stretch=0),
                    ]
                   ]
-                 
+
 plugins = [
     # pluginName, moduleName, className, workspaceName, tabName
     ('radec', 'RaDec', 'RaDec', 'top', ''),
     ('times', 'RaDec', 'Times', 'bottom', ''),
     ('envmon', 'EnvMonPlugin', 'EnvMonPlugin', 'right1', 'EnvMon'),
     ('statusable', 'StatusTablePlugin', 'StatusTablePlugin', 'right1', 'StatTable'),
-    ('debug', 'Debug', 'Debug', 'right1', "Debug"), 
+    ('debug', 'Debug', 'Debug', 'right1', "Debug"),
     ('state', 'StatePlugin', 'StatePlugin', 'left1', ''),
     ('plot', 'PlotPlugin', 'PlotPlugin', 'left2', ''),
     ('guidingimage', 'GuidingImagePlugin', 'GuidingImagePlugin', 'left3','' ),
     ('probe1limit', 'LimitPlugin', 'Probe1LimitPlugin', 'left4','' ),
     ('probe2limit', 'LimitPlugin', 'Probe2LimitPlugin', 'left5','' ),
-    ('telescope', 'TelescopePlugin', 'TelescopePlugin', 'middle11',''), 
-    ('azlimit', 'LimitPlugin', 'AzLimitPlugin', 'middle12', ''), 
+    ('telescope', 'TelescopePlugin', 'TelescopePlugin', 'middle11',''),
+    ('azlimit', 'LimitPlugin', 'AzLimitPlugin', 'middle12', ''),
     ('ellimit', 'LimitPlugin', 'ElLimitPlugin', 'middle13', ''),
     ('rotlimit', 'LimitPlugin', 'RotLimitPlugin', 'middle14','' ),
     ('domeff', 'DomeffPlugin', 'DomeffPlugin', 'middle21', ''),
@@ -117,7 +117,7 @@ class StatMon(Controller, Viewer):
                  soundsink, ev_quit, model):
 
         self.soundsink = soundsink
-        
+
         Viewer.__init__(self, logger, ev_quit)
         Controller.__init__(self, logger, threadPool, module_manager,
                             settings, ev_quit, model)
@@ -125,7 +125,7 @@ class StatMon(Controller, Viewer):
     def play_soundfile(self, filepath, format=None, priority=20):
         self.soundsink.playFile(filepath, format=format,
                                 priority=priority)
-        
+
     def add_menus(self):
         menubar = QtWidgets.QMenuBar()
         self.w.menubox.add_widget(Widgets.wrap(menubar), stretch=0)
@@ -136,7 +136,7 @@ class StatMon(Controller, Viewer):
         sep = QtWidgets.QAction(menubar)
         sep.setSeparator(True)
         filemenu.addAction(sep)
-        
+
         item = QtWidgets.QAction("Quit", menubar)
         item.triggered.connect(self.quit)
         filemenu.addAction(item)
@@ -147,7 +147,7 @@ class StatMon(Controller, Viewer):
     def add_statusbar(self):
         self.w.status = QtWidgets.QStatusBar()
         self.w.statusbox.add_widget(Widgets.wrap(self.w.status), stretch=1)
-   
+
 def main(options, args):
     # Create top level logger.
     svcname = options.svcname
@@ -179,7 +179,7 @@ def main(options, args):
 
     sndsink = SoundSink.SoundSource(monitor=mymon, logger=logger,
                                     channels=['sound'])
-    
+
     # Get settings folder
     if 'CONFHOME' in os.environ:
         basedir = os.path.join(os.environ['CONFHOME'], svcname)
@@ -199,7 +199,7 @@ def main(options, args):
             self.mm.loadModule(name)
 
     model = Model.StatusModel(logger)
-    
+
     # Start up the control/display engine
     statmon = StatMon(logger, threadPool, mm, prefs,
                       sndsink, ev_quit, model)
@@ -270,16 +270,16 @@ def main(options, args):
         mymon.stop(wait=True)
 
     sys.exit(0)
-        
+
 
 if __name__ == "__main__":
-   
+
     # Parse command line options with nifty new optparse module
     from optparse import OptionParser
 
     usage = "usage: %prog [options] cmd [args]"
     optprs = OptionParser(usage=usage, version=('%%prog %s' % version))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -292,7 +292,7 @@ if __name__ == "__main__":
     optprs.add_option("--monitor", dest="monitor", metavar="NAME",
                       default='monitor',
                       help="Synchronize from monitor named NAME")
-    optprs.add_option("--monchannels", dest="monchannels", 
+    optprs.add_option("--monchannels", dest="monchannels",
                       default='status', metavar="NAMES",
                       help="Specify monitor channels to subscribe to")
     optprs.add_option("--monport", dest="monport", type="int",
