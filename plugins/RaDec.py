@@ -1,6 +1,6 @@
 #
 # RaDec.py -- RA/DEC plugin for StatMon
-# 
+#
 # Eric Jeschke (eric@naoj.org)
 #
 from __future__ import absolute_import
@@ -9,7 +9,7 @@ import math
 import astro.radec as radec
 import astro.wcs as wcs
 from datetime import datetime
-from pytz import timezone
+from dateutil import tz
 
 from ginga.qtw import QtHelp
 from ginga.misc import Bunch
@@ -53,7 +53,7 @@ class RaDec(PlBase.Plugin):
         layout.addWidget(lb, stretch=0, alignment=QtCore.Qt.AlignTop)
 
         return Bunch.Bunch(box=vbox, lt=lt, lm=lm, lb=lb)
-        
+
     def build_gui(self, container):
         self.root = container
         self.root.setStyleSheet("QWidget { background: lightblue }")
@@ -61,7 +61,7 @@ class RaDec(PlBase.Plugin):
         self.labels = (('ra', al_ra, al_ra_cmd), ('dec', al_dec, al_dec_cmd),
                        ('az', al_az, al_az_cmd), ('el', al_el, al_el_cmd),
                        ('rot', al_rot, al_rot_cmd), ('airmass', al_el, al_el))
-        
+
         layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(2)
@@ -131,7 +131,7 @@ class RaDec(PlBase.Plugin):
             rad = math.radians(zd)
             sz = 1.0 / math.cos(rad)
             sz1 = sz - 1.0
-            am = sz - 0.0018167 * sz1 - 0.002875 * sz1**2 - 0.0008083 * sz1**3 
+            am = sz - 0.0018167 * sz1 - 0.002875 * sz1**2 - 0.0008083 * sz1**3
             airmass_str = '{0:.3f}'.format(am)
         finally:
             self.w.airmass.lm.setText(airmass_str)
@@ -139,7 +139,7 @@ class RaDec(PlBase.Plugin):
         # Azimuth, actual
         try:
             az = float(statusDict[al_az])
-            # Mitsubishi says 
+            # Mitsubishi says
             az_str = "%+5.2f" % (az)
         except Exception as e:
             self.logger.error("Error displaying azimuth: %s" % (str(e)))
@@ -149,7 +149,7 @@ class RaDec(PlBase.Plugin):
         # Azimuth, commanded
         try:
             az = float(statusDict[al_az_cmd])
-            # Mitsubishi says 
+            # Mitsubishi says
             az_str = "%+5.2f" % (az)
         except Exception as e:
             self.logger.error("Error displaying azimuth: %s" % (str(e)))
@@ -187,12 +187,12 @@ class RaDec(PlBase.Plugin):
             self.logger.error("Error displaying rotation: %s" % (str(e)))
             rot_str = "ERROR"
         self.w.rot.lb.setText(rot_str)
-        
-    
+
+
     def __str__(self):
         return 'radec'
 
-    
+
 class Times(PlBase.Plugin):
 
     def build_gui(self, container):
@@ -200,12 +200,13 @@ class Times(PlBase.Plugin):
         self.root.setStyleSheet("QWidget { background: lightblue }")
 
         self.labels = [ 'ut', 'hst', 'lst', 'ha' ]
+        self.hst_tz = tz.gettz('US/Hawaii')
 
         layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(0)
         container.setLayout(layout)
-        
+
         fontfamily = "Monospace"
         self.bigfont = QtGui.QFont(fontfamily, 24)
 
@@ -227,39 +228,41 @@ class Times(PlBase.Plugin):
     def update(self, statusDict):
         t_sec = statusDict[al_epoch]
         ut1_utc = statusDict[al_ut1utc]
+        self.logger.debug("epoch: {}  ut1-utc: {}".format(t_sec, ut1_utc))
 
-        # Display HST even in Mitaka, Japan
-        fmt = '%H:%M:%S (%b/%d)'
-        zone = 'HST'
-        hst_time = datetime.now(timezone(zone))
-        hst = hst_time.strftime(fmt)
-        ut = time.strftime(fmt, time.gmtime(t_sec))
+        try:
+            # Display HST even in Mitaka, Japan
+            fmt = '%H:%M:%S (%b/%d)'
+            hst_time = datetime.utcfromtimestamp(t_sec).replace(tzinfo=tz.UTC).astimezone(self.hst_tz)
+            hst = hst_time.strftime(fmt)
+            ut = time.strftime(fmt, time.gmtime(t_sec))
 
-        #hst = time.strftime('%H:%M:%S (%b/%d)', time.localtime(t_sec))
-        #ut = time.strftime('%H:%M:%S (%b/%d)', time.gmtime(t_sec))
-        lst_sec = wcs.calcLST_sec(t_sec, ut1_utc)
-        lst_tup = wcs.adjustTime(lst_sec, 0)
-        lst = '%02d:%02d:%02d' % lst_tup[3:6]
+            lst_sec = wcs.calcLST_sec(t_sec, ut1_utc)
+            lst_tup = wcs.adjustTime(lst_sec, 0)
+            lst = '%02d:%02d:%02d' % lst_tup[3:6]
 
-        ra_deg = radec.funkyHMStoDeg(statusDict[al_ras])
-        ha_sec = wcs.calcHA_sec(lst_sec, ra_deg)
-        c = '+'
-        if ha_sec < 0.0:
-            c = '-'
-        ha_abs = math.fabs(ha_sec)
-        ha_hrs = ha_abs // 3600
-        ha_abs -= (ha_hrs * 3600)
-        ha_min = ha_abs // 60
-        ha_sec = ha_abs - (ha_min * 60)
-        # TODO
-        ha = '%s%02dh:%02dm' % (c, ha_hrs, ha_min)
+            ra_deg = radec.funkyHMStoDeg(statusDict[al_ras])
+            ha_sec = wcs.calcHA_sec(lst_sec, ra_deg)
+            c = '+'
+            if ha_sec < 0.0:
+                c = '-'
+            ha_abs = math.fabs(ha_sec)
+            ha_hrs = ha_abs // 3600
+            ha_abs -= (ha_hrs * 3600)
+            ha_min = ha_abs // 60
+            ha_sec = ha_abs - (ha_min * 60)
+            # TODO
+            ha = '%s%02dh:%02dm' % (c, ha_hrs, ha_min)
 
-        self.w.ut.setText("UT: %s" % ut)
-        self.w.hst.setText("HST: %s" % hst)
-        self.w.lst.setText("LST: %s" % lst)
-        self.w.ha.setText("HA: %s" % ha)
-    
+            self.w.ut.setText("UT: %s" % ut)
+            self.w.hst.setText("HST: %s" % hst)
+            self.w.lst.setText("LST: %s" % lst)
+            self.w.ha.setText("HA: %s" % ha)
+
+        except Exception as e:
+            self.logger.error("Error updating times: {}".format(str(e)))
+
     def __str__(self):
         return 'times'
-    
+
 #END
