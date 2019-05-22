@@ -78,10 +78,10 @@ def load_data(data_file, datakey, datapoint, logger):
 
     # open/load shelve file 
     try:
-        logger.debug('opening env data...')   
+        logger.debug('opening env data file %s...' % data_file)
         envi_data = shelve.open(data_file)
     except Exception as e:
-        logger.error('error: opening envi file. %s' %str(e))
+        logger.error('error: opening envi file: %s, Error: %s' % (data_file, str(e)))
         Global.persistentData = {}
     else:
         __set_data(envi_data, datakey, logger)  
