@@ -141,7 +141,8 @@ class Viewer(GwMain.GwMain, Widgets.Application):
 
             # Add the widget to a workspace and save the tab name in
             # case we need to delete the widget later on.
-            dsTabName = self.ds.add_tab(wsName, Widgets.wrap(widget), 2, tabName)
+            dsTabBnch = self.ds.add_tab(wsName, Widgets.wrap(widget), 2, tabName)
+            dsTabName = dsTabBnch.tabname
             self.plugins[pluginName].setvals(wsTabName=dsTabName)
 
             # Start the plugin
