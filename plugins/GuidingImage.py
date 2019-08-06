@@ -6,7 +6,6 @@ import time
 import math
 import os
 import sys
-import shelve
 
 # TODO: I think eventually most of these should be migrated over to
 # statmon, or else redone....EJ
@@ -48,18 +47,17 @@ class GuidingImage(QtWidgets.QWidget):
 
         self.statusDict = {}
         self.datakey = 'guidingimage'
-        #self.data_file = 'guidingimage.shelve'
 
-        filename =  'guidingimage.shelve'
-        shelve_path = os.path.join(self._get_shelve_path(), filename)
+        filename =  'guidingimage.pickle'
+        persist_file_path = os.path.join(self._get_persist_file_path(), filename)
 
         bright, bright_format = self.__status_bright_format(obcp)
         seeing, seeing_format = self.__status_seeing_format(obcp) 
 
-        self.__load_data(shelve_path) 
+        self.__load_data(persist_file_path)
 
         self.sc = timeValueGraph.TVCoordinator(self.statusDict, 10, \
-                                               shelve_path, self.datakey, self.logger)
+                                               persist_file_path, self.datakey, self.logger)
 
         self.bright = StatusGraph.StatusGraph(title="Brightness",
                           key='brightness',
@@ -86,7 +84,7 @@ class GuidingImage(QtWidgets.QWidget):
         self.__set_layout()
 
 
-    def _get_shelve_path(self):
+    def _get_persist_file_path(self):
         try:
             g2comm = os.environ['GEN2COMMON']
             path = os.path.join(g2comm, 'db')  
@@ -94,13 +92,18 @@ class GuidingImage(QtWidgets.QWidget):
             logger.error('error: %s' %e)
             path = os.path.join('/gen2/share/db')   
 
+        # If we don't have write access to the "path" directory, use
+        # our home directory instead.
+        if not os.access(path, os.W_OK):
+            path = os.environ['HOME']
+
         return path
   
 
-    def __load_data(self, shelve_path):
+    def __load_data(self, persist_file_path):
 
-        datapoint=3600
-        load_data(shelve_path, self.datakey, \
+        datapoint=86400
+        load_data(persist_file_path, self.datakey, \
                   datapoint, logger=self.logger)
 
     def __status_bright_format(self, obcp):

@@ -12,7 +12,7 @@ import time
 import math
 import os
 import sys
-import shelve
+import pickle
 
 from qtpy import QtWidgets, QtCore
 
@@ -44,10 +44,10 @@ topring_r = "TSCL.TOPRING_WINDS_R"
 def __set_data(envi_data, key, logger):
 
     try:
+        logger.info('Setting data in Global.persistentData from key=%s' %key)
         Global.persistentData = envi_data[key]
         #print 'GETDATA:%d' % len(Global.persistentData['temperature'][0])
         #print 'GETDATA:%s' % Global.persistentData 
-        logger.debug('getting data for key %s' %key)
         #print envi_data[key_str]
     #except KeyError as e:
     except Exception as e:
@@ -56,6 +56,7 @@ def __set_data(envi_data, key, logger):
 
 def __restore_data(envi_data, key, logger):
     try:
+        logger.info('restoring data from Global.persistentData for key=%s' %key)
         envi_data[key] = Global.persistentData
     except Exception as e:
         logger.error('error: restoring data. %s' %e)
@@ -63,23 +64,30 @@ def __restore_data(envi_data, key, logger):
 def __remove_old_data(datapoint, logger):
  
     for k in Global.persistentData.keys():
-         logger.debug('removing key=%s' %k)
+         logger.info('removing key=%s' %k)
          try:
              for val in range(len(Global.persistentData[k])):
                   num_points = len(Global.persistentData[k][val])
-                  logger.debug('length of datapoint=%d' %num_points )
+                  logger.info('beginning length of data=%d' %num_points )
+                  logger.info('datapoint value is %d' %datapoint )
                   if num_points > datapoint:
                       del Global.persistentData[k][val][:num_points-datapoint]  
+                  num_points = len(Global.persistentData[k][val])
+                  logger.info('ending length of data=%d' %num_points )
          except Exception as e:  
              logger.error('error: removing old data. %s' %e)
 
 def load_data(data_file, datakey, datapoint, logger):
     ''' loading data '''
 
-    # open/load shelve file 
+    # open/load persistent data file
     try:
-        logger.debug('opening env data file %s...' % data_file)
-        envi_data = shelve.open(data_file)
+        logger.info('opening env data file %s...' % data_file)
+        with open(data_file, 'rb') as f:
+            envi_data = pickle.load(f)
+    except (FileNotFoundError, EOFError) as e:
+        logger.info('env data file %s status is %s' % (data_file, str(e)))
+        Global.persistentData = {}
     except Exception as e:
         logger.error('error: opening envi file: %s, Error: %s' % (data_file, str(e)))
         Global.persistentData = {}
@@ -87,7 +95,8 @@ def load_data(data_file, datakey, datapoint, logger):
         __set_data(envi_data, datakey, logger)  
         __remove_old_data(datapoint, logger)
         __restore_data(envi_data, datakey, logger)
-        envi_data.close()
+        with open(data_file, 'wb') as f:
+            pickle.dump(envi_data, f)
 
 progname = os.path.basename(sys.argv[0])
 
@@ -101,16 +110,15 @@ class EnvMon(QtWidgets.QWidget):
         self.statusDict = {}
         self.envi_file = None
         self.datakey = 'envmon'
-        #self.data_file =  'envi.shelve'
 
-        filename =  'envi.shelve'
-        shelve_path = os.path.join(self._get_shelve_path(), filename)
+        filename =  'envi.pickle'
+        persist_file_path = os.path.join(self._get_persist_file_path(), filename)
 
 
-        self.__load_data(shelve_path) 
+        self.__load_data(persist_file_path)
 
         self.sc = timeValueGraph.TVCoordinator(self.statusDict, 10, \
-                      shelve_path, self.datakey, self.logger)
+                      persist_file_path, self.datakey, self.logger)
 
         self.widgets = []
         # wind direction
@@ -201,7 +209,7 @@ class EnvMon(QtWidgets.QWidget):
 
         self.__set_layout()
  
-    def _get_shelve_path(self):
+    def _get_persist_file_path(self):
         try:
             g2comm = os.environ['GEN2COMMON']
             path = os.path.join(g2comm, 'db')  
@@ -209,13 +217,18 @@ class EnvMon(QtWidgets.QWidget):
             logger.error('error: %s' %e)
             path = os.path.join('/gen2/share/db')   
 
+        # If we don't have write access to the "path" directory, use
+        # our home directory instead.
+        if not os.access(path, os.W_OK):
+            path = os.environ['HOME']
+
         return path
   
 
-    def __load_data(self, shelve_path):
+    def __load_data(self, persist_file_path):
 
-        datapoint=3600
-        load_data(shelve_path, self.datakey, \
+        datapoint=86400
+        load_data(persist_file_path, self.datakey, \
                   datapoint, logger=self.logger)
 
     def __set_layout(self):
