@@ -5,7 +5,7 @@
 # that can be "plugged in" to statmon.
 #
 #[ Russell Kackley (rkackley@naoj.org) --
-#  Last edit: Mon Jun 24 16:02:13 HST 2013
+#  Last edit: Thu Aug 29 16:16:40 HST 2019
 #]
 #
 
@@ -79,6 +79,12 @@ class Alarm(PlBase.Plugin):
             persist_data_dir = os.path.join(pyhome, 'db')
         except:
             persist_data_dir =  os.path.join('/gen2/share/db')
+
+        # If we don't have write access to the persist_data_dir
+        # location, use our home directory instead.
+        if not os.access(persist_data_dir, os.W_OK):
+            persist_data_dir = os.environ['HOME']
+
         default_persist_data_file = os.path.join(persist_data_dir, default_persist_data_filename)
 
         # Load the status value history
