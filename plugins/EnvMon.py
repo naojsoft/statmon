@@ -123,9 +123,13 @@ class EnvMon(QtWidgets.QWidget):
         # don't crop/scale the compass values to the wind data
         self.wd.hardMinDisplayVal = -0.1
         self.wd.hardMaxDisplayVal = 370
-        self.wd.valueRuler.marksPerUnit = 1
-        self.wd.valueRuler.hardValueIncrement = 90
+        self.wd.valueRulerRight.marksPerUnit = 1
+        self.wd.valueRulerRight.hardValueIncrement = 90
+        self.wd.valueRulerLeft.marksPerUnit = 1
+        self.wd.valueRulerLeft.hardValueIncrement = 90
 
+
+        
         self.widgets.append(self.wd)
 
         # wind speed
@@ -134,6 +138,7 @@ class EnvMon(QtWidgets.QWidget):
                              statusKeys=(winds_outside, winds_dome),
                              alarmValues = (19.9,10),
                              warningValues = (7,5),
+                             ruler='LR',
                              logger=self.logger)
 
         self.widgets.append(self.ws) 
@@ -141,7 +146,8 @@ class EnvMon(QtWidgets.QWidget):
         self.temp = StatusGraph.StatusGraph(title="Temperature (C)",
                              key="temperature",
                              statusKeys=(temp_outside, temp_dome),
-                             displayTime=True, 
+                             displayTime=True,
+                             ruler='LR',
                              logger=self.logger)
     
         self.widgets.append(self.temp)
@@ -152,6 +158,7 @@ class EnvMon(QtWidgets.QWidget):
                              statusKeys=(humi_outside, humi_dome),
                              alarmValues = (80,80),
                              warningValues = (70,70),
+                             ruler='LR',            
                              logger=self.logger)
         self.widgets.append(self.h)
 
@@ -161,6 +168,7 @@ class EnvMon(QtWidgets.QWidget):
                              statusKeys=(m1_temp, dew_point),
                              statusFormats=("M1: %0.2f", "Dew: %0.2f"),
 #                             alarmValues = (5,5),
+                             ruler='LR',
                              logger=self.logger)
         self.widgets.append(self.md)
  
@@ -170,7 +178,8 @@ class EnvMon(QtWidgets.QWidget):
                              statusKeys=(topring_f, topring_r),
                              statusFormats=("Front: %0.2f", "Rear: %0.2f"),
                              alarmValues = (2,2),
-                             displayTime=True, 
+                             displayTime=True,
+                             ruler='LR',
                              logger=self.logger)
         self.widgets.append(self.topring)
 

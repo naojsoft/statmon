@@ -107,7 +107,8 @@ class EnvMon(QtWidgets.QWidget):
                              statusKeys=(winds_max,),
                              statusFormats=("Max: %0.2f(m/s)",),
                              alarmValues = (2.0,2.0),
-                             displayTime=True, 
+                             displayTime=True,
+                             ruler='LR',
                              logger=self.logger)
 
         self.widgets.append(self.ws) 

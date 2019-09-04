@@ -69,6 +69,7 @@ class GuidingImage(QtWidgets.QWidget):
                           alarmValues = (999999, 999999),
 #                      warningValues = (0,0),
                           displayTime=False,
+                          ruler='LR',
                           #backgroundColor=QtWidgets.QColor(255,255,255),
                           logger=self.logger)
 
@@ -79,6 +80,7 @@ class GuidingImage(QtWidgets.QWidget):
                           statusFormats=seeing_format,
                           size=(350,200),
                           displayTime=True,
+                          ruler='lr',
                           logger=self.logger)
 
         self.__set_layout()
