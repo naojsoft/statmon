@@ -270,7 +270,7 @@ class TelescopeGui(QtWidgets.QWidget):
         ''' spcam/hsc: insrot,adc
             fmos: insrot
             hds:  imgrot,adc
-            ircs/hiciao/k3d/charis: imgrot,waveplate
+            ircs/hiciao/k3d/charis/vampires: imgrot,waveplate
             comics: insrot,tipchop
             focas: insrot,adc
             moircs insrot
@@ -282,7 +282,8 @@ class TelescopeGui(QtWidgets.QWidget):
                  'K3D': self.nsir_layout, 'MOIRCS': self.cs_layout, \
                  'SWIMS': self.csir_layout, 'MIMIZUKU' : self.csir_layout, \
                  'FOCAS': self.csopt_layout, 'COMICS': self.csir_layout, \
-                 'SUKA': self.cs_layout, 'PFS': self.popt_layout}
+                 'SUKA': self.cs_layout, 'PFS': self.popt_layout, \
+                 'VAMPIRES': self.nsir_layout,}
 
         self.logger.debug('telescope focuslayout ins=%s' %self.obcp)
 
@@ -370,7 +371,8 @@ class Telescope(TelescopeGui):
                  'K3D': self.update_nsir, 'MOIRCS': self.update_cs, \
                  'SWIMS':  self.update_cs, 'MIMIZUKU' :  self.update_cs, \
                  'FOCAS': self.update_csopt, 'COMICS': self.update_csir, \
-                 'SUKA': self.update_cs, 'PFS': self.update_popt,}
+                 'SUKA': self.update_cs, 'PFS': self.update_popt, \
+                 'VAMPIRES': self.update_nsir,}
 
         try:
             focus[self.obcp](**kargs)
@@ -446,9 +448,9 @@ class Telescope(TelescopeGui):
 
         if self.obcp in ('MOIRCS', 'FOCAS', 'SPCAM', 'HSC', 'COMICS', 'FMOS', 'SWIMS', 'MIMIZUKU', 'SUKA', 'PFS'):
             self.insrot.tick()
-        if self.obcp in ('HDS', 'HICIAO', 'IRCS', 'K3D', 'CHARIS'):
+        if self.obcp in ('HDS', 'HICIAO', 'IRCS', 'K3D', 'CHARIS', 'VAMPIRES'):
             self.imgrot.tick()
-        if self.obcp in ('HICIAO', 'IRCS', 'K3D', 'CHARIS', 'IRD'):
+        if self.obcp in ('HICIAO', 'IRCS', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES'):
             self.waveplate.tick()
             self.aoshutter.tick()
         if self.obcp in ('HDS', 'FOCAS', 'SPCAM', 'HSC', 'PFS'):
