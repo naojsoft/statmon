@@ -22,30 +22,13 @@ class StatusModel(Callback.Callbacks):
         self.lock = threading.RLock()
         # This is where we store all incoming status
         self.statusDict = {}
-        
+
+        # Set of channels that we will subscribe to
+        self.channels = set()
+
         # Enable callbacks that can be registered
-        for name in ['status-arrived', ]:
+        for name in ['status-arrived', 'channel-arrived']:
             self.enable_callback(name)
-
-    def arr_status(self, payload, name, channels):
-        """Called when new status information arrives at the periodic
-        interval.
-        """
-        #self.logger.debug("received values '%s'" % str(payload))
-        try:
-            bnch = Monitor.unpack_payload(payload)
-
-        except Monitor.MonitorError:
-            self.logger.error("malformed packet '%s': %s" % (
-                str(payload), str(e)))
-            return
-
-        if bnch.path != 'mon.status':
-            return
-        
-        statusInfo = bnch.value
-
-        self.update_statusInfo(statusInfo)
 
     def store(self, statusInfo):
         with self.lock:
@@ -68,6 +51,26 @@ class StatusModel(Callback.Callbacks):
         need_aliases = aliasset.difference(set(aliases))
         return need_aliases
 
-        
+    def update_channel_list(self, channels):
+        self.channels |= channels
+
+    def arr_channel(self, payload, name, channels):
+        """ Called when new information arrives on a channel """
+        #self.logger.debug("received values '%s'" % str(payload))
+        try:
+            bnch = Monitor.unpack_payload(payload)
+
+        except Monitor.MonitorError:
+            self.logger.error("malformed packet '%s': %s" % (
+                str(payload), str(e)))
+            return
+
+        if bnch.path == 'mon.status':
+            # status channel gets special treatment
+            statusInfo = bnch.value
+
+            self.update_statusInfo(statusInfo)
+        else:
+            self.make_callback('channel-arrived', bnch.path, bnch.value)
 # END
 

@@ -5,7 +5,7 @@
 # that can be "plugged in" to statmon.
 #
 #[ Russell Kackley (rkackley@naoj.org) --
-#  Last edit: Thu Aug 29 16:16:40 HST 2019
+#  Last edit: Thu Oct 31 14:56:11 HST 2019
 #]
 #
 
@@ -46,7 +46,17 @@ class Alarm(PlBase.Plugin):
         layout.addWidget(self.mw, stretch=1)
 
     def start(self):
+        self.lock = threading.RLock()
         persistDatafileLock = threading.RLock()
+
+        # Tell alarm_handler process to save its status value history so
+        # that we can get the up-date status values from the persistent
+        # data file.
+        alhProxy = ro.remoteObjectProxy('alarm_handler')
+        try:
+            alhProxy.saveHistory()
+        except ro.remoteObjectError as e:
+            self.logger.warn('Warning: unable to connect to alarm_handler to save history: %s' % str(e))
 
         # The configuration files tell us which Gen2 aliases we want
         # to monitor. The configuration files are normally in
@@ -65,15 +75,22 @@ class Alarm(PlBase.Plugin):
         except Exception as e:
             self.logger.error('Error opening configuration file(s): %s' % str(e))
 
+        statusDict = {}
+        try:
+            alarmChannelState = self.alhProxy.getMonitorAlarmTree()
+            self.logger.info('initial alarm channel %s' % alarmChannelState)
+            for ID, value in alarmChannelState.items():
+                statusDict['ALARM_' + ID] = value
+                self.logger.info('statusDict is {}'.format(statusDict))
+        except ro.remoteObjectError as e:
+            self.logger.warning('alarm_handler is not running: {}'.format(str(e)))
+
         # Create a list of all the Gen2 aliases we want to monitor
         self.aliases = []
-        for ID in self.svConfig.configID:
-            if self.svConfig.configID[ID].Alarm:
-                self.aliases.append('ALARM_' + ID)
         self.aliases.append('STS.TIME1')
 
         # Default persistent data file
-        default_persist_data_filename = 'alarm_handler3.shelve'
+        default_persist_data_filename = AlarmGui.default_persist_data_filename
         try:
             pyhome = os.environ['GEN2COMMON']
             persist_data_dir = os.path.join(pyhome, 'db')
@@ -91,9 +108,14 @@ class Alarm(PlBase.Plugin):
         self.statusValHistory = StatusValHistory.StatusValHistory(persistDatafileLock, self.logger)
         self.statusValHistory.loadHistory(default_persist_data_file, self.svConfig)
 
+        self.logger.info('Alarm.start calling AlarmGui.initializeAlarmWindow')
+        AlarmGui.initializeAlarmWindow(self.mw, self.svConfig, self.statusValHistory, statusDict)
+
         # Register the update callback function and tell the
         # controller the names of the Gen2 aliases we want to monitor.
         self.controller.register_select('alarm', self.update, self.aliases)
+
+        self.controller.register_channels('alarm', self.update_channel, 'alarm')
 
     # changedStatus copies from statusDict only the status values that
     # have changed since the last time we got the update.
@@ -136,15 +158,7 @@ class Alarm(PlBase.Plugin):
         return changedStatusDict
 
     def update(self, statusDict):
-        # The first time we get called, we have to call the
-        # initializeAlarmWindow method. On subsequent calls, we need
-        # to determine which status values have changed and then call
-        # updateAlarmWindow.
-        if self.firstTime:
-            self.logger.debug(statusDict)
-            AlarmGui.initializeAlarmWindow(self.mw, self.svConfig, self.statusValHistory, statusDict)
-            self.firstTime = False
-        else:
+        with self.lock:
             try:
                 changedStatusDict = self.changedStatus(statusDict)
             except TypeError as e:
@@ -158,6 +172,15 @@ class Alarm(PlBase.Plugin):
         # Save the current statusDict information so that we can
         # determine if there are any changes the next time around.
         self.previousStatusDict = statusDict
+
+    def update_channel(self, path, value):
+        if not path.startswith('mon.alarm'):
+            return
+
+        with self.lock:
+            self.logger.info('path is {} value is {}'.format(path, value))
+            changedStatusDict = {'ALARM_' + value['ID']: value}
+            AlarmGui.updateAlarmWindow(self.mw, self.svConfig, changedStatusDict)
 
     def __str__(self):
         return 'alarm'

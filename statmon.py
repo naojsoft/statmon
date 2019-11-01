@@ -231,14 +231,22 @@ def main(options, args):
         mymon.start_server(wait=True, port=options.monport)
         server_started = True
 
+        # Compute the union of channels supplied on command-line with
+        # channels registered by plugins
+        allChannels = set(channels) | model.channels
+
         if options.monitor:
-            # subscribe our monitor to the central monitor hub
-            mymon.subscribe_remote(options.monitor, channels, {})
+            # subscribe our monitor to the central monitor hub.
+            # Monitor.subscribe_remote requires that the channels be
+            # supplied as a Python list, so convert allChannels from a
+            # set to a list when we supply it to Monitor.subscribe_remote.
+            mymon.subscribe_remote(options.monitor, list(allChannels), {})
             # publishing for remote command executions
             mymon.publish_to(options.monitor, ['sound'], {})
 
-        # Register local status info subscription callback
-        mymon.subscribe_cb(model.arr_status, ['status'])
+        # Register channel subscription callback
+        logger.info('subscribe to channels {}'.format(allChannels))
+        mymon.subscribe_cb(model.arr_channel, allChannels)
 
         # Create our remote service object
         ctrlsvc = ro.remoteObjectServer(svcname=options.svcname,

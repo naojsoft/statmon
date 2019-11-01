@@ -52,6 +52,10 @@ class Controller(Callback.Callbacks):
         # Time limit (secs) that GUI should update within or get a warning
         self.update_limit = 1.0
 
+        # Registrations for channels that plugins want to subscribe to
+        self.regChannels = {}
+        self.model.add_callback('channel-arrived', self.update_channels)
+
         # Holds plugin registrations for specific status items
         self.regSelect = {}
         self.model.add_callback('status-arrived', self.update_status)
@@ -68,6 +72,35 @@ class Controller(Callback.Callbacks):
 
     def stop(self):
         self.ev_quit.set()
+
+    def register_channels(self, ident, cb_fn, channels):
+        # channels can be supplied as either a comma-separated string
+        # or as a list or a set
+        if type(channels) == str:
+            channels = set([c.strip() for c in channels.split(',')])
+        else:
+            channels = set(channels)
+        for channel in channels:
+            if channel in self.regChannels:
+                self.regChannels[channel].append((ident, cb_fn))
+            else:
+                self.regChannels[channel] = [(ident, cb_fn)]
+        self.model.update_channel_list(channels)
+
+    def update_channels(self, model, path, value):
+        # This code assumes that the path is of the form
+        # '<prefix>.<channel_name>.<rest_of_path>, so we can extract
+        # the channel name from the second component in the path.
+        pathComponents = path.split('.')
+        # Ignore the message if we can't find the channel name or the
+        # regChannels data structure has no information on the
+        # channel.
+        if len(pathComponents) > 1:
+            channel = pathComponents[1]
+            if channel in self.regChannels:
+                for i in range(len(self.regChannels[channel])):
+                    (ident, cb_fn) = self.regChannels[channel][i]
+                    self.gui_do(self.error_wrap, cb_fn, path, value)
 
     def get_status_handle(self):
         self.proxystatus = ro.remoteObjectProxy('status')
