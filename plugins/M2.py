@@ -22,44 +22,17 @@ class M2(Label):
         super(M2, self).__init__(parent=parent, fs=16, width=250, \
                                  height=35, logger=logger )
 
-    foci = {0x01000000: 'SPCAM at M2', 
-            0x02000000: 'FMOS at M2', 0x00001000: 'IR M2',
-            0x04000000: 'Cs Opt M2' , 0x08000000: 'Cs Opt M2', 
-            0x10000000: 'Cs Opt M2' , 0x20000000: 'Cs Opt M2' , 
-            0x40000000: 'Cs Opt M2' , long(0x80000000): 'Cs Opt M2' ,
-            0x00010000: 'Cs Opt M2' , 0x00020000: 'Cs Opt M2' , 
-            0x00100000: 'Ns Opt M2' , 0x00200000: 'Ns Opt M2' ,
-            0x00400000: 'Ns Opt M2' , 0x00800000: 'Ns Opt M2' , 
-            0x00000100: 'Ns Opt M2' , 0x00000200: 'Ns Opt M2' ,
-            0x00002000: 'IR M2', 0x00004000: 'IR M2', 
-            0x00008000: 'IR M2', 0x00000001: 'IR M2',
-            0x00000002: 'IR M2', 0x00000004: 'IR M2', 
-            0x00040000: 'Cs Opt M2', 0x00080000: 'Cs Opt M2', 
-            0x00000400: 'Ns Opt M2', 0x00000800: 'Ns Opt M2',
-            0x00000008: 'IR M2', 0x00000010: 'IR M2',
-            (0x00000000, 0x01): 'IR M2',
-            (0x00000000, 0x02): 'Cs Opt M2',
-            (0x00000000, 0x04): 'Ns Opt M2', 
-            (0x00000000, 0x08): 'HSC at M2',}            
+    def update_m2(self,focus):
+        ''' focus = STATL.M2_DESCR  '''
 
-    def update_m2(self,focus, focus2):
-        ''' focus = TSCV.FOCUSINFO 
-            focus2= TSCV.FOCUSINFO2 '''
-
-        self.logger.debug('focus=%s focus2=%s' %(str(focus), str(focus2)))
+        self.logger.debug('focus={}'.format(focus))
 
         color = self.normal
-        try:
-            text = M2.foci[focus]
-        except KeyError:
-            try:
-                text = M2.foci[(focus, focus2)]
-            except KeyError:
-                text = 'M2 Undefined'
-                color = self.alarm
-                self.logger.error('error: m2 undef. focus=%s focus2=%s' %(str(focus), str(focus2)))
 
-        self.setText(text)
+        if focus.upper()=="M2 UNDEFINED":
+            color = self.alarm    
+
+        self.setText(focus)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
 
@@ -68,29 +41,17 @@ class M2(Label):
         import random  
         random.seed()
 
-        indx = random.randrange(0, 35)
-        indx2 = random.randrange(0, 5) 
+        indx = random.randrange(0, 5)
 
-        foci = [0x01000000, 0x02000000, 0x04000000, 0x08000000,
-                0x10000000, 0x20000000, 0x40000000, long(0x80000000),
-                0x00010000, 0x00020000, 0x00040000, 0x00080000,
-                0x00100000, 0x00200000, 0x00400000, 0x00800000,
-                0x00000100, 0x00000200, 0x00000400, 0x00000800,
-                0x00001000, 0x00002000, 0x00004000, 0x00008000,
-                0x00000001, 0x00000002, 0x00000004, 0x00000008, 
-                0x00000010, 0x00000000, 
-                "Unknown", None, '##STATNONE##', '##NODATA##', '##ERROR##']
- 
-        foci2 = [0x01, 0x02, 0x04, "Unknown", None, '##STATNONE##', \
-                 '##NODATA##', 0x08, '##ERROR##']
+        foci = ["Cs Opt M2", "Ns Opt M2", "HSC at M2", 'IR M2', "M2 Undefined"]
+
         try:
             focus = foci[indx]
-            focus2 = foci2[indx2]
         except Exception as e:
-            focus = None
-            focus2 = None
+            focus = "M2 Undefined"
             print(e)
-        self.update_m2(focus, focus2)
+
+        self.update_m2(focus)
 
 
 def main(options, args):

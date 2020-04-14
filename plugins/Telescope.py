@@ -396,11 +396,9 @@ class Telescope(TelescopeGui):
 
         self.z.update_z(z=kargs.get('TSCL.Z'))
 
-        self.m2.update_m2(focus=kargs.get('TSCV.FOCUSINFO'), \
-                          focus2=kargs.get('TSCV.FOCUSINFO2'),)
+        self.m2.update_m2(focus=kargs.get('STATL.M2_DESCR'))
 
-        self.focus.update_focus(focus=kargs.get('TSCV.FOCUSINFO'), \
-                                focus2=kargs.get('TSCV.FOCUSINFO2'), \
+        self.focus.update_focus(focus=kargs.get('STATL.FOC_DESCR'), \
                                 alarm=kargs.get('TSCV.FOCUSALARM'))
 
         #self.el.update_el(el=kargs.get('TSCS.EL'), \

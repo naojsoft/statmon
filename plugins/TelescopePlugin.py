@@ -12,7 +12,7 @@ class TelescopePlugin(PlBase.Plugin):
     aliases=['TSCV.DomeShutter', 'TSCV.TopScreen', 'TSCL.TSFPOS', \
              'TSCL.TSRPOS', 'TSCV.WINDSDRV', 'TSCV.WindScreen', \
              'TSCL.WINDSPOS', 'TSCL.WINDSCMD', 'TSCL.WINDD', 'TSCL.Z', \
-             'TSCV.FOCUSINFO', 'TSCV.FOCUSINFO2', 'TSCV.FOCUSALARM', \
+             'STATL.FOC_DESCR', 'STATL.M2_DESCR', 'TSCV.FOCUSALARM', \
              'TSCS.AZ', 'STATL.TELDRIVE', 'TSCS.EL', \
              'TSCV.M1Cover', 'TSCV.M1CoverOnway', 'TSCV.CellCover', \
              'TSCV.ADCONOFF_PF', 'TSCV.ADCMODE_PF', \

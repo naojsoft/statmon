@@ -22,45 +22,17 @@ class Focus(Label):
     def __init__(self, parent=None, logger=None):
         super(Focus, self).__init__(parent=parent, fs=18, width=250, height=35, frame=True, linewidth=1,  logger=logger )
 
-    # to do 0x11111111 is a tentative for popt2. need to figure it out. 
-    foci = {0x01000000: 'Prime Optical',
-            0x02000000: 'Prime IR', 0x00001000: 'Cassegrain IR',
-            0x04000000: 'Cassegrain Optical', 0x08000000: 'Cassegrain Optical', 
-            0x10000000: 'Nasmyth Optical', 0x20000000: 'Nasmyth Optical' , 
-            0x40000000: 'Nasmyth Optical', long(0x80000000): 'Nasmyth Optical',
-            0x00010000: 'Nasmyth Optical', 0x00020000: 'Nasmyth Optical', 
-            0x00100000: 'Nasmyth Optical', 0x00200000: 'Nasmyth Optical',
-            0x00400000: 'Nasmyth Optical', 0x00800000: 'Nasmyth Optical', 
-            0x00000100: 'Nasmyth Optical', 0x00000200: 'Nasmyth Optical',
-            0x00002000: 'Nasmyth Optical', 0x00004000: 'Nasmyth Optical', 
-            0x00008000: 'Nasmyth Optical', 0x00000001: 'Nasmyth Optical',
-            0x00000002: 'Nasmyth Optical', 0x00000004: 'Nasmyth Optical', 
-            0x00040000: 'Nasmyth IR', 0x00080000: 'Nasmyth IR', 
-            0x00000400: 'Nasmyth IR', 0x00000800: 'Nasmyth IR',
-            0x00000800: 'Nasmyth IR', 0x00000008: 'Nasmyth IR', 
-            0x00000010: 'Nasmyth IR', 
-            (0x00000000, 0x01): 'Nasmyth IR',
-            (0x00000000, 0x02): 'Nasmyth IR',
-            (0x00000000, 0x04): 'Nasmyth IR', 
-            (0x00000000, 0x08): 'Prime Optical2'}
-
-    def update_focus(self,focus, focus2, alarm):
-        ''' focus = TSCV.FOCUSINFO 
-            focus2 = TSCV.FOCUSINFO2
+    def update_focus(self,focus, alarm):
+        ''' focus = STATL.FOC_DESR 
             alarm = TSCV.FOCUSALARM '''
 
-        self.logger.debug('focus=%s focus2=%s alarm=%s' %(str(focus), str(focus2), str(alarm)))
+        self.logger.debug('focus={} alarm={}'.format(focus, alarm))
 
         color = self.normal
-        try:
-            text = Focus.foci[focus]
-        except KeyError:
-            try:
-                text = Focus.foci[(focus,focus2)]
-            except KeyError:
-                text = 'Focus Undefined'
-                color = self.alarm
-                self.logger.error('error: focus undef. focusinfo=%s focusinfo2=%s focusalarm=%s' %(str(focus), str(focus2), str(alarm)))
+        text = focus
+        
+        if text.upper()=="FOCUS UNDEFINED":
+            color = self.alarm
 
         try:
             if alarm & 0x40:        
@@ -73,8 +45,7 @@ class Focus(Label):
         except TypeError:
             text = 'Focus Undefined'
             color = self.alarm
-            self.logger.error('error: focusalarm undef. focusinfo=%s focusinfo2=%s focusalarm=%s' %(str(focus), str(focus2), str(alarm)))
-
+            self.logger.error('error: focusalarm undef. focusinfo=%s focusalarm=%s' %(str(focus),  str(alarm)))
 
         self.setStyleSheet("QLabel {color :%s; background-color:%s}" \
                            %(color, self.bg) )
@@ -85,18 +56,9 @@ class Focus(Label):
         import random  
         random.seed()
 
-        findx = random.randrange(0, 35)
+        findx = random.randrange(0, 7)
 
-        foci = [0x01000000, 0x02000000, 0x04000000, 0x08000000,
-              0x10000000, 0x20000000, 0x40000000, long(0x80000000),
-              0x00010000, 0x00020000, 0x00040000, 0x00080000,
-              0x00100000, 0x00200000, 0x00400000, 0x00800000,
-              0x00000100, 0x00000200, 0x00000400, 0x00000800,
-              0x00001000, 0x00002000, 0x00004000, 0x00008000,
-              0x00000001, 0x00000002, 0x00000004, 0x00000008, 
-              0x00000010, 0x00000000, 
-              "Unknown", None, '##STATNONE##', '##NODATA##', '##ERROR##']
-  
+        foci = ["Cassegrain Optical", 'Prime IR',  "Nasmyth Optical", "Nasmyth IR", "Prime Optical2", 'Cassegrain IR', "Focus Undefined"] 
         
         aindx = random.randrange(0, 6)
         alarm = [0x40,  None, 0x00, 0x80, '##NODATA##', 0x00 ]
@@ -104,12 +66,11 @@ class Focus(Label):
             focus = foci[findx]
             alarm = alarm[aindx]
         except Exception as e:
-            focus = None
+            focus = "Focus Undefined"
             alarm = 0x40
             print(e)
-        #focus=0x04000000
-        focus2=0x08
-        self.update_focus(focus, focus2, alarm)
+
+        self.update_focus(focus, alarm)
 
 
 def main(options, args):
