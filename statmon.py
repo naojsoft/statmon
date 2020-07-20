@@ -103,6 +103,7 @@ plugins = [
     ('azlimit', 'LimitPlugin', 'AzLimitPlugin', 'middle12', ''),
     ('ellimit', 'LimitPlugin', 'ElLimitPlugin', 'middle13', ''),
     ('rotlimit', 'LimitPlugin', 'RotLimitPlugin', 'middle14','' ),
+    ('tsccontrol', 'TscControlPlugin', 'TscControlPlugin', 'middle15','' ),
     ('domeff', 'DomeffPlugin', 'DomeffPlugin', 'middle21', ''),
     ('cal', 'CalPlugin', 'CalPlugin', 'middle23', ''),
     ('calprobe', 'CalprobePlugin', 'CalprobePlugin', 'middle24', ''),
