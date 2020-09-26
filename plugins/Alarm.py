@@ -5,7 +5,7 @@
 # that can be "plugged in" to statmon.
 #
 #[ Russell Kackley (rkackley@naoj.org) --
-#  Last edit: Thu Oct 31 14:56:11 HST 2019
+#  Last edit: Sun Sep 27 22:36:46 HST 2020
 #]
 #
 
@@ -130,7 +130,10 @@ class Alarm(PlBase.Plugin):
             # of changed status values.
             if 'ALARM_' in name:
                 currentAlarmItem = statusDict[name]
-                previousAlarmItem = self.previousStatusDict[name]
+                try:
+                    previousAlarmItem = self.previousStatusDict[name]
+                except (TypeError, KeyError) as e:
+                    previousAlarmItem = common.STATNONE
                 # We cannot check the attributes for changes if either
                 # of the currentAlarmItem or previousAlarmItem values
                 # are STATERROR or STATNONE
@@ -151,7 +154,11 @@ class Alarm(PlBase.Plugin):
                 # STS.TIME1 is a scalar quantity, so just check to see
                 # if it has been updated. If so, add it to the list of
                 # changed status values.
-                if statusDict[name] != self.previousStatusDict[name]:
+                try:
+                    previousValue = self.previousStatusDict[name]
+                except (TypeError, KeyError)	as e:
+                    previousValue = common.STATNONE
+                if statusDict[name] != previousValue:
                     changedStatusDict[name] = statusDict[name]
 
         # Return the list of changed values
