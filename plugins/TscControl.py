@@ -29,7 +29,7 @@ class TscControlGui(QtWidgets.QWidget):
         self.set_layout()
 
     def set_layout(self):
-        mainlayout = QtWidgets.QHBoxLayout()
+        mainlayout = QtWidgets.QVBoxLayout()
         mainlayout.setSpacing(1)
         mainlayout.setContentsMargins(0, 0, 0, 0)
         mainlayout.addWidget(self.tsclogin)
@@ -46,8 +46,14 @@ class TscControl(TscControlGui):
         self.logger.debug('updating tsccontrol. {}'.format(kargs))
 
         try:
-            self.tsclogin.update_tsclogin(tcslogin=kargs.get('GEN2.TSCLOGINS'))
-            self.tscmode.update_tscmode(tscmode=kargs.get('GEN2.TSCMODE'))
+            tsclogin = kargs.get('GEN2.TSCLOGINS')
+            #tsclogin = tsclogin.replace('%', '')
+            self.logger.debug('tsc login. {}'.format(tsclogin))
+            self.tsclogin.update_tsclogin(tsclogin=tsclogin)
+
+            tscmode = kargs.get('GEN2.TSCMODE')
+            self.logger.debug('tsc mode. {}'.format(tscmode))
+            self.tscmode.update_tscmode(tscmode=tscmode)
         except Exception as e:
             self.logger.error('error: updating tsccontrol. {}'.format(e))
 

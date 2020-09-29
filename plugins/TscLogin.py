@@ -15,23 +15,24 @@ progname = os.path.basename(sys.argv[0])
 class TscLogin(Label):
     ''' TSC Login  '''
     def __init__(self, parent=None, logger=None):
-        super(TscLogin, self).__init__(parent=parent, fs=13, width=200,\
-                                     height=25, align='vcenter', \
+        super(TscLogin, self).__init__(parent=parent, fs=13, width=50,\
+                                     height=25, align='left', \
                                      weight='normal', logger=logger)
  
     def update_tsclogin(self, tsclogin):
         ''' tsclogin = GEN2.TSCLOGINS '''
                   
-        self.logger.debug('tsclogin={}'.format(tsclogin))
+        self.logger.debug('update tsclogin={}'.format(tsclogin))
 
         color = self.normal
 
-        if not tsclogin in ERROR:
-            text = '{0}'.format(tsclogin)
-        else:
-            text = '{0}'.format('Undefined')
+        try:
+            assert "OCS" in tsclogin
+            text = 'Logged IN({0})'.format(tsclogin)
+        except Exception as e:
+            text = 'Logged OUT'
             color = self.alarm
-            self.logger.error('error: tsclogin undef. {}'.format(tsclogin))
+            self.logger.warning('warning: gen2 logged out. tsclogin={}'.format(tsclogin))
 
         #self.setText('CalProbe: ')
         self.setText(text)
@@ -43,7 +44,7 @@ class TscLoginDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(TscLoginDisplay, self).__init__(parent)
    
-        self.tsclogin_label = Label(parent=parent, fs=13, width=175,\
+        self.tsclogin_label = Label(parent=parent, fs=13, width=30,\
                                 height=25, align='vcenter', weight='normal', \
                                 logger=logger)
 
@@ -70,9 +71,9 @@ class TscLoginDisplay(QtWidgets.QWidget):
         import random  
         random.seed()
 
-        indx = random.randrange(0, 4)
+        indx = random.randrange(0, 8)
 
-        tsclogin = ['Gen2 Logged OUT', None, 'Gen2 Logged In', '##ERROR##']
+        tsclogin = ['OCS%,TWS2', None, 'OCS%', '##ERROR##', '', 'TWS2', 'TWS2,OCS%']
  
         try:
             tsclogin = tsclogin[indx]
@@ -91,7 +92,7 @@ def main(options, args):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=450; self.h=25;
+            self.w=500; self.h=25;
             self.init_ui()
 
         def init_ui(self):

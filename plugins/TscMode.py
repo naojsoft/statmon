@@ -15,8 +15,8 @@ progname = os.path.basename(sys.argv[0])
 class TscMode(Label):
     ''' TSC Mode  '''
     def __init__(self, parent=None, logger=None):
-        super(TscMode, self).__init__(parent=parent, fs=13, width=200,\
-                                     height=25, align='vcenter', \
+        super(TscMode, self).__init__(parent=parent, fs=13, width=50,\
+                                     height=25, align='left', \
                                      weight='normal', logger=logger)
  
     def update_tscmode(self, tscmode):
@@ -26,12 +26,15 @@ class TscMode(Label):
 
         color = self.normal
 
-        if not tscmode in ERROR:
+        if not tscmode:
+            text = '{0}'.format('None')
+            color = self.alarm    
+        elif "OBS" in  tscmode:
             text = '{0}'.format(tscmode)
         else:
-            text = '{0}'.format('Undefined')
+            text = '{0}'.format(tscmode)
             color = self.alarm
-            self.logger.error('error: tscmode undef. tscmode={}'.format(tscmode))
+        self.logger.debug('tscmode={} color={}'.format(tscmode, color))
 
         self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
@@ -42,11 +45,11 @@ class TscModeDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(TscModeDisplay, self).__init__(parent)
    
-        self.tscmode_label = Label(parent=parent, fs=13, width=175,\
+        self.tscmode_label = Label(parent=parent, fs=13, width=30,\
                                 height=25, align='vcenter', weight='normal', \
                                 logger=logger)
 
-        self.tscmode_label.setText('Priority:')
+        self.tscmode_label.setText('TSC Priority:')
         self.tscmode_label.setIndent(15)
         self.tscmode = TscMode(parent=parent, logger=logger)
         self.__set_layout() 
@@ -69,7 +72,7 @@ class TscModeDisplay(QtWidgets.QWidget):
 
         indx = random.randrange(0, 5)
 
-        tscmode = ['TSC', 'OCS', "Unknown", '##ERROR##']
+        tscmode = ['TSC', 'OCS', "TSC Only", '', []]
  
         try:
             tscmode = tscmode[indx]

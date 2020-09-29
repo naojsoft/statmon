@@ -4,7 +4,6 @@ from qtpy import QtWidgets, QtCore
 
 import PlBase
 import TscControl
-import  cfg.INS as INS
 
 
 class TscControlPlugin(PlBase.Plugin):
@@ -13,7 +12,7 @@ class TscControlPlugin(PlBase.Plugin):
     aliases = ['GEN2.TSCLOGINS', 'GEN2.TSCMODE']
 
     def build_gui(self, container):
-        #self.root = container
+        self.root = container
 
         qtwidget = QtWidgets.QWidget()
         self.tc = TscControl.TscControl(qtwidget, logger=self.logger)
@@ -25,9 +24,8 @@ class TscControlPlugin(PlBase.Plugin):
         container.setLayout(self.vlayout)
 
     def start(self):
-        self.controller.register_select('tsccontrol', self.update, \
-                                         TscControl.aliases)
+        self.controller.register_select('tsccontrol', self.update, TscControlPlugin.aliases)
 
     def update(self, statusDict):
-        self.logger.debug('status=%s' %str(statusDict))
+        self.logger.debug('TSCCONTROL status={}'.format(statusDict))
         self.tc.update_tsccontrol(**statusDict) 
