@@ -7,7 +7,7 @@ from qtpy import QtWidgets, QtCore
 class EnvMonPlugin(PlBase.Plugin):
     """ EnvMon """
     aliases = ['TSCL.WINDD', 'STATS.AZ_ADJ', 'TSCL.WINDS_O',  'TSCL.WINDS_I', \
-               'TSCL.TEMP_O',  'TSCL.TEMP_I', 'TSCL.HUMI_O', 'TSCL.HUMI_I', \
+               'TSCL.TEMP_O',  'TSCL.TEMP_I', 'STATL.HUMI_O.MEAN', 'TSCL.HUMI_O', 'TSCL.HUMI_I', \
                "STATL.DEW_POINT_O", 'TSCL.M1_TEMP', \
                'TSCL.TOPRING_WINDS_F', 'TSCL.TOPRING_WINDS_R']
 
