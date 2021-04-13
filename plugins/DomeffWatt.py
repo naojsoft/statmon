@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import os
 import sys
 
@@ -11,7 +9,7 @@ if QT_VERSION.startswith('5'):
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 else:
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-    
+
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
@@ -26,16 +24,16 @@ from error import *
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
- 
+
 class DomeffCanvas(FigureCanvas):
     """ Dome Flat drawing canvas """
     def __init__(self, parent=None, width=1, height=1,  dpi=None, logger=None):
-      
+
         sub = SubplotParams(left=0, bottom=0, right=1, \
                           top=1, wspace=0, hspace=0)
         self.fig = Figure(figsize=(width, height), \
                           facecolor='white', subplotpars=sub)
- 
+
         #self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='white')
         #self.fig = Figure(facecolor='white')
         self.axes = self.fig.add_subplot(111)
@@ -47,7 +45,7 @@ class DomeffCanvas(FigureCanvas):
         self.warn = 'orange'
         self.alarm = 'red'
         self.bg = 'white'
-        # y axis values. these are fixed values. 
+        # y axis values. these are fixed values.
         #self.x_scale=[-0.007, 1.0]
         #self.y_scale=[-0.002,  1.011]
 
@@ -66,9 +64,9 @@ class DomeffCanvas(FigureCanvas):
         #FigureCanvas.resize(self, self.w, self.h)
 
         self.logger=logger
-   
+
         self.init_figure()
-  
+
     def init_figure(self):
         ''' initial drawing '''
 
@@ -76,33 +74,33 @@ class DomeffCanvas(FigureCanvas):
         h = 0.6
         label_y = 0.2
         frame_y = 0.1
-        common_keys = dict(va='baseline', ha="center", size=13, color=self.normal)       
+        common_keys = dict(va='baseline', ha="center", size=13, color=self.normal)
         kwargs = dict(fc=self.bg, ec=self.normal, lw=1.5)
- 
+
         # 10W Label
         self.axes.text(0.11, label_y, "10W", common_keys)
-        
+
         # 10W frame
-        bs = mpatches.BoxStyle("Round4", pad=0.05) 
+        bs = mpatches.BoxStyle("Round4", pad=0.05)
         self.frame_10w = mpatches.FancyBboxPatch((0.05, frame_y), w, h, \
                                           boxstyle=bs, **kwargs)
         self.axes.add_patch(self.frame_10w)
 
         # 600W Label
         self.axes.text(0.36, label_y, "600W", common_keys)
-       
+
         # 600# frame
         self.frame_600w = mpatches.FancyBboxPatch((0.3,frame_y), w, h, \
                                           boxstyle=bs, **kwargs)
         self.axes.add_patch(self.frame_600w)
-       
+
         self.axes.set_ylim(min(self.y_scale), max(self.y_scale))
         self.axes.set_xlim(min(self.x_scale), max(self.x_scale))
-        # # disable default x/y axis drawing 
+        # # disable default x/y axis drawing
         #self.axes.set_xlabel(False)
         #self.axes.apply_aspect()
         self.axes.set_axis_off()
-       
+
         #self.axes.set_xscale(10)
         #self.axes.axison=False
         self.draw()
@@ -132,51 +130,53 @@ class DomeffWatt(DomeffCanvas):
 
     def _shift_value(self, val, shift=2):
         ''' default right shift by 2  '''
-  
+
         try:
-            #val = int('%s' %(str(val)) , 16)   
+            #val = int('%s' %(str(val)) , 16)
             val = val >> shift
         except Exception:
             val = None
         finally:
-            return val  
+            return val
 
     def _num_of_undef_vals(self, val_set):
 
         for val in [self.on, self.off]:
-            self.logger.debug('val to remove=%s vals=%s' %(str(val), str(val_set)))
+            self.logger.debug(f'val to remove={val} val_set={val_set}')
             try:
                 val_set.remove(val)
-                self.logger.debug('removed=%s' %str(val_set))
+                self.logger.debug(f'val removed. val_set={val_set}')
             except KeyError:
-                pass 
+                pass
         return len(val_set)
- 
+
     def update_watt(self, ff_a, ff_1b, ff_2b, ff_3b, ff_4b):
         ''' note: all values are hex
-            ff_a = TSCV.DomeFF_A  
+            ff_a = TSCV.DomeFF_A
             ff_1b = TSCV.DomeFF_1B
             ff_2b = TSCV.DomeFF_2B
             ff_3b = TSCV.DomeFF_3B
             ff_4b = TSCV.DomeFF_4B
         '''
-        self.logger.debug('updating domeff a=%s 1b=%s 2b=%s 3b=%s 4b=%s' %(str(ff_a), str(ff_1b), str(ff_2b), str(ff_3b), str(ff_4b))) 
+        self.logger.debug('updating domeff a=%s 1b=%s 2b=%s 3b=%s 4b=%s' %(str(ff_a), str(ff_1b), str(ff_2b), str(ff_3b), str(ff_4b)))
 
         # somehow, right shift is required for certain statas aliases
-        # before shifting, converting hex to int is also done in this method    
+        # before shifting, converting hex to int is also done in this method
         ff_1b =  self._shift_value(ff_1b)
         ff_2b =  self._shift_value(ff_2b, shift=4)
         ff_4b =  self._shift_value(ff_4b)
 
-        self.logger.debug('shifted value a=%s 1b=%s 2b=%s 3b=%s 4b=%s' %(str(ff_a), str(ff_1b), str(ff_2b), str(ff_3b), str(ff_4b))) 
- 
-        num_on = [ff_a, ff_1b, ff_2b, ff_3b, ff_4b].count(self.on)     
+        self.logger.debug('shifted value a=%s 1b=%s 2b=%s 3b=%s 4b=%s' %(str(ff_a), str(ff_1b), str(ff_2b), str(ff_3b), str(ff_4b)))
+
+        num_on = [ff_a, ff_1b, ff_2b, ff_3b, ff_4b].count(self.on)
         self.logger.debug("number of on's=%d" %num_on )
 
         vals = set([ff_1b, ff_2b, ff_3b, ff_4b])
-        num_undef = self._num_of_undef_vals(val_set=vals)       
+        num_undef = self._num_of_undef_vals(val_set=vals)
         self.logger.debug("number of undef's=%d" %num_undef)
-        six00W = (ff_1b, ff_2b, ff_3b, ff_4b)  
+        six00W = (ff_1b, ff_2b, ff_3b, ff_4b)
+
+        self.logger.debug(f'ff_a={ff_a}, six00W={six00W}, num_undef={num_undef}, num_on={num_on}')
 
         self._watt(ff_a, six00W, num_undef, num_on)
         #self.update_voltage()
@@ -187,37 +187,45 @@ class DomeffWatt(DomeffCanvas):
     def _watt(self, ff_a, six00W, num_undef, num_on):
 
         if ff_a == self.on:
+            self.logger.debug(f'ff_a is on. {ff_a}')
             self.set_10W(status=self.normal, alpha=0.3)
             if num_on > self.on:
-                self.set_10W(status=self.warn, alpha=1) 
+                self.logger.debug(f'ff_a is on {ff_a}, but num_on > on {num_on} > {self.on}')
+                self.set_10W(status=self.warn, alpha=1)
         elif ff_a == self.off:
+            self.logger.debug(f'ff_a is off. {ff_a}')
             self.set_10W(status=self.bg, alpha=1)
         else:
+            self.logger.debug(f'ff_a is not on or off. {ff_a}')
             self.set_10W(status=self.alarm, alpha=1)
 
-        if num_undef: # there is some undef value in 600W, not on or off  
+        if num_undef: # there is some undef value in 600W, not on or off
+            self.logger.debug(f'num_undef. {num_undef}')
             self.set_600W(status=self.alarm, alpha=1)
 
         else:  # 600W is either on or off
             if self.on in six00W:
+                self.logger.debug(f'on in six00W. {six00W}')
                 self.set_600W(status=self.normal, alpha=0.3)
 
                 if num_on > self.on:
+                    self.logger.debug(f'on in six00W {six00W}, but num_on > on {num_on} > {self.on}')
                     self.set_600W(status=self.warn, alpha=1)
-            else:  #  off 
+            else:  #  off
+                self.logger.debug(f'on not in six00W. {six00W}')
                 self.set_600W(status=self.bg, alpha=1)
 
 
 class DomeffWattDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(DomeffWattDisplay, self).__init__(parent)
-   
+
         self.domeffwatt = DomeffWatt(parent=parent, logger=logger)
-        self._set_layout() 
+        self._set_layout()
 
     def _set_layout(self):
         hlayout = QtWidgets.QHBoxLayout()
-        hlayout.setSpacing(0) 
+        hlayout.setSpacing(0)
         hlayout.setContentsMargins(0, 0, 0, 0)
 
         hlayout.addWidget(self.domeffwatt)
@@ -228,20 +236,20 @@ class DomeffWattDisplay(QtWidgets.QWidget):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
-  
+        import random
+
         indx=random.randrange(0, 5)
 
         ff_a = (1, 2, 5, None, 1)
 
         ff_1b, ff_2b, ff_3b, ff_4b = [8, 20, 2, 8]
- 
+
         #ff_1b, ff_2b, ff_3b, ff_4b = [None, 1 , 90, '#STATNO#']
         try:
             ff_a = ff_a[indx]
         except Exception:
             pass
-        else:  
+        else:
             self.update_domeff_watt(ff_a, ff_1b, ff_2b, ff_3b, ff_4b)
 
 
@@ -249,7 +257,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('el', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             QtWidgets.QMainWindow.__init__(self)
@@ -295,10 +303,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -311,7 +319,7 @@ if __name__ == '__main__':
                       help="Inverval for plotting(milli sec).")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:

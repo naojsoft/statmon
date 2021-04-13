@@ -20,7 +20,7 @@ class DomeShutter(Label):
                                           weight='bold', logger=logger )
 
     def update_dome(self, dome):
-        ''' dome=TSCV.DomeShutter '''
+        ''' dome=STATL.DOMESHUTTER_POS '''
         self.logger.debug('dome=%s' %(str(dome)))
 
         if dome in ERROR:
@@ -28,17 +28,17 @@ class DomeShutter(Label):
             text = 'Dome Shutter Undefined'
             bg = self.alarm
             fg = self.fg
-        elif dome == 0x50: # dome shutter open
+        elif dome == "OPEN": # dome shutter open
             self.logger.debug('open dome=%s' %(str(dome)))
             text = 'Dome Shutter Open'
             bg = self.fg  
             fg = self.normal
-        elif dome == 0x00: # dome shuuter close
+        elif dome == "CLOSED": # dome shuuter close
             self.logger.debug('close dome=%s' %(str(dome)))
             text = 'Dome Shutter Closed'
             bg = self.bg
             fg = self.fg
-        else: # dome shutter  partial
+        elif not dome : # dome shutter  partial
             self.logger.debug('partial dome=%s' %(str(dome)))
             text = 'Dome Shuter Partial'
             bg = self.warn
@@ -55,9 +55,9 @@ class DomeShutter(Label):
         import random  
         random.seed()
 
-        indx = random.randrange(0,12)
-        dome = ['##NODATA##', 0x50, 0xA0, None,  0x20, 'Unkonw', \
-                0x80, 0x90, '##STATNONE##', 0x00, 0x10, '##ERROR##']
+        indx = random.randrange(0,8)
+        dome = ['##NODATA##', "OPEN", None,  "CLOSED", 'Unkonw', \
+                '', '##STATNONE##', '##ERROR##']
 
         try:
             dome = dome[indx]

@@ -383,7 +383,8 @@ class Telescope(TelescopeGui):
 
         self.logger.debug('updating telescope. %s' %str(kargs))
 
-        self.dome_shutter.update_dome(dome=kargs.get('TSCV.DomeShutter'))
+        self.dome_shutter.update_dome(dome=kargs.get('STATL.DOMESHUTTER_POS'))
+        #self.dome_shutter.update_dome(dome=kargs.get('TSCV.DomeShutter'))
         self.topscreen.update_topscreen(mode=kargs.get('TSCV.TopScreen'), \
                                         front=kargs.get('TSCL.TSFPOS'), \
                                         rear=kargs.get('TSCL.TSRPOS'))

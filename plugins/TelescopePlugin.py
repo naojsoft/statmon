@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 from qtpy import QtWidgets, QtCore
 import sip
 
@@ -9,7 +8,7 @@ import Telescope
 class TelescopePlugin(PlBase.Plugin):
     """ Telescope Plugin"""
 
-    aliases=['TSCV.DomeShutter', 'TSCV.TopScreen', 'TSCL.TSFPOS', \
+    aliases=['STATL.DOMESHUTTER_POS', 'TSCV.TopScreen', 'TSCL.TSFPOS', \
              'TSCL.TSRPOS', 'TSCV.WINDSDRV', 'TSCV.WindScreen', \
              'TSCL.WINDSPOS', 'TSCL.WINDSCMD', 'TSCL.WINDD', 'TSCL.Z', \
              'STATL.FOC_DESCR', 'STATL.M2_DESCR', 'TSCV.FOCUSALARM', \
@@ -41,18 +40,18 @@ class TelescopePlugin(PlBase.Plugin):
 
     def change_config(self, controller, d):
 
-        self.logger.debug('telescope change config dict=%s ins=%s' %(d, d['inst']))  
+        self.logger.debug('telescope change config dict=%s ins=%s' %(d, d['inst']))
         obcp = d['inst']
         if obcp.startswith('#'):
             self.logger.debug('obcp is not assigned. %s' %obcp)
-            return 
-       
+            return
+
         try:
             sip.delete(self.telescope)
             sip.delete(self.vlayout)
-            self.set_layout(obcp=obcp) 
+            self.set_layout(obcp=obcp)
         except Exception as e:
-            self.logger.error('error: configuring layout. %s' %e)  
+            self.logger.error('error: configuring layout. %s' %e)
 
     def build_gui(self, container):
 
@@ -71,4 +70,4 @@ class TelescopePlugin(PlBase.Plugin):
 
     def update(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
-        self.telescope.update_telescope(**statusDict) 
+        self.telescope.update_telescope(**statusDict)

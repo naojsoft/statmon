@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import os
 import sys
 
-from qtpy import QtWidgets, QtCore, QT_VERSION 
+from qtpy import QtWidgets, QtCore, QT_VERSION
 
 if QT_VERSION.startswith('5'):
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 else:
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-    
+
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
@@ -26,16 +24,16 @@ from six.moves import zip
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
- 
+
 class DomeffCanvas(FigureCanvas):
     """ Dome Flat drawing canvas """
     def __init__(self, parent=None, width=1, height=1,  dpi=None, logger=None):
-      
+
         sub=SubplotParams(left=0, bottom=0, right=1, \
                           top=1, wspace=0, hspace=0)
         self.fig = Figure(figsize=(width, height), \
                           facecolor='white', subplotpars=sub)
- 
+
         #self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='white')
         #self.fig = Figure(facecolor='white')
         self.axes = self.fig.add_subplot(111)
@@ -47,7 +45,7 @@ class DomeffCanvas(FigureCanvas):
         self.warn = 'orange'
         self.alarm = 'red'
         self.bg = 'white'
-        # y axis values. these are fixed values. 
+        # y axis values. these are fixed values.
         #self.x_scale=[-0.007, 1.0]
         #self.y_scale=[-0.002,  1.011]
 
@@ -66,24 +64,24 @@ class DomeffCanvas(FigureCanvas):
         #FigureCanvas.resize(self, self.w, self.h)
 
         self.logger=logger
-   
+
         self.init_figure()
-  
+
     def init_figure(self):
         ''' initial drawing '''
 
         w = 0.11
         h = 0.6
-        common_keys = dict(va='top', ha="left", size=11)       
+        common_keys = dict(va='top', ha="left", size=11)
         kwargs = dict(fc=self.bg, ec=self.normal, lw=1.5)
-  
-        '''         
+
+        '''
                  col1     col2      col3
            row1  A: 0.0V  1B: 0.0V  3B: 0.0V
            row2           2B: 0.0V  4B: 0.0V
 
         '''
-  
+
         row1_y = 0.9
         row2_y = 0.35
         col2_x = 0.27
@@ -114,14 +112,14 @@ class DomeffCanvas(FigureCanvas):
         b4_volt = self.axes.text(x+d*2, row2_y, init, common_keys, color=self.normal)
 
         self.labels = [a_volt, b1_volt, b2_volt, b3_volt, b4_volt]
-       
+
         self.axes.set_ylim(min(self.y_scale), max(self.y_scale))
         self.axes.set_xlim(min(self.x_scale), max(self.x_scale))
-        # # disable default x/y axis drawing 
+        # # disable default x/y axis drawing
         #self.axes.set_xlabel(False)
         #self.axes.apply_aspect()
         self.axes.set_axis_off()
-       
+
         #self.axes.set_xscale(10)
         #self.axes.axison=False
         self.draw()
@@ -146,27 +144,27 @@ class DomeffVolt(DomeffCanvas):
     """ Dome Flat Voltage"""
     def __init__(self,*args, **kwargs):
         super(DomeffVolt, self).__init__(*args, **kwargs)
- 
+
     def _validate(self, volt):
 
         try:
             val = '%.1fV' %volt
             res = (val, self.normal)
         except Exception:
-            val = 'Undef' 
-            res = (val, self.alarm) 
+            val = 'Undef'
+            res = (val, self.alarm)
 
         return res
 
     def update_volt(self, ff_a_v, ff_1b_v, ff_2b_v, ff_3b_v, ff_4b_v):
         '''
-            ff_a_v = TSCV.DomeFF_A_VOL  
-            ff_1b_v = TSCV.DomeFF_1B_VOL
-            ff_2b_v = TSCV.DomeFF_2B_VOL
-            ff_3b_v = TSCV.DomeFF_3B_VOL
-            ff_4b_v = TSCV.DomeFF_4B_VOL
+            ff_a_v = TSCL.DomeFF_A_VOL
+            ff_1b_v = TSCL.DomeFF_1B_VOL
+            ff_2b_v = TSCL.DomeFF_2B_VOL
+            ff_3b_v = TSCL.DomeFF_3B_VOL
+            ff_4b_v = TSCL.DomeFF_4B_VOL
         '''
-        self.logger.debug('updating domeff a=%s 1b=%s 2b=%s 3b=%s 4b=%s' %(str(ff_a_v), str(ff_1b_v), str(ff_2b_v), str(ff_3b_v), str(ff_4b_v))) 
+        self.logger.debug('updating domeff a=%s 1b=%s 2b=%s 3b=%s 4b=%s' %(str(ff_a_v), str(ff_1b_v), str(ff_2b_v), str(ff_3b_v), str(ff_4b_v)))
 
         volts = [ff_a_v, ff_1b_v, ff_2b_v, ff_3b_v, ff_4b_v]
 
@@ -180,13 +178,13 @@ class DomeffVolt(DomeffCanvas):
 class DomeffVoltDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(DomeffVoltDisplay, self).__init__(parent)
-   
+
         self.domeffvolt = DomeffVolt(parent=parent, logger=logger)
-        self.__set_layout() 
+        self.__set_layout()
 
     def __set_layout(self):
         hlayout = QtWidgets.QHBoxLayout()
-        hlayout.setSpacing(0) 
+        hlayout.setSpacing(0)
         hlayout.setContentsMargins(0, 0, 0, 0)
 
         hlayout.addWidget(self.domeffvolt)
@@ -197,11 +195,11 @@ class DomeffVoltDisplay(QtWidgets.QWidget):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
-  
+        import random
+
         v = random.uniform(0, 5)
 
-        ff_a_v = ff_1b_v = ff_2b_v = ff_3b_v = v 
+        ff_a_v = ff_1b_v = ff_2b_v = ff_3b_v = v
         ff_4b_v = '#STATERROR'
 
         self.update_domeff_volt(ff_a_v, ff_1b_v, ff_2b_v, ff_3b_v, ff_4b_v)
@@ -211,7 +209,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('el', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             QtWidgets.QMainWindow.__init__(self)
@@ -257,10 +255,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -273,7 +271,7 @@ if __name__ == '__main__':
                       help="Inverval for plotting(milli sec).")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
