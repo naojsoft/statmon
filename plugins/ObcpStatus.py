@@ -62,10 +62,12 @@ class ObcpDisplay(QtWidgets.QWidget):
            latest =  [t for t in obcp_times if isinstance(t, float)]
            if len(latest) == 0:
                return None
+           if len(latest) == 1:
+               return latest[0]
            return max(*latest)
 
         except Exception as e:
-           self.logger.error('error: finding obcp latest update time.  %s' %e)
+           self.logger.error('error: finding obcp latest update time: %s' % e)
            latest = None
 
         return latest

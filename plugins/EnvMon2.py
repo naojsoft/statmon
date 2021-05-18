@@ -1,272 +1,177 @@
 #
-# EnvMon.py -- Environment plugin for StatMon
-# 
-# Takeshi Inagaki (tinagaki@naoj.org)
-#[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Fri Jun  8 14:56:15 HST 2012
-#]
+# EnvMon2.py -- Environmental monitor #2 plugin for StatMon
 #
-from __future__ import absolute_import
-from __future__ import print_function
-import time
-import math
+# Eric Jeschke (eric@naoj.org)
+#
 import os
-import sys
-import pickle
+import time
+import numpy as np
 
-from qtpy import QtWidgets, QtCore
+import ginga.toolkit as ginga_toolkit
+from ginga.misc import Bunch
+from ginga.gw import Viewers
+from ginga.plot.plotaide import PlotAide
+from ginga.canvas.types import plots as gplots
+from ginga.plot import time_series as tsp
+from ginga.plot import data_source as dsp
+from ginga.misc import Bunch
 
-import Gen2.senvmon.statusGraph as StatusGraph
-import Gen2.senvmon.timeValueGraph as timeValueGraph
-# Needed for unpickling...ugh
-from Gen2.senvmon.timeValueGraph import Global
-from six.moves import range
-# Hack required by timeValueGraph
-timeValueGraph.Global.persistentData = {}
+from qtpy import QtWidgets, QtCore, QtGui
 
-from g2base import ssdlog
+from chest import Chest
 
-winds_max = "STATL.CSCT_WINDS_MAX"
+import PlBase
+from EnvMon3 import cross_connect_plots, make_plot
 
-def __set_data(envi_data, key, logger):
+# For "envmon2" plugin
+al_ctr_winds = ['STATL.CSCT_WINDS_MAX',
+               ]
+al_misc = ['GEN2.STATUS.TBLTIME.TSCL',
+           #'FITS.SBR.EPOCH',
+          ]
 
-    try:
-        Global.persistentData = envi_data[key]
-        #print 'GETDATA:%d' % len(Global.persistentData['temperature'][0])
-        #print 'GETDATA:%s' % Global.persistentData 
-        logger.debug('getting data for key %s' %key)
-        #print envi_data[key_str]
-    # except KeyError as e:
-    except Exception as e:
-        Global.persistentData = {}
-        logger.error('error: setting data. %s' %e)
+# starting dimensions of graph window (can change with window size)
+dims = (500, 200)
 
-def __restore_data(envi_data, key, logger):
-    try:
-        envi_data[key] = Global.persistentData
-    except Exception as e:
-        logger.error('error: restoring data. %s' %e)
+# maximum number of data points to plot and save
+num_pts = int(24 * 60 * 60)      # 24 hours worth
 
-def __remove_old_data(datapoint, logger):
- 
-    for k in Global.persistentData.keys():
-         logger.debug('removing key=%s' %k)
-         try:
-             for val in range(len(Global.persistentData[k])):
-                  num_points = len(Global.persistentData[k][val])
-                  logger.debug('length of datapoint=%d' %num_points )
-                  if num_points > datapoint:
-                      del Global.persistentData[k][val][:num_points-datapoint]  
-         except Exception as e:  
-             logger.error('error: removing old data. %s' %e)
+# interval (secs) between plot visual updates
+# NOTE: this is independent of the rate at which data is saved
+update_interval = 5.0
 
-def load_data(data_file, datakey, datapoint, logger):
-    ''' loading data '''
+# interval (secs) between dataset flush to disk
+save_interval = 10.0 * 60.0   # every 10 minutes
 
-    # open/load persistent file
-    try:
-        logger.debug('opening env data file %s ...' % data_file)
-        with open(data_file, 'rb') as f:
-            envi_data = pickle.load(f)
-    except Exception as e:
-        logger.error('error: opening envi file: %s, Error: %s' % (data_file, str(e)))
-        Global.persistentData = {}
-    else:
-        __set_data(envi_data, datakey, logger)  
-        __remove_old_data(datapoint, logger)
-        __restore_data(envi_data, datakey, logger)
-        with open(data_file, 'wb') as f:
-            pickle.dump(envi_data, f)
+# initialize graphs to show back this time period from current time
+show_last_time = 4.0 * 60 * 60
 
-progname = os.path.basename(sys.argv[0])
+plot_colors = ['darkviolet']
 
 
-class EnvMon(QtWidgets.QWidget):
+class EnvMon2(PlBase.Plugin):
 
-    def __init__(self, parent=None, obcp=None,  logger=None):
-        super(EnvMon, self).__init__(parent)
-        self.logger = logger
+    def build_gui(self, container):
+        self.root = container
+        #self.root.setStyleSheet("QWidget { background: lightblue }")
 
-        self.statusDict = {}
-        self.envi_file = None
-        self.datakey = 'envmon2'
-
-        filename =  'envi2.pickle'
-        persist_file_path = os.path.join(self._get_persist_file_path(), filename)
-
-
-        self.__load_data(persist_file_path)
-
-        self.sc = timeValueGraph.TVCoordinator(self.statusDict, 10, \
-                      persist_file_path, self.datakey, self.logger)
-
-        self.widgets = []
-
-        # winds speed Max Value at the center section
-        self.ws = StatusGraph.StatusGraph(title="Wind Speed CenterSection",
-                             key="windspeedmax",
-                             statusKeys=(winds_max,),
-                             statusFormats=("Max: %0.2f(m/s)",),
-                             alarmValues = (2.0,2.0),
-                             displayTime=True,
-                             ruler='LR',
-                             logger=self.logger)
-
-        self.widgets.append(self.ws) 
-
-        self.__set_layout()
- 
-    def _get_persist_file_path(self):
-        try:
-            g2comm = os.environ['GEN2COMMON']
-            path = os.path.join(g2comm, 'db')  
-        except OSError as e:
-            logger.error('error: %s' %e)
-            path = os.path.join('/gen2/share/db')   
-
-        # If we don't have write access to the "path" directory, use
-        # our home directory instead.
-        if not os.access(path, os.W_OK):
-            path = os.environ['HOME']
-
-        return path
-  
-
-    def __load_data(self, persist_file_path):
-
-        datapoint=86400
-        load_data(persist_file_path, self.datakey, \
-                  datapoint, logger=self.logger)
-
-
-    def __set_layout(self):
+        self.alias_sets = [al_ctr_winds, al_misc]
+        self.alias_d = {}
 
         layout = QtWidgets.QVBoxLayout()
-        layout.setSpacing(0) 
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(2, 2, 2, 2)
+        container.setLayout(layout)
 
-        for widget in self.widgets: 
-            self.sc.addGraph(widget)
-            layout.addWidget(widget, stretch=1)
-        self.setLayout(layout)
+        self.plots = Bunch.Bunch()
+        self.update_time = time.time()
+        self.save_time = time.time()
+
+        names = ["Center"]
+        res = make_plot(self.alias_d, self.logger, dims,
+                        names, al_ctr_winds, num_pts,
+                        y_acc=np.mean, title="Wind Speed Center",
+                        alert_y=2.0)
+        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.plots.windspeed_center = res
+
+        cross_connect_plots(self.plots.values())
+
+        self.gui_up = True
 
     def start(self):
-        now = time.time()
-        self.sc.setTimeRange(now - (3600*4), now, calcTimeRange=True)
-        self.sc.timerEvent(False)
+        aliases = []
+        for _aliases in self.alias_sets:
+            aliases.extend(_aliases)
 
-    def update_envmon(self, status_dict):
-        self.logger.debug('updating envmon. %s' %str(status_dict))
-        self.statusDict.update(status_dict)
+        env2file = os.path.join(os.environ['GEN2COMMON'], 'db',
+                                "statmon_envmon2.cst")
+        self.cst = Chest(path=env2file)
+
+        t = time.time()
+
+        for alias in aliases:
+
+            if alias in self.alias_d:
+                # create a array for this alias if we don't have one
+                if alias not in self.cst:
+                    self.cst[alias] = np.zeros((0, 2), dtype=np.float)
+
+                points = self.cst[alias]
+                bnch = self.alias_d[alias]
+                bnch.dsrc.set_points(points)
+                dsp.update_plot_from_source(bnch.dsrc, bnch.plot,
+                                            update_limits=True)
+
+                bnch.aide.update_plots()
+                bnch.aide.zoom_limit_x(t - show_last_time, t)
+
+        self.update_plots()
+
+        self.controller.register_select(str(self), self.update, aliases)
+
+    def stop(self):
+        self.update_persist()
+
+    def update(self, statusDict):
+        t = statusDict.get('GEN2.STATUS.TBLTIME.TSCL', time.time())
+        #t = statusDict.get('FITS.SBR.EPOCH', time.time())
+        self.logger.debug("status update t={}".format(t))
+
         try:
-            self.sc.timerEvent(True)
+            for alias in self.alias_d.keys():
+
+                if alias in statusDict:
+                    val = statusDict[alias]
+                    if isinstance(val, float):
+                        pt = (t, val)
+
+                        bnch = self.alias_d[alias]
+                        bnch.dsrc.add(pt)
+                        dsp.update_plot_from_source(bnch.dsrc, bnch.plot,
+                                                    update_limits=True)
+
+            t = time.time()
+            secs_since = t - self.update_time
+            self.logger.debug("{0:.2f} secs since last plot update".format(secs_since))
+            if secs_since >= update_interval:
+                self.update_plots()
+
+            secs_since = t - self.save_time
+            self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))
+            if t - self.save_time >= save_interval:
+                self.update_persist()
+
         except Exception as e:
-            self.logger.error("error: updating status: %s" % (str(e)))
+            self.logger.error("error updating from status: {}".format(e),
+                              exc_info=True)
 
-    def tick(self):
-        import random  
+    def update_plots(self):
+        t = time.time()
+        self.update_time = t
+        self.logger.debug('updating plots')
+        for plot in self.plots.values():
+            plot.aide.update_plots()
+        t1 = time.time()
+        self.logger.debug("time to update plots {0:.4f} sec".format(t1 - t))
 
-        wind_speed = random.uniform(-1, 5)
+    def update_persist(self):
+        t = time.time()
+        self.save_time = t
+        self.logger.debug('persisting data')
+        # Ugh. It seems we have to reassign the arrays into the chest
+        # every time, otherwise the additions to the array do not persist
+        # in the chest when it is flushed
+        # Double Ugh. Seems Chest does not have an update() method
+        for alias, bnch in self.alias_d.items():
+            self.cst[alias] = bnch.dsrc.get_points()
 
-        statusDict = {winds_max: wind_speed}
+        try:
+            self.cst.flush()
+        except Exception as e:
+            self.logger.error("Error saving chest file: {}".format(e),
+                              exc_info=True)
+        t1 = time.time()
+        self.logger.debug("time to persist data {0:.4f} sec".format(t1 - t))
 
-        self.update_envmon(statusDict)
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
- 
-    class AppWindow(QtWidgets.QMainWindow):
-        def __init__(self):
-            super(AppWindow, self).__init__()
-            self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w = 450
-            self.h = 150;
-            self.init_ui()
-
-        def init_ui(self):
-            self.resize(self.w, self.h)
-
-            self.main_widget = QtWidgets.QWidget()
-            l = QtWidgets.QVBoxLayout(self.main_widget)
-            l.setContentsMargins(0, 0, 0, 0)
-            l.setSpacing(0)
-            em = EnvMon(parent=self.main_widget, logger=logger)
-            l.addWidget(em)
-            em.start()
-            timer = QtCore.QTimer(self)
-            timer.timeout.connect(em.tick)
-            timer.start(options.interval)
-
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
-            self.statusBar().showMessage("starting...")
-
-        def closeEvent(self, ce):
-            self.close()
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)  
-        aw.setWindowTitle("%s" % progname)
-        aw.show()
-        #state.show()
-        print('show')
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as e:
-        logger.warn('keyboard interruption....')
-        sys.exit(0)
-
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
-
-    if len(args) != 0:
-        optprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)
-
-    
-#END
+    def __str__(self):
+        return 'envmon2'

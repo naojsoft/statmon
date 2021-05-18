@@ -5,11 +5,7 @@
 #
 # stdlib imports
 import sys, os
-import six
-if six.PY2:
-    import Queue
-else:
-    import queue as Queue
+import queue as Queue
 import traceback
 
 # GUI imports
@@ -72,6 +68,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         self.w.root = root
         # TEMP: temporarily needed until "all-closed" callback from Desktop is working
         root.add_callback('close', self.quit)
+        root.set_title("StatMon")
 
         # Add menubar and menus, if desired
         self.add_menus()

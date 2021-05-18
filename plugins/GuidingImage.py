@@ -1,293 +1,257 @@
-#!/usr/bin/env python
-
-from __future__ import absolute_import
-from __future__ import print_function
-import time
-import math
+#
+# GuidingImage.py -- Guiding Image plugin for StatMon
+#
+# Eric Jeschke (eric@naoj.org)
+#
 import os
-import sys
+import time
+import numpy as np
 
-# TODO: I think eventually most of these should be migrated over to
-# statmon, or else redone....EJ
-import Gen2.senvmon.statusGraph as StatusGraph
-import Gen2.senvmon.timeValueGraph as timeValueGraph
-# Needed for unpickling...ugh
-from Gen2.senvmon.timeValueGraph import Global
-import Gen2.senvmon.TVData as TVData
-# Hack required by timeValueGraph
-timeValueGraph.Global.persistentData = {}
+import ginga.toolkit as ginga_toolkit
+from ginga.misc import Bunch
+from ginga.gw import Viewers
+from ginga.plot.plotaide import PlotAide
+from ginga.canvas.types import plots as gplots
+from ginga.plot import time_series as tsp
+from ginga.plot import data_source as dsp
+from ginga.misc import Bunch
 
-from qtpy import QtWidgets, QtCore
-#from Gen2.Fitsview.qtw import QtHelp
+from qtpy import QtWidgets, QtCore, QtGui
+import sip
 
-from g2base import ssdlog
-from EnvMon import load_data
+from chest import Chest
 
-progname = os.path.basename(sys.argv[0])
+import PlBase
+from EnvMon3 import cross_connect_plots, make_plot
 
+# For "guiding image" plugin
 ag_bright = 'TSCL.AG1Intensity'
 sv_bright = 'TSCL.SV1Intensity'
-fmos_bright = 'TSCL.AGFMOSIntensity'
+#fmos_bright = 'TSCL.AGFMOSIntensity'
 ag_seeing = 'VGWD.FWHM.AG'
 sv_seeing = 'VGWD.FWHM.SV'
-fmos_seeing = 'TSCL.AGFMOSStarSize'
+#fmos_seeing = 'TSCL.AGFMOSStarSize'
 
 scag_bright = 'TSCL.HSC.SCAG.Intensity'
 scag_seeing = 'TSCL.HSC.SCAG.StarSize'
-
 shag_bright = 'TSCL.HSC.SHAG.Intensity'
 shag_seeing = 'TSCL.HSC.SHAG.StarSize'
 
+al_guiding = [ag_bright, sv_bright,  #fmos_bright,
+              ag_seeing, sv_seeing,  #fmos_seeing,
+              scag_bright, scag_seeing,
+              shag_bright, shag_seeing,
+              'GEN2.STATUS.TBLTIME.TSCL',
+              ]
 
-class GuidingImage(QtWidgets.QWidget):
+# starting dimensions of graph window (can change with window size)
+dims = (500, 200)
 
-    def __init__(self, parent=None, obcp=None,  logger=None):
-        super(GuidingImage, self).__init__(parent)
-        self.logger = logger
+# maximum number of data points to plot and save
+num_pts = int(24 * 60 * 60)      # 24 hours worth
 
-        self.statusDict = {}
-        self.datakey = 'guidingimage'
+# interval (secs) between plot visual updates
+# NOTE: this is independent of the rate at which data is saved
+update_interval = 5.0
 
-        filename =  'guidingimage.pickle'
-        persist_file_path = os.path.join(self._get_persist_file_path(), filename)
+# interval (secs) between dataset flush to disk
+save_interval = 10.0 * 60.0   # every 10 minutes
 
-        bright, bright_format = self.__status_bright_format(obcp)
-        seeing, seeing_format = self.__status_seeing_format(obcp) 
+# initialize graphs to show back this time period from current time
+show_last_time = 4.0 * 60 * 60
 
-        self.__load_data(persist_file_path)
-
-        self.sc = timeValueGraph.TVCoordinator(self.statusDict, 10, \
-                                               persist_file_path, self.datakey, self.logger)
-
-        self.bright = StatusGraph.StatusGraph(title="Brightness",
-                          key='brightness',
-                          size=(350, 200),
-                          statusKeys=bright,
-                          statusFormats=bright_format,
-                          alarmValues = (999999, 999999),
-#                      warningValues = (0,0),
-                          displayTime=False,
-                          ruler='LR',
-                          #backgroundColor=QtWidgets.QColor(255,255,255),
-                          logger=self.logger)
-
-        self.seeing = StatusGraph.StatusGraph(title="Seeing",
-                          key="seeingsize",
-                          statusKeys=seeing,
-                          alarmValues = (1,1),
-                          statusFormats=seeing_format,
-                          size=(350,200),
-                          displayTime=True,
-                          ruler='lr',
-                          logger=self.logger)
-
-        self.__set_layout()
+plot_colors = ['darkviolet', 'palegreen4']
 
 
-    def _get_persist_file_path(self):
-        try:
-            g2comm = os.environ['GEN2COMMON']
-            path = os.path.join(g2comm, 'db')  
-        except OSError as e:
-            logger.error('error: %s' %e)
-            path = os.path.join('/gen2/share/db')   
+class GuidingImage(PlBase.Plugin):
 
-        # If we don't have write access to the "path" directory, use
-        # our home directory instead.
-        if not os.access(path, os.W_OK):
-            path = os.environ['HOME']
+    # TODO: this needs to be configured elsewhere and read in here
+    ao = ['IRCS', 'HICIAO', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES']
 
-        return path
-  
+    def build_gui(self, container):
+        self.root = container
 
-    def __load_data(self, persist_file_path):
-
-        datapoint=86400
-        load_data(persist_file_path, self.datakey, \
-                  datapoint, logger=self.logger)
-
-    def __status_bright_format(self, obcp):
-
-        # hsc bright 
-        #TSCL.HSC.SCAG.Intensity
-        #TSCL.HSC.SHAG.Intensity
-
-        # TO DO HSC brightness
-        format = ("AG: %0.0f",)
-        if obcp == 'FMOS':
-            bright = (fmos_bright,)
-        elif obcp == 'HSC':
-            bright = (scag_bright, shag_bright)
-            format = ("SC: %0.0f", "SH: %0.0f")
-        elif obcp == 'HDS':
-            bright = (ag_bright, sv_bright)
-            format = ("AG: %0.0f", "SV: %0.0f")
-        else: 
-            bright = (ag_bright,)
-
-        return (bright, format)
-
-    def __status_seeing_format(self, obcp):
-
-        #seeing
-        #TSCL.HSC.SCAG.StarSize
-        #TSCL.HSC.SHAG.StarSize
-
-        # TO DO HSC seeing
-        format = ("AG: %0.1f",)
-        if obcp == 'FMOS':
-            seeing = (fmos_seeing,)
-        elif obcp == 'HSC':
-            seeing  = (scag_seeing, shag_seeing)
-            format = ("SC: %0.1f", "SH: %0.1f")
-        elif obcp == 'HDS':
-            seeing = (ag_seeing, sv_seeing)
-            format = ("AG: %0.1f", "SV: %0.1f")
-        else: 
-            seeing = (ag_seeing,)
-
-        return (seeing, format)
-
-    def __set_layout(self):
+        self.alias_d = {}
+        self.plots = Bunch.Bunch()
+        self.cst = None
+        self.update_time = time.time()
+        self.save_time = time.time()
 
         layout = QtWidgets.QVBoxLayout()
-        layout.setSpacing(0) 
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(2, 2, 2, 2)
+        self.root.setLayout(layout)
+        self.root_layout = layout
 
-        for w in [self.bright, self.seeing]:
-        #for w in [self.bright]:
-            self.sc.addGraph(w)
-            layout.addWidget(w, stretch=1)
-        self.setLayout(layout)
+        self.sub_widget = None
+        self.gui_up = True
+
+    def configure_plots(self, obcp):
+
+        self.alias_d = {}
+        self.plots = Bunch.Bunch()
+
+        # delete old widget
+        w = self.sub_widget
+        if w is not None:
+            self.sub_widget = None
+            sip.delete(w)
+            #w.deleteLater()
+
+        if obcp is None or obcp.startswith('#') or obcp in self.ao:
+            self.logger.debug("OBCP ({}) is not a guiding instrument".format(obcp))
+            return
+        # NOTE: FMOS decommissioned...2021 EJ
+        ## elif obcp == 'FMOS':
+        ##     names = ['FMOS']
+        ##     bright = [fmos_bright]
+        ##     seeing = [fmos_seeing]
+        elif obcp == 'HSC':
+            names = ['SCAG', 'SHAG']
+            al_bright = [scag_bright, shag_bright]
+            al_seeing = [scag_seeing, shag_seeing]
+        elif obcp == 'HDS':
+            # NOTE: AG is not used with HDS any more...2021 EJ
+            #names = ['AG', 'SV']
+            #al_bright = [ag_bright, sv_bright]
+            #al_seeing = [ag_seeing, sv_seeing]
+            names = ['SV']
+            al_bright = [sv_bright]
+            al_seeing = [sv_seeing]
+        else:
+            # other guiding instrument
+            names = ['AG']
+            al_bright = [ag_bright]
+            al_seeing = [ag_seeing]
+
+        w = QtWidgets.QWidget()
+        self.sub_widget = w
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(2)
+        w.setLayout(layout)
+
+        res = make_plot(self.alias_d, self.logger, dims,
+                        names, al_bright, num_pts,
+                        y_acc=np.mean, title="Brightness")
+        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.plots.brightness = res
+
+        res = make_plot(self.alias_d, self.logger, dims,
+                        names, al_seeing, num_pts,
+                        y_acc=np.mean, title="Seeing",
+                        warn_y=1.0)
+        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.plots.seeing = res
+
+        cross_connect_plots(self.plots.values())
+
+        self.root_layout.addWidget(w, stretch=1)
+
+        t = time.time()
+
+        for alias in self.alias_d.keys():
+            points = self.cst[alias]
+            bnch = self.alias_d[alias]
+            bnch.dsrc.set_points(points)
+            dsp.update_plot_from_source(bnch.dsrc, bnch.plot,
+                                        update_limits=True)
+
+            bnch.aide.zoom_limit_x(t - show_last_time, t)
+
+        self.update_plots()
 
     def start(self):
-        now = time.time()
-        self.sc.setTimeRange(now - (3600*4), now, calcTimeRange=True)
-        self.sc.timerEvent(False)
+        aliases = al_guiding
 
-    def update_guidingimage(self, status_dict):
-        self.logger.debug('updating guiding-image. %s' %str(status_dict))
-        self.statusDict.update(status_dict)
+        env2file = os.path.join(os.environ['GEN2COMMON'], 'db',
+                                "statmon_guidingimage.cst")
+        self.cst = Chest(path=env2file)
+
+        t = time.time()
+
+        for alias in aliases:
+            # create a chest item for this alias if we don't have one
+            if alias not in self.cst:
+                self.cst[alias] = np.zeros((0, 2), dtype=np.float)
+
+        obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
+        self.configure_plots(obcp)
+
+        self.controller.register_select(str(self), self.update, aliases)
+        self.controller.add_callback('change-config', self.change_config)
+
+    def stop(self):
+        self.update_persist()
+
+    def change_config(self, controller, d):
+        """This get's called if we have a change in configuration
+        (e.g. instrument changed)
+        """
+        obcp = d.get('inst', None)
+        self.configure_plots(obcp)
+
+    def update(self, statusDict):
+        #print(statusDict)
+        t = statusDict.get('GEN2.STATUS.TBLTIME.TSCL', time.time())
+        #t = statusDict.get('FITS.SBR.EPOCH', time.time())
+        self.logger.debug("status update t={}".format(t))
+
         try:
-            self.sc.timerEvent(True)
+            for alias in self.alias_d.keys():
+
+                if alias in statusDict:
+                    val = statusDict[alias]
+                    if isinstance(val, float):
+                        pt = (t, val)
+
+                        bnch = self.alias_d[alias]
+                        bnch.dsrc.add(pt)
+                        dsp.update_plot_from_source(bnch.dsrc, bnch.plot,
+                                                    update_limits=True)
+
+            t = time.time()
+            secs_since = t - self.update_time
+            self.logger.debug("{0:.2f} secs since last plot update".format(secs_since))
+            if secs_since >= update_interval:
+                self.update_plots()
+
+            secs_since = t - self.save_time
+            self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))
+            if t - self.save_time >= save_interval:
+                self.update_persist()
+
         except Exception as e:
-            self.logger.error("error: updating status: %s" % (str(e)))
+            self.logger.error("error updating from status: {}".format(e),
+                              exc_info=True)
 
-    def tick(self):
-        import random  
-      
-        ab = random.randrange(100000, 200000)
-        sb = random.randrange(100000, 200000)
+    def update_plots(self):
+        t = time.time()
+        self.update_time = t
+        self.logger.debug('updating plots')
+        for plot in self.plots.values():
+            plot.aide.update_plots()
+        t1 = time.time()
+        self.logger.debug("time to update plots {0:.4f} sec".format(t1 - t))
 
-        asi = random.uniform(0, 1.5) 
-        ssi = random.uniform(0, 1.5)
+    def update_persist(self):
+        t = time.time()
+        self.save_time = t
+        self.logger.debug('persisting data')
+        # Ugh. It seems we have to reassign the arrays into the chest
+        # every time, otherwise the additions to the array do not persist
+        # in the chest when it is flushed
+        # Double Ugh. Seems Chest does not have an update() method
+        for alias, bnch in self.alias_d.items():
+            self.cst[alias] = bnch.dsrc.get_points()
 
-        statusDict = {ag_bright:ab, fmos_bright: ab, sv_bright: sb, \
-                      ag_seeing: asi, sv_seeing: ssi, fmos_seeing: asi, \
-                      scag_bright: ab, scag_seeing: asi, \
-                      shag_bright: ab, shag_seeing: asi,}
+        try:
+            self.cst.flush()
+        except Exception as e:
+            self.logger.error("Error saving chest file: {}".format(e),
+                              exc_info=True)
+        t1 = time.time()
+        self.logger.debug("time to persist data {0:.4f} sec".format(t1 - t))
 
-        self.update_guidingimage(statusDict)
-
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
- 
-    class AppWindow(QtWidgets.QMainWindow):
-        def __init__(self):
-            super(AppWindow, self).__init__()
-            self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=350; self.h=100;
-            self.init_ui()
-
-        def init_ui(self):
-            self.resize(self.w, self.h)
-
-            self.main_widget = QtWidgets.QWidget()
-            l = QtWidgets.QVBoxLayout(self.main_widget)
-            l.setContentsMargins(0, 0, 0, 0)
-            l.setSpacing(0)
-            gi = GuidingImage(parent=self.main_widget, obcp=options.ins, logger=logger)
-            l.addWidget(gi)
-            gi.start()
-            timer = QtCore.QTimer(self)
-            timer.timeout.connect(gi.tick)
-            timer.start(options.interval)
-
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
-            self.statusBar().showMessage("%s starting..." %options.ins, options.interval)
-
-        def closeEvent(self, ce):
-            self.close()
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)  
-        aw.setWindowTitle("%s" % progname)
-        aw.show()
-        #state.show()
-        print('show')
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as e:
-        logger.warn('keyboard interruption....')
-        sys.exit(0)
-
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--ins", dest="ins",
-                      default='HDS',
-                      help="Specify an instrument. e.g. SPCAM")
-
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
-
-    if len(args) != 0:
-        optprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)
-
-    
-#END
+    def __str__(self):
+        return 'guidingimage'

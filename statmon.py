@@ -8,13 +8,11 @@
 Usage:
     statmon.py --monport=NNNNN --plugins=X,Y,Z
 """
-from __future__ import print_function
 # stdlib imports
 import sys, os
 import threading
 
 from ginga.qtw import QtHelp
-#from PyQt4 import QtGui, QtCore
 from qtpy import QtWidgets, QtCore
 
 moduleHome = os.path.split(sys.modules[__name__].__file__)[0]
@@ -42,7 +40,7 @@ defaultServiceName = 'statmon'
 version = "20120405.0"
 
 default_layout = ['seq', {},
-                  ['vbox', dict(name='toplvl', width=2300, height=1100),
+                  ['vbox', dict(name='toplvl', width=2400, height=1100),
                    ['hbox', dict(name='menubox', stretch=0)],
                    ['vbox', dict(stretch=1),
                     ['ws', dict(name='top', show_tabs=False,
@@ -62,7 +60,7 @@ default_layout = ['seq', {},
                                   show_tabs=False),],
                       #['ws', dict(name='left6', height=80, show_tabs=False),],
                       ],
-                     ['vbox', dict(width=350, spacing=4, stretch=0),
+                     ['vbox', dict(width=400, spacing=4, stretch=0),
                       ['ws', dict(name='middle11', height=500, stretch=0,
                                   show_tabs=False), ],
                       ['ws', dict(name='middle12', height=80, stretch=1,
@@ -76,26 +74,28 @@ default_layout = ['seq', {},
                       ['ws', dict(name='middle16', height=80, show_tabs=False), ],
                       ['ws', dict(name='middle17', height=80, show_tabs=False), ],
                       ],
-                     ['vbox', dict(width=350, spacing=4, stretch=1),
-                      ['ws', dict(name='middle21', height=25, stretch=0,
-                                  show_tabs=False), ],
-                      ['ws', dict(name='middle22', height=150, stretch=0,
-                                  show_tabs=False), ],
-                      ['ws', dict(name='middle23', height=50, stretch=0,
-                                  show_tabs=False), ],
-                      ['ws', dict(name='middle24', height=25, stretch=0,
-                                  show_tabs=False), ],
-                      ['ws', dict(name='middle25', height=350, stretch=3,
-                                  show_tabs=False), ],
-                      ['ws', dict(name='middle26', height=120, stretch=1,
-                                  show_tabs=False), ],
+                     ['hpanel', dict(stretch=1),
+                      ['vbox', dict(width=350, spacing=4),
+                       ['ws', dict(name='middle21', height=25, stretch=0,
+                                   show_tabs=False), ],
+                       ['ws', dict(name='middle22', height=150, stretch=0,
+                                   show_tabs=False), ],
+                       ['ws', dict(name='middle23', height=50, stretch=0,
+                                   show_tabs=False), ],
+                       ['ws', dict(name='middle24', height=25, stretch=0,
+                                   show_tabs=False), ],
+                       ['ws', dict(name='middle25', height=350, stretch=3,
+                                   show_tabs=False), ],
+                       ['ws', dict(name='middle26', height=120, stretch=1,
+                                   show_tabs=False), ],
                       ],
-                     ['vbox', dict(width=350, stretch=1),
-                      ['ws', dict(name='right1', width=350), ],
+                      ['vbox', dict(width=350, stretch=1),
+                       ['ws', dict(name='right1', width=350), ],
                       ],
-                     ['vbox', dict(width=350, spacing=4, stretch=1),
-                      ['ws', dict(name='farright1', show_tabs=False), ],
-                     ],
+                      ['vbox', dict(width=350, spacing=4, stretch=1),
+                       ['ws', dict(name='farright1', show_tabs=False), ],
+                      ],
+                     ]
                     ],
                     ['ws', dict(name='bottom', show_tabs=False,
                                 height=50, stretch=0), ],
@@ -108,12 +108,12 @@ plugins = [
     # pluginName, moduleName, className, workspaceName, tabName
     ('radec', 'RaDec', 'RaDec', 'top', ''),
     ('times', 'RaDec', 'Times', 'bottom', ''),
-    ('envmon', 'EnvMonPlugin', 'EnvMonPlugin', 'right1', 'EnvMon'),
+    ('envmon', 'EnvMon', 'EnvMon', 'right1', 'EnvMon'),
     ('statusable', 'StatusTablePlugin', 'StatusTablePlugin', 'right1', 'StatTable'),
     ('debug', 'Debug', 'Debug', 'right1', "Debug"),
     ('state', 'StatePlugin', 'StatePlugin', 'left1', ''),
     ('plot', 'PlotPlugin', 'PlotPlugin', 'left2', ''),
-    ('guidingimage', 'GuidingImagePlugin', 'GuidingImagePlugin', 'left3','' ),
+    ('guidingimage', 'GuidingImage', 'GuidingImage', 'left3','' ),
     ('probe1limit', 'LimitPlugin', 'Probe1LimitPlugin', 'left4','' ),
     ('probe2limit', 'LimitPlugin', 'Probe2LimitPlugin', 'left5','' ),
     ('telescope', 'TelescopePlugin', 'TelescopePlugin', 'middle11',''),
@@ -125,8 +125,9 @@ plugins = [
     ('cal', 'CalPlugin', 'CalPlugin', 'middle23', ''),
     ('calprobe', 'CalprobePlugin', 'CalprobePlugin', 'middle24', ''),
     ('target', 'TargetPlugin', 'TargetPlugin', 'middle22', ''),
-    ('envmon2', 'EnvMon2Plugin', 'EnvMon2Plugin', 'middle26', ''),
+    ('envmon2', 'EnvMon2', 'EnvMon2', 'middle26', ''),
     ('alarm', 'Alarm', 'Alarm', 'middle25', ''),
+    ('envmon3', 'EnvMon3', 'EnvMon3', 'farright1', ''),
     ]
 
 class StatMon(Controller, Viewer):
