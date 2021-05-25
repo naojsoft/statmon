@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
 import os
 
 from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
 
-import six
-
-if six.PY3:
-    long = int
+long = int
 
 progname = os.path.basename(sys.argv[0])
 
@@ -30,7 +25,7 @@ class M2(Label):
         color = self.normal
 
         if focus.upper()=="M2 UNDEFINED":
-            color = self.alarm    
+            color = self.alarm
 
         self.setText(focus)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
@@ -38,7 +33,7 @@ class M2(Label):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         indx = random.randrange(0, 5)
@@ -58,7 +53,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -71,7 +66,7 @@ def main(options, args):
 
             self.main_widget = QtWidgets.QWidget()
             l = QtWidgets.QVBoxLayout(self.main_widget)
-            l.setContentsMargins(0, 0, 0, 0) 
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             m2 = M2(parent=self.main_widget, logger=logger)
             l.addWidget(m2)
@@ -81,7 +76,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("M2 starting..." , options.interval)
 
         def closeEvent(self, ce):
@@ -91,7 +86,7 @@ def main(options, args):
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
-        #state = State(logger=logger)  
+        #state = State(logger=logger)
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
@@ -108,10 +103,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -124,7 +119,7 @@ if __name__ == '__main__':
                       help="Inverval for plotting(milli sec).")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
@@ -148,4 +143,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

@@ -11,6 +11,7 @@ Usage:
 # stdlib imports
 import sys, os
 import threading
+import queue as Queue
 
 from ginga.qtw import QtHelp
 from qtpy import QtWidgets, QtCore
@@ -20,14 +21,16 @@ sys.path.insert(0, moduleHome)
 pluginHome = os.path.join(moduleHome, 'plugins')
 sys.path.insert(0, pluginHome)
 
+from g2base import Task
 from g2base.remoteObjects import remoteObjects as ro
 from g2base.remoteObjects import Monitor
+from g2cam.status.stream import StatusStream
 
 # Subaru python stdlib imports
 import g2client.soundsink as SoundSink
 
 from ginga import toolkit
-toolkit.use('qt4')
+toolkit.use('qt5')
 from ginga.gw import Widgets
 from ginga.misc import ModuleManager, Settings, log
 
@@ -167,7 +170,9 @@ class StatMon(Controller, Viewer):
         self.w.status = QtWidgets.QStatusBar()
         self.w.statusbox.add_widget(Widgets.wrap(self.w.status), stretch=1)
 
+
 def main(options, args):
+
     # Create top level logger.
     svcname = options.svcname
     logger = log.get_logger(svcname, options=options)
@@ -252,7 +257,10 @@ def main(options, args):
 
         # Compute the union of channels supplied on command-line with
         # channels registered by plugins
-        allChannels = set(channels) | model.channels
+        #allChannels = set(channels) | model.channels
+        # status now handled via different mechanism
+        allChannels = (set(channels) | model.channels) - set(['status'])
+        print("channels are", allChannels)
 
         if options.monitor:
             # subscribe our monitor to the central monitor hub.
@@ -266,6 +274,33 @@ def main(options, args):
         # Register channel subscription callback
         logger.info('subscribe to channels {}'.format(allChannels))
         mymon.subscribe_cb(model.arr_channel, allChannels)
+
+        settings = prefs.create_category('status')
+        st_stream = None
+        try:
+            settings.load()
+
+            # set up the status stream interface
+            st_stream = StatusStream(host=settings.get('stream_host'),
+                                     username=settings.get('stream_user'),
+                                     password=settings.get('stream_pass'),
+                                     logger=logger)
+            st_stream.connect()
+
+        except Exception as e:
+            self.logger.error("Error setting up status stream: {}".format(e),
+                              exc_info=True)
+
+        # intermediary queue
+        status_q = Queue.Queue()
+
+        # stream producer puts updates on the queue
+        task1 = Task.FuncTask2(st_stream.subscribe_loop, ev_quit, status_q)
+        task1.init_and_start(statmon)
+
+        # stream consumer takes them and updates the status cache
+        task2 = Task.FuncTask2(model.consume_stream, ev_quit, status_q)
+        task2.init_and_start(statmon)
 
         # Create our remote service object
         ctrlsvc = ro.remoteObjectServer(svcname=options.svcname,
@@ -301,45 +336,45 @@ def main(options, args):
 
 if __name__ == "__main__":
 
-    # Parse command line options with nifty new optparse module
-    from optparse import OptionParser
+    # Parse command line options
+    from argparse import ArgumentParser
+    argprs = ArgumentParser(description="Gen2 Status Monitor")
 
-    usage = "usage: %prog [options] cmd [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog %s' % version))
+    argprs.add_argument('-f', "--config", dest="configfile", default=None,
+                        help="Specify configuration file")
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
+                        help="Enter the pdb debugger on main()")
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
+                        help="Use X display on HOST:N")
+    argprs.add_argument("-g", "--geometry", dest="geometry",
+                        metavar="GEOM", default="+20+100",
+                    help="X geometry for initial size and placement")
+    argprs.add_argument("--modules", dest="modules", metavar="NAMES",
+                        help="Specify additional modules to load")
+    argprs.add_argument("--monitor", dest="monitor", metavar="NAME",
+                        default='monitor',
+                        help="Synchronize from monitor named NAME")
+    argprs.add_argument("--monchannels", dest="monchannels",
+                        default='status', metavar="NAMES",
+                        help="Specify monitor channels to subscribe to")
+    argprs.add_argument("--monport", dest="monport", type=int,
+                        help="Register monitor using PORT", metavar="PORT")
+    argprs.add_argument("--numthreads", dest="numthreads", type=int,
+                        default=30,
+                        help="Start NUM threads in thread pool", metavar="NUM")
+    argprs.add_argument("--plugins", dest="plugins", metavar="NAMES",
+                        help="Specify additional plugins to load")
+    argprs.add_argument("--port", dest="port", type=int, default=None,
+                        help="Register using PORT", metavar="PORT")
+    argprs.add_argument("--profile", dest="profile", action="store_true",
+                        default=False,
+                        help="Run the profiler on main()")
+    argprs.add_argument("--svcname", dest="svcname", metavar="NAME",
+                        default=defaultServiceName,
+                        help="Register using NAME as service name")
+    log.addlogopts(argprs)
 
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    optprs.add_option("-g", "--geometry", dest="geometry",
-                      metavar="GEOM", default="+20+100",
-                      help="X geometry for initial size and placement")
-    optprs.add_option("--modules", dest="modules", metavar="NAMES",
-                      help="Specify additional modules to load")
-    optprs.add_option("--monitor", dest="monitor", metavar="NAME",
-                      default='monitor',
-                      help="Synchronize from monitor named NAME")
-    optprs.add_option("--monchannels", dest="monchannels",
-                      default='status', metavar="NAMES",
-                      help="Specify monitor channels to subscribe to")
-    optprs.add_option("--monport", dest="monport", type="int",
-                      help="Register monitor using PORT", metavar="PORT")
-    optprs.add_option("--numthreads", dest="numthreads", type="int",
-                      default=30,
-                      help="Start NUM threads in thread pool", metavar="NUM")
-    optprs.add_option("--plugins", dest="plugins", metavar="NAMES",
-                      help="Specify additional plugins to load")
-    optprs.add_option("--port", dest="port", type="int", default=None,
-                      help="Register using PORT", metavar="PORT")
-    optprs.add_option("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    optprs.add_option("--svcname", dest="svcname", metavar="NAME",
-                      default=defaultServiceName,
-                      help="Register using NAME as service name")
-    log.addlogopts(optprs)
-
-    (options, args) = optprs.parse_args(sys.argv[1:])
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if options.display:
         os.environ['DISPLAY'] = options.display

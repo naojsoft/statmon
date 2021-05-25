@@ -4,13 +4,8 @@
 # Uses the MainWindow class from alarm_gui.py to create an Alarm GUI
 # that can be "plugged in" to statmon.
 #
-#[ Russell Kackley (rkackley@naoj.org) --
-#  Last edit: Sun Sep 27 22:36:46 HST 2020
-#]
+# Russell Kackley (rkackley@naoj.org)
 #
-
-from __future__ import absolute_import
-from __future__ import print_function
 
 import os
 import threading

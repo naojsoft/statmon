@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
 import os
 
 from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
+from g2cam.status.common import STATNONE, STATERROR
 
 progname = os.path.basename(sys.argv[0])
 
@@ -24,14 +23,14 @@ class DomeShutter(Label):
         self.logger.debug('dome=%s' %(str(dome)))
 
         if dome in ERROR:
-            self.logger.error('error: dome=%s' %(str(dome)))   
+            self.logger.error('error: dome=%s' %(str(dome)))
             text = 'Dome Shutter Undefined'
             bg = self.alarm
             fg = self.fg
         elif dome == "OPEN": # dome shutter open
             self.logger.debug('open dome=%s' %(str(dome)))
             text = 'Dome Shutter Open'
-            bg = self.fg  
+            bg = self.fg
             fg = self.normal
         elif dome == "CLOSED": # dome shuuter close
             self.logger.debug('close dome=%s' %(str(dome)))
@@ -44,7 +43,7 @@ class DomeShutter(Label):
             bg = self.warn
             fg = self.fg
 
-        self.logger.debug('text=%s fg=%s bg=%s' %(text, fg, bg))      
+        self.logger.debug('text=%s fg=%s bg=%s' %(text, fg, bg))
 
         self.setStyleSheet("QLabel {color: %s; background-color: %s}" %(fg, bg))
         self.setText(text)
@@ -52,12 +51,11 @@ class DomeShutter(Label):
     def tick(self):
         ''' testing solo mode '''
         self.logger.debug('ticking...')
-        import random  
+        import random
         random.seed()
 
         indx = random.randrange(0,8)
-        dome = ['##NODATA##', "OPEN", None,  "CLOSED", 'Unkonw', \
-                '', '##STATNONE##', '##ERROR##']
+        dome = ["OPEN", None,  "CLOSED", 'Unknown', '', STATNONE, STATERROR]
 
         try:
             dome = dome[indx]
@@ -71,7 +69,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -94,7 +92,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("DomeShutter starting..." , options.interval)
 
         def closeEvent(self, ce):
@@ -104,7 +102,7 @@ def main(options, args):
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
-        #state = State(logger=logger)  
+        #state = State(logger=logger)
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
@@ -121,10 +119,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -137,7 +135,7 @@ if __name__ == '__main__':
                       help="Inverval for plotting(milli sec).")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
@@ -161,4 +159,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

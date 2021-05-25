@@ -18,7 +18,6 @@ from matplotlib.artist import Artist
 
 from g2base import ssdlog
 from error import *
-from six.moves import zip
 
 
 progname = os.path.basename(sys.argv[0])

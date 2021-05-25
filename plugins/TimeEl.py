@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
 import os
 
 from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
+from g2cam.status.common import STATNONE, STATERROR
 
 progname = os.path.basename(sys.argv[0])
 
@@ -20,9 +19,9 @@ def to_hour_min(limit):
         self.logger.error('error: to hour min.  %s' %e)
         hm = '--h --m calc error'
     else:
-        hm = '%dh %dm' %(h,m)           
+        hm = '%dh %dm' %(h,m)
     finally:
-        return hm 
+        return hm
 
 class TimeElLimit(Label):
     ''' Time to Elevation Limit   '''
@@ -30,10 +29,10 @@ class TimeElLimit(Label):
         super(TimeElLimit, self).__init__(parent=parent, fs=13, width=200,\
                                           height=25, align='vcenter', \
                                           weight='normal', logger=logger)
- 
+
     def update_ellimit(self, flag, low, high):
-        ''' flag = TSCL.LIMIT_FLAG 
-            low = TSCL.LIMIT_EL_LOW 
+        ''' flag = TSCL.LIMIT_FLAG
+            low = TSCL.LIMIT_EL_LOW
             high = TSCL.LIMIT_EL_HIGH '''
 
         self.logger.debug('flag=%s low=%s high=%s' %(str(flag), str(low), str(high)))
@@ -43,11 +42,11 @@ class TimeElLimit(Label):
 
         low_limit = 0x01
         high_limit = 0x02
- 
+
         limit = 721 # in minute
         color = self.normal
         el_txt = ''
- 
+
         if flag in ERROR or low in ERROR or high in ERROR:
             text = 'Undifined'
             color = self.alarm
@@ -56,23 +55,23 @@ class TimeElLimit(Label):
                 if low < limit:
                     el_txt = "(Low)"
                     limit = low
-            #elif flag is high_limit or flag is high_limit2: 
-            elif flag & high_limit: 
+            #elif flag is high_limit or flag is high_limit2:
+            elif flag & high_limit:
                 # high limit seems to be either flag=2 or flag=3
-                # need to confirm it. 
+                # need to confirm it.
                 if high < limit:
                     el_txt = "(High)"
                     limit = high
 
             if limit > 720.0: # plenty of time. 12 hours
-                text = '--h --m' 
+                text = '--h --m'
             elif limit <= 1: # 0 to 1 minute left
                 color = self.alarm
                 hm  = to_hour_min(limit)
-                text = '%s <= 1m %s' %(hm, el_txt) 
+                text = '%s <= 1m %s' %(hm, el_txt)
             elif limit > 30: # 30 to 720 min left
                 hm = to_hour_min(limit)
-                text = '%s %s' %(hm, el_txt)  
+                text = '%s %s' %(hm, el_txt)
             else: # 1 to 30 min left
                 color = self.warn
                 hm = to_hour_min(limit)
@@ -85,7 +84,7 @@ class TimeElLimit(Label):
 class TimeElLimitDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(TimeElLimitDisplay, self).__init__(parent)
-   
+
         self.timelimit_label = Label(parent=parent, fs=13, width=175,\
                                      height=25, align='vcenter', \
                                      weight='normal', logger=logger)
@@ -94,11 +93,11 @@ class TimeElLimitDisplay(QtWidgets.QWidget):
         self.timelimit_label.setIndent(15)
 
         self.ellimit = TimeElLimit(parent=parent, logger=logger)
-        self._set_layout() 
+        self._set_layout()
 
     def _set_layout(self):
         ellayout = QtWidgets.QHBoxLayout()
-        ellayout.setSpacing(0) 
+        ellayout.setSpacing(0)
         ellayout.setContentsMargins(0, 0, 0, 0)
         ellayout.addWidget(self.timelimit_label)
         ellayout.addWidget(self.ellimit)
@@ -109,8 +108,8 @@ class TimeElLimitDisplay(QtWidgets.QWidget):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
-        
+        import random
+
         indx = random.randrange(0,3)
         flag = [0, 1, 2, 'Unknown']
         flag = flag[indx]
@@ -119,16 +118,16 @@ class TimeElLimitDisplay(QtWidgets.QWidget):
         high = random.uniform(0, 760)
 
         if low > 750.0:
-            low = '##NODATA##'
+            low = STATNONE
         if high > 750.0:
-            high = '##STATNONE##'
+            high = STATNONE
         self.update_ellimit(flag, low, high)
 
 def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -151,7 +150,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
 
         def closeEvent(self, ce):
@@ -177,10 +176,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -191,13 +190,13 @@ if __name__ == '__main__':
     optprs.add_option("--interval", dest="interval", type='int',
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
+    # note: there are sv/pir plotting, but mode ag uses the same code.
     optprs.add_option("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
@@ -221,4 +220,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

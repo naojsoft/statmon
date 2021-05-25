@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
 import os
 
 from CustomLabel import Label, QtCore, QtWidgets, ERROR
 
 from g2base import ssdlog
+from g2cam.status.common import STATNONE, STATERROR
 
 progname = os.path.basename(sys.argv[0])
 
@@ -27,7 +26,7 @@ class Object(Label):
         color=self.normal
 
         if not obj in ERROR:
-            #text = '%s %s' %(label.ljust(15), obj.rjust(20))            
+            #text = '%s %s' %(label.ljust(15), obj.rjust(20))
             text = '{0}'.format(obj)
         else:
             #text = '%s %s' %(label.ljust(15), 'Undefined'.rjust(20))
@@ -44,21 +43,21 @@ class Object(Label):
 class ObjectDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(ObjectDisplay, self).__init__(parent)
-   
+
         self.obj_label = Label(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', \
                                 weight='normal', logger=logger)
 
         self.obj_label.setText('Object')
         self.obj_label.setIndent(15)
-        #self.obj_label.setAlignment(QtCore.Qt.AlignVCenter) 
+        #self.obj_label.setAlignment(QtCore.Qt.AlignVCenter)
 
         self.obj = Object(parent=parent, logger=logger)
-        self._set_layout() 
+        self._set_layout()
 
     def _set_layout(self):
         objlayout = QtWidgets.QHBoxLayout()
-        objlayout.setSpacing(0) 
+        objlayout.setSpacing(0)
         objlayout.setContentsMargins(0, 0, 0, 0)
         objlayout.addWidget(self.obj_label)
         objlayout.addWidget(self.obj)
@@ -69,14 +68,14 @@ class ObjectDisplay(QtWidgets.QWidget):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         indx = random.randrange(0, 9)
 
-        obj = ['FOFOSS', None, 'NAOJ1212', 'M78asfaf', "Unknown", \
-               '##STATNONE##', '##NODATA##', 'GINZA', '##ERROR##']
- 
+        obj = ['FOFOSS', None, 'NAOJ1212', 'M78asfaf', "Unknown",
+               STATNONE, 'GINZA', STATERROR]
+
         try:
             obj = obj[indx]
         except Exception as e:
@@ -89,7 +88,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -112,7 +111,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
 
         def closeEvent(self, ce):
@@ -122,7 +121,7 @@ def main(options, args):
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
-        #state = State(logger=logger)  
+        #state = State(logger=logger)
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
@@ -139,10 +138,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -153,13 +152,13 @@ if __name__ == '__main__':
     optprs.add_option("--interval", dest="interval", type='int',
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
+    # note: there are sv/pir plotting, but mode ag uses the same code.
     optprs.add_option("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
@@ -183,4 +182,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

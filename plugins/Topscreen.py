@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import os
 import sys
 import math
@@ -20,12 +18,13 @@ import matplotlib.patches as mpatches
 
 from error import ERROR
 from g2base import ssdlog
+from g2cam.status.common import STATNONE, STATERROR
 import PlBase
 
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
- 
+
 class TopscreenCanvas(FigureCanvas):
     """ Topscreen """
     def __init__(self, parent=None, width=1, height=1,  logger=None):
@@ -39,7 +38,7 @@ class TopscreenCanvas(FigureCanvas):
         #self.axes.hold(False)
         #self.axes.grid(True)
 
-        # y axis values. these are fixed values. 
+        # y axis values. these are fixed values.
         self.y_axis=[-1.0, 0, 1]
         self.center_y=0.0
 
@@ -59,9 +58,9 @@ class TopscreenCanvas(FigureCanvas):
         # width/hight of widget
         self.w=500
         self.h=50
-        
+
         self.logger=logger
-   
+
         self.init_figure()
 
     def minimumSizeHint(self):
@@ -69,15 +68,15 @@ class TopscreenCanvas(FigureCanvas):
 
     def sizeHint(self):
          return QtCore.QSize(self.w, self.h)
-  
+
     def init_figure(self):
         ''' initial drawing '''
 
-        limit=[30.3, 0] # there is a case of tscl.tsfpos=24.28, so limit is at least 24.28 + 6 = 30.28 
+        limit=[30.3, 0] # there is a case of tscl.tsfpos=24.28, so limit is at least 24.28 + 6 = 30.28
         front_init=16
         self.rear1_pos=rear1_init=4
         rear2_init=10
-       
+
         # top screen front/rear length/width
         self.screen_len=6 # 6 meter
         screen_width=0.2
@@ -88,7 +87,7 @@ class TopscreenCanvas(FigureCanvas):
 
         # front/rear top screen
         ts_kwargs=dict(alpha=0.8, fc=self.screen_color, \
-                       ec=self.screen_color, lw=1, ) 
+                       ec=self.screen_color, lw=1, )
         self.front=mpatches.Rectangle((front_init, screen_width - screen_width), \
                                       self.screen_len, screen_width, **ts_kwargs)
 
@@ -104,11 +103,11 @@ class TopscreenCanvas(FigureCanvas):
         self.axes.add_patch(self.rear2)
 
         # draw x-axis line
-        line_kwargs=dict(alpha=0.7, ls='-', lw=0.7 , color=self.screen_color, 
-                         marker='|', ms=10.0, mew=2, markevery=(0,1)) 
+        line_kwargs=dict(alpha=0.7, ls='-', lw=0.7 , color=self.screen_color,
+                         marker='|', ms=10.0, mew=2, markevery=(0,1))
 
         offset_drawing = 0.04
-        middle=[max(limit)-offset_drawing, min(limit)+offset_drawing] 
+        middle=[max(limit)-offset_drawing, min(limit)+offset_drawing]
         line=Line2D(middle, [self.center_y]*len(middle), **line_kwargs)
         self.axes.add_line(line)
 
@@ -119,27 +118,27 @@ class TopscreenCanvas(FigureCanvas):
                                              color=self.normal_color, \
                                              fontsize=13)
 
-        # set x,y limit values  
+        # set x,y limit values
         self.axes.set_xlim(max(limit), min(limit))
         self.axes.set_ylim(min(self.y_axis), max(self.y_axis))
-        # # disable default x/y axis drawing 
+        # # disable default x/y axis drawing
         #self.axes.set_xlabel(False)
         #self.axes.apply_aspect()
         self.axes.set_axis_off()
-       
+
         #self.axes.set_xscale(10)
         self.axes.axison=False
         self.draw()
 
 
 class Topscreen(TopscreenCanvas):
-    
+
     """A canvas that updates itself every second with a new plot."""
     def __init__(self,*args, **kwargs):
- 
+
         TopscreenCanvas.__init__(self, *args, **kwargs)
         #super(TopscreenCanvas, self).__init__(*args, **kwargs)
-   
+
     def update_topscreen(self, mode, front , rear):
         ''' mode = TSCV.TopScreen
             front = TSCL.TSFPOS
@@ -147,33 +146,33 @@ class Topscreen(TopscreenCanvas):
         '''
         free=0x10
         link=0x0C
-        color=self.normal_color   
-        
-        self.logger.debug('mode=%s' %(mode))  
+        color=self.normal_color
 
-        if mode in ERROR: 
-            mode='Top Screen Undefined'     
+        self.logger.debug('mode=%s' %(mode))
+
+        if mode in ERROR:
+            mode='Top Screen Undefined'
             color=self.alarm_color
         elif mode & free:
             mode='Top Screen Free'
         elif mode & link:
             mode='Top Screen Link'
-        else: 
+        else:
             mode='Top Screen Mode Undef'
             color=self.alarm_color
 
         self.text.set_text(mode)
-        self.text.set_color(color)  
+        self.text.set_color(color)
 
-        self.logger.debug('updating pre_rear1=%s' %(self.rear1_pos))  
+        self.logger.debug('updating pre_rear1=%s' %(self.rear1_pos))
 
         try:
             if rear < self.rear1_pos:
                 self.rear1_pos=rear
-            elif ((self.rear1_pos+self.screen_len) < rear): 
+            elif ((self.rear1_pos+self.screen_len) < rear):
                 self.rear1_pos=rear-self.screen_len
             self.logger.debug('updating front=%s rear1=%s rear2=%s' \
-                              %(front, self.rear1_pos, rear))  
+                              %(front, self.rear1_pos, rear))
 
             self.front.set_x(front)
             self.rear1.set_x(self.rear1_pos)
@@ -187,11 +186,11 @@ class Topscreen(TopscreenCanvas):
 
     def tick(self):
         ''' testing  mode solo '''
-        import random  
+        import random
         random.seed()
- 
-        mode=[32, "Unknown", 31,  None, 11, '##STATNONE##', 12, '##NODATA##', 30, '##ERROR##']
-        #  range is limit+-100, 
+
+        mode=[32, "Unknown", 31,  None, 11, STATNONE, 12, 30, STATERROR]
+        #  range is limit+-100,
         indx=random.randrange(0, 10)
         try:
             mode=mode[indx]
@@ -207,7 +206,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('plot', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             QtWidgets.QMainWindow.__init__(self)
@@ -253,10 +252,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -269,7 +268,7 @@ if __name__ == '__main__':
                       help="Inverval for plotting(milli sec).")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:

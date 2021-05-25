@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import os
 import sys
 
@@ -18,7 +16,6 @@ from matplotlib.figure import SubplotParams
 from matplotlib.artist import Artist
 
 from CustomLabel import Label, ERROR
-#from CanvasLabel import Canvas, QtCore, QtWidgets, Qt, ERROR
 from g2base import ssdlog
 from g2base.Bunch import Bunch
 import PlBase

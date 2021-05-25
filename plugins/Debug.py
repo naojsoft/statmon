@@ -1,11 +1,8 @@
 #
 # Debug.py -- Debugging plugin for StatMon
 # 
-#[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Thu Apr  5 14:18:45 HST 2012
-#]
+# Eric Jeschke (eric@naoj.org)
 #
-from __future__ import absolute_import
 import PlBase
 
 from qtpy import QtWidgets, QtGui, QtCore

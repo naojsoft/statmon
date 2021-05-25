@@ -1,27 +1,26 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
 import os
 import math
 
 from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
+from g2cam.status.common import STATNONE, STATERROR
 
 progname = os.path.basename(sys.argv[0])
 
-    
+
 class Pa(object):
     ''' Position Angle   '''
     def __init__(self, logger=None):
         super(Pa, self).__init__()
         self.logger = logger
- 
+
     def cmd_diff(self, cmd_diff):
-   
+
         try:
-            cmd_diff = math.fabs(float(cmd_diff)) 
+            cmd_diff = math.fabs(float(cmd_diff))
         except Exception as e:
             cmd_diff = None
             self.logger.debug('error: cmd_diff to float. %s' %(str(e)))
@@ -29,7 +28,7 @@ class Pa(object):
             return cmd_diff
 
     def pa(self, pa):
-        
+
         try:
             pa = ((pa + 540.0) % 360.0) - 180.0
         except Exception as e:
@@ -42,7 +41,7 @@ class Pa(object):
 class PaDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(PaDisplay, self).__init__(parent)
-   
+
         self.pa_label = Label(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', \
                                 weight='normal', logger=logger)
@@ -57,12 +56,12 @@ class PaDisplay(QtWidgets.QWidget):
         self.pa = Pa(logger=logger)
 
         self.__set_layout()
-       
-        self.logger = logger    
+
+        self.logger = logger
 
     def __set_layout(self):
         layout = QtWidgets.QHBoxLayout()
-        layout.setSpacing(0) 
+        layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.pa_label)
         layout.addWidget(self.pa_val)
@@ -87,7 +86,7 @@ class PaDisplay(QtWidgets.QWidget):
             if cmd_diff >= diff:
                 color =  self.pa_val.warn
                 #text = '{0:.2f} deg.  cmd_diff={1:.2f}>={2}'.format(pa, cmd_diff, diff)
-                text = '{0:.2f} deg  Diff:{1:.2f}'.format(pa, cmd_diff)     
+                text = '{0:.2f} deg  Diff:{1:.2f}'.format(pa, cmd_diff)
         else:
             text = '{0}'.format('Undefined')
             color =  self.pa_val.alarm
@@ -100,12 +99,12 @@ class PaDisplay(QtWidgets.QWidget):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
 
         pa = random.uniform(-100.0, 150)
         cmd_diff = random.uniform(-0.5, 0.5)
         if pa > 100:
-            pa = '##STATNONE##'    
+            pa = STATNONE
         if cmd_diff < -0.3:
             cmd_diff = 'Unknown'
         self.update_pa(pa, cmd_diff)
@@ -115,7 +114,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -138,7 +137,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("Pa starting..." , options.interval)
 
         def closeEvent(self, ce):
@@ -148,7 +147,7 @@ def main(options, args):
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
-        #state = State(logger=logger)  
+        #state = State(logger=logger)
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
@@ -165,10 +164,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -181,7 +180,7 @@ if __name__ == '__main__':
                       help="Inverval for plotting(milli sec).")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
@@ -205,4 +204,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import PlBase
 import Cal
 from qtpy import QtWidgets, QtGui, QtCore

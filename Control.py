@@ -8,13 +8,8 @@ import sys, os
 import traceback
 import time
 import threading
-import six
-if six.PY2:
-    import Queue
-    import thread
-else:
-    import queue as Queue
-    import _thread as thread
+import queue as Queue
+import _thread as thread
 
 from g2base.remoteObjects import remoteObjects as ro
 

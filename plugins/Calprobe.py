@@ -1,22 +1,18 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
 import os
 
 from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
+from g2cam.status.common import STATNONE, STATERROR
 
-import six
-
-if six.PY3:
-    long = int
+long = int
 
 
 progname = os.path.basename(sys.argv[0])
 
-    
+
 class CalProbe(Label):
     ''' Cal Source Probe  '''
     def __init__(self, parent=None, logger=None):
@@ -45,7 +41,7 @@ class CalProbe(Label):
 class CalProbeDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(CalProbeDisplay, self).__init__(parent)
-   
+
         self.calprobe_label = Label(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', \
                                 weight='normal', logger=logger)
@@ -54,11 +50,11 @@ class CalProbeDisplay(QtWidgets.QWidget):
         self.calprobe_label.setIndent(15)
 
         self.calprobe = CalProbe(parent=parent, logger=logger)
-        self._set_layout() 
+        self._set_layout()
 
     def _set_layout(self):
         layout = QtWidgets.QHBoxLayout()
-        layout.setSpacing(0) 
+        layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.calprobe_label)
         layout.addWidget(self.calprobe)
@@ -69,11 +65,11 @@ class CalProbeDisplay(QtWidgets.QWidget):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         indx = random.randrange(0, 35)
-        indx2 = random.randrange(0, 5) 
+        indx2 = random.randrange(0, 5)
 
         foci = [0x01000000, 0x02000000, 0x04000000, 0x08000000,
                 0x10000000, 0x20000000, 0x40000000, long(0x80000000),
@@ -81,12 +77,12 @@ class CalProbeDisplay(QtWidgets.QWidget):
                 0x00100000, 0x00200000, 0x00400000, 0x00800000,
                 0x00000100, 0x00000200, 0x00000400, 0x00000800,
                 0x00001000, 0x00002000, 0x00004000, 0x00008000,
-                0x00000001, 0x00000002, 0x00000004, 0x00000008, 
-                0x00000010, 0x00000000, 
-                "Unknown", None, '##STATNONE##', '##NODATA##', '##ERROR##']
- 
-        foci2 = [0x01, 0x02, 0x04, "Unknown", None, '##STATNONE##', \
-                 '##NODATA##', 0x08, '##ERROR##']
+                0x00000001, 0x00000002, 0x00000004, 0x00000008,
+                0x00000010, 0x00000000,
+                "Unknown", None, STATNONE, STATERROR]
+
+        foci2 = [0x01, 0x02, 0x04, "Unknown", None,
+                 STATNONE, 0x08, STATERROR]
         try:
             focus = foci[indx]
             focus2 = foci2[indx2]
@@ -102,7 +98,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -115,7 +111,7 @@ def main(options, args):
 
             self.main_widget = QtWidgets.QWidget()
             l = QtWidgets.QVBoxLayout(self.main_widget)
-            l.setContentsMargins(0, 0, 0, 0) 
+            l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
             cpd = CalProbeDisplay(parent=self.main_widget, logger=logger)
             l.addWidget(cpd)
@@ -125,7 +121,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("calprobe starting..." ,options.interval)
 
         def closeEvent(self, ce):
@@ -147,10 +143,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -163,7 +159,7 @@ if __name__ == '__main__':
                       help="Inverval for plotting(milli sec).")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
@@ -187,4 +183,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

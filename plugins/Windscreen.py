@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import os
 import sys
 import math
@@ -19,17 +17,18 @@ import matplotlib.patches as mpatches
 from matplotlib.figure import SubplotParams
 
 from g2base import ssdlog
+from g2cam.status.common import STATNONE, STATERROR
 import PlBase
 from error import *
 
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
- 
+
 class WindscreenCanvas(FigureCanvas):
     """ Windscreen """
     def __init__(self, parent=None, width=1, height=1,  dpi=None, logger=None):
-      
+
 #        sub  =SubplotParams(left=0, bottom=0.234, right=1, \
 #                            top=0.998, wspace=0, hspace=0)
 
@@ -38,7 +37,7 @@ class WindscreenCanvas(FigureCanvas):
 
         self.fig = Figure(figsize=(width, height), facecolor='white', \
                           subplotpars=sub)
- 
+
         #self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='white')
         #self.fig = Figure(facecolor='white')
         self.axes = self.fig.add_subplot(111)
@@ -47,13 +46,13 @@ class WindscreenCanvas(FigureCanvas):
         #self.axes.grid(True)
 
         self.limit = [-14.5, 14.5]
-        
+
         self.wind = 'blue'
         self.normal = 'green'
         self.warn = 'orange'
         self.alarm = 'red'
 
-        # y axis values. these are fixed values. 
+        # y axis values. these are fixed values.
         self.x_axis = [0, 1]
         self.y_axis = [-14.5, 14.5]
         self.center_x = 0.5
@@ -71,15 +70,15 @@ class WindscreenCanvas(FigureCanvas):
         self.w = 125
         self.h = 450
         #FigureCanvas.resize(self, self.w, self.h)
-        
+
         # top screen lenght/width
         self.ts_len = 6
         self.ts_width = 0.1
 
         self.logger=logger
-   
+
         self.init_figure()
-  
+
     def init_figure(self):
         ''' initial drawing '''
 
@@ -87,29 +86,29 @@ class WindscreenCanvas(FigureCanvas):
         self.y_curoffset = 0.35
         self.y_cmdoffset = -0.65
 
-        
+
         #self.axes.add_patch(self.rear)
         # draw x-axis
-        line_kwargs = dict(alpha=0.7, ls='-', lw=1 , color=self.normal, 
-                         marker='_', ms=15.0, mew=1.0, markevery=(0,1)) 
-#        line_kwargs=dict(alpha=0.7, ls='-', lw=1 , color=self.normal, 
+        line_kwargs = dict(alpha=0.7, ls='-', lw=1 , color=self.normal,
+                         marker='_', ms=15.0, mew=1.0, markevery=(0,1))
+#        line_kwargs=dict(alpha=0.7, ls='-', lw=1 , color=self.normal,
 #
-#                         marker='v', ms=17.0, mew=0.5, markevery=(1,2)) 
+#                         marker='v', ms=17.0, mew=0.5, markevery=(1,2))
 
 
-        middle = [min(self.limit),  max(self.limit)] 
+        middle = [min(self.limit),  max(self.limit)]
         line = Line2D([0.87]*len(middle), [0, 14.5],  \
                       #transform=self.axes.transAxes, \
                       **line_kwargs)
         self.axes.add_line(line)
 
 
-        
-        line_kwargs = dict(alpha=0.7, ls=':', lw=5, color=self.normal, 
-                         marker='', ms=7.0, mew=1.0, markevery=(1,2)) 
+
+        line_kwargs = dict(alpha=0.7, ls=':', lw=5, color=self.normal,
+                         marker='', ms=7.0, mew=1.0, markevery=(1,2))
 
 
-  
+
         y = math.tan(math.radians(90)) * 14.5
         self.light = Line2D([2.0, 0], [0, y],  \
                       #transform=self.axes.transAxes, \
@@ -119,7 +118,7 @@ class WindscreenCanvas(FigureCanvas):
 
 
 
-        ts_kwargs = dict(alpha=0.7, fc=self.wind, ec=self.wind, lw=1.5) 
+        ts_kwargs = dict(alpha=0.7, fc=self.wind, ec=self.wind, lw=1.5)
 
         self.windscreen = mpatches.Rectangle((self.center_x-(self.ts_width/2.0)+0.425, 0.0), \
                                            self.ts_width, 0, \
@@ -132,14 +131,14 @@ class WindscreenCanvas(FigureCanvas):
                                   color=self.normal,  va='top', ha='right', \
                                   transform=self.axes.transAxes, fontsize=13)
 
-        # set x,y limit values  
+        # set x,y limit values
         self.axes.set_ylim(min(self.limit),  max(self.limit))
         self.axes.set_xlim(min(self.x_axis), max(self.x_axis))
-        # # disable default x/y axis drawing 
+        # # disable default x/y axis drawing
         #self.axes.set_xlabel(False)
         #self.axes.apply_aspect()
         self.axes.set_axis_off()
-       
+
         #self.axes.set_xscale(10)
         #self.axes.axison=False
         self.draw()
@@ -152,15 +151,15 @@ class WindscreenCanvas(FigureCanvas):
 
 
 class Windscreen(WindscreenCanvas):
-    
+
     """A canvas that updates itself every second with a new plot."""
     def __init__(self,*args, **kwargs):
- 
+
         #super(AGPlot, self).__init__(*args, **kwargs)
         WindscreenCanvas.__init__(self, *args, **kwargs)
 
     def __msg(self,  drv, windscreen, cmd, pos):
-      
+
         color = self.normal
 
         if windscreen == 0x02: # windscreen free
@@ -170,14 +169,14 @@ class Windscreen(WindscreenCanvas):
         else:# windscreen undefined
             msg = 'WindScreen\nMode Undef'
             color = self.alarm
-            
+
         if pos in ERROR:
             color = self.alarm
             msg += '\nNo Pos Data'
         elif cmd in ERROR:
             color = self.alarm
             msg += '\nNo Cmd Data'
-        elif not drv == 0x04 and pos <= 5.0: # drive not on  
+        elif not drv == 0x04 and pos <= 5.0: # drive not on
             pass #msg+='\n'
         elif not drv == 0x04 and pos > 5.0: # drive not on
             color=self.alarm
@@ -186,14 +185,14 @@ class Windscreen(WindscreenCanvas):
             color = self.alarm
             msg += '\nDriveOn'
         # drive on/link/cmd==pos
-        elif drv == 0x04 and windscreen == 0x01 and math.fabs(cmd-pos) <= 1.0:  
+        elif drv == 0x04 and windscreen == 0x01 and math.fabs(cmd-pos) <= 1.0:
             pass #msg+='\n'   # GREEN, no alerts
         # drive on/link/ cmd!=pos
-        elif  drv == 0x04 and windscreen == 0x01 and (cmd-pos > 1.0):  
+        elif  drv == 0x04 and windscreen == 0x01 and (cmd-pos > 1.0):
             color = self.warn
-            msg += '\nPos!=Cmd' 
+            msg += '\nPos!=Cmd'
         #drive on/link/ cmd-pos < -1
-        elif  drv == 0x04 and windscreen == 0x01: 
+        elif  drv == 0x04 and windscreen == 0x01:
             color = self.alarm
             msg += '\nWS OBSTRUCT'
         else:
@@ -203,7 +202,7 @@ class Windscreen(WindscreenCanvas):
         return (msg, color)
 
     def __update_lightpath(self, el):
-    
+
         try:
             y = math.tan(math.radians(el)) * 14.5
         except Exception:
@@ -218,7 +217,7 @@ class Windscreen(WindscreenCanvas):
             else:
                 offset = 0
 
-            # 10 0.1, 15 0.3, 20 0.5, 25 0.7, 30 0.9, 
+            # 10 0.1, 15 0.3, 20 0.5, 25 0.7, 30 0.9,
             # 35 1.1, 40 1.4, 45 1.7, 50 2.0,   55 2.6, 60 3.2
             self.light.set_ydata([0, y+offset])
 
@@ -227,20 +226,20 @@ class Windscreen(WindscreenCanvas):
             windscreen = TSCV.WindScreen
             pos = TSCL.WINDSPOS
             cmd = TSCL.WINDSCMD
-            el = TSCS.EL 
+            el = TSCS.EL
         '''
 
         self.logger.debug('updating drv=%s ws=%s cmd=%s  pos=%s' \
-                          %(drv, windscreen, cmd,  pos)) 
+                          %(drv, windscreen, cmd,  pos))
 
         msg, color=self.__msg(drv, windscreen, cmd, pos)
 
         self.msg.set_text(msg)
         #self.msg.set_backgroundcolor(color)
-        self.msg.set_color(color)  
+        self.msg.set_color(color)
 
         self.windscreen.set_color(color)
-        if not pos in ERROR: 
+        if not pos in ERROR:
             self.windscreen.set_height(pos)
 
         self.__update_lightpath(el)
@@ -249,21 +248,21 @@ class Windscreen(WindscreenCanvas):
 
     def tick(self, el=None):
         ''' testing  mode solo '''
-        import random  
+        import random
         random.seed()
- 
-        drv = [0x08, "Unknown",  None, 0x04, '##STATNONE##', '##NODATA##', '##ERROR##']
-        windscreen = ["Unknown", 0x01,  None, '##STATNONE##', 0x02, \
-                      '##NODATA##', '##ERROR##']
+
+        drv = [0x08, "Unknown",  None, 0x04, STATNONE, STATERROR]
+        windscreen = ["Unknown", 0x01,  None, STATNONE, 0x02,
+                      STATERROR]
 
         indx = random.randrange(0, 7)
-        #  0 ~ 14.9m 
+        #  0 ~ 14.9m
         pos = random.random()*random.randrange(0, 16)
         cmd = random.random()*random.randrange(0, 16)
-  
+
         if el is None:
             el = random.random()*random.randrange(0,100)
-             
+
         drv = drv[indx]
         windscreen = windscreen[indx]
 
@@ -274,7 +273,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('plot', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             QtWidgets.QMainWindow.__init__(self)
@@ -285,7 +284,7 @@ def main(options, args):
         def setup(self):
             self.resize(self.w, self.h)
             self.main_widget = QtWidgets.QWidget(self)
-            
+
             l = QtWidgets.QVBoxLayout(self.main_widget)
             windscreen = Windscreen(self.main_widget, logger=logger)
 
@@ -296,7 +295,7 @@ def main(options, args):
             timer.start(options.interval)
             self.main_widget.setFocus()
             self.setCentralWidget(self.main_widget)
-            
+
             self.statusBar().showMessage("windscreen starting..."  ,5000)
             #print options
 
@@ -320,10 +319,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -336,7 +335,7 @@ if __name__ == '__main__':
                       help="Inverval for plotting(milli sec).")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:

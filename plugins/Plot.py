@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys, os
 import math
 import threading
@@ -32,7 +30,6 @@ from g2base import ssdlog
 from Exptime import Exptime
 from Threshold import Threshold
 from Dummy import Dummy
-from six.moves import range
 from six.moves import zip
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
@@ -372,7 +369,6 @@ class Plot(PlotCanvas):
     def clear(self):
         ''' clear all plottings '''
         with self.rlock:
-            #for num in xrange(len(self.plot_record)):
             for num in list(range(len(self.plot_record))):
                 self.delete_oldest_record()
             self.arrow.xy=(0, 0)

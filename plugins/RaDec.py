@@ -3,7 +3,6 @@
 #
 # Eric Jeschke (eric@naoj.org)
 #
-from __future__ import absolute_import
 import time
 import math
 import astro.radec as radec

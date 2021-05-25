@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
 import os
 
 from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
+from g2cam.status.common import STATNONE, STATERROR
 
 progname = os.path.basename(sys.argv[0])
 
@@ -18,15 +17,15 @@ class TipChop(Label):
                                       height=35, logger=logger )
 
     def update_tipchop(self, mode, drive, data, state, focus=None, focus2=None):
-        ''' 
+        '''
            mode=TSCV.TT_Mode
            drive=TSCV.TT_Drive
            data=TSCV.TT_DataAvail
-           chop_state=TSCV.TT_ChopStat 
+           chop_state=TSCV.TT_ChopStat
            focus=
            focus2=
         '''
-       
+
         self.logger.debug('mode=%s drive=%s  data=%s state=%s' %(str(mode), str(drive), str(data), str(state)))
         self.logger.debug('focus=%s focus2=%s' %(str(focus), str(focus2)))
 
@@ -46,40 +45,40 @@ class TipChop(Label):
         elif mode&0x47 == 0x01: # chopping mode
             text = 'Chopping'
             # choppig stop/not chopping start/not chopping start ready
-            if state&0x02 or (not state&0x05 == 0x05): 
+            if state&0x02 or (not state&0x05 == 0x05):
                 color = self.warn
-        else:   
+        else:
             text = 'Tip/Chop Undefined'
             color = self.alarm
- 
+
         self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(color, self.bg))
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         findx = random.randrange(0, 11)
-        f2indx = random.randrange(0, 6) 
-      
-        mindx = random.randrange(0, 4) 
-        dindx = random.randrange(0, 2) 
-        daindx = random.randrange(0, 2) 
-        sindx = random.randrange(0,3) 
-       
+        f2indx = random.randrange(0, 6)
+
+        mindx = random.randrange(0, 4)
+        dindx = random.randrange(0, 2)
+        daindx = random.randrange(0, 2)
+        sindx = random.randrange(0,3)
+
         print(findx, f2indx, mindx, dindx, daindx, sindx)
- 
+
         mode = [0x04, 0x02, 0x01, None]
         drive = [0x02, 0x01]
         data = [0x02, 0x01]
         state = [0x02, 0x05, 0x00]
 
-        foci = [0x00001000, 0x00002000, 0x00004000, '##STATNONE##', \
-                0x00008000, 0x00000001, 0x00000002, 0x00000004, \
+        foci = [0x00001000, 0x00002000, 0x00004000, STATNONE,
+                0x00008000, 0x00000001, 0x00000002, 0x00000004,
                 0x00000008, 0x00000010, 0x00000000]
- 
+
         foci2 = [0x01, 0x02, 0x04, "Unknown", 0x01, 0x01]
         try:
             mode=mode[mindx]
@@ -103,7 +102,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -126,7 +125,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("TipChop starting...", options.interval)
 
         def closeEvent(self, ce):
@@ -151,10 +150,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -165,10 +164,10 @@ if __name__ == '__main__':
     optprs.add_option("--interval", dest="interval", type='int',
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
+    # note: there are sv/pir plotting, but mode ag uses the same code.
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
@@ -192,4 +191,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

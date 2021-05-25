@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
 import os
 
 from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
+from g2cam.status.common import STATNONE, STATERROR
 
 progname = os.path.basename(sys.argv[0])
 
@@ -47,22 +46,22 @@ class InsRotPf(InsRot):
 
     def update_insrot(self, insrot, mode):
         ''' insrot=TSCV.INSROTROTATION_PF
-            mode=TSCV.INSROTMODE_PF 
-        ''' 
+            mode=TSCV.INSROTMODE_PF
+        '''
         super(InsRotPf, self).update_insrot(insrot, mode)
 
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         rindx = random.randrange(0, 6)
         mindx = random.randrange(0, 6)
 
-        insrot = [0x01, 0x02, 0x02, 0x01,  '##NODATA##', '##ERROR##']
- 
-        mode = [0x10, 0x20, None, '##STATNONE##', 0x10, 0x20]
+        insrot = [0x01, 0x02, 0x02, 0x01, STATNONE, STATERROR]
+
+        mode = [0x10, 0x20, None, STATNONE, 0x10, 0x20]
         try:
             insrot = insrot[rindx]
             mode = mode[mindx]
@@ -91,15 +90,15 @@ class InsRotCs(InsRot):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         rindx = random.randrange(0, 6)
         mindx = random.randrange(0, 6)
 
-        insrot = [0x01, 0x02, None, 0x02, '##NODATA##', 0x01]
- 
-        mode = [0x01, 0x02, 0x02, '##STATNONE##', 0x01, '##ERROR##']
+        insrot = [0x01, 0x02, None, 0x02, STATNONE, 0x01]
+
+        mode = [0x01, 0x02, 0x02, STATNONE, 0x01, STATERROR]
         try:
             insrot = insrot[rindx]
             mode = mode[mindx]
@@ -114,7 +113,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('insrot', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -141,7 +140,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
 
         def closeEvent(self, ce):
@@ -151,7 +150,7 @@ def main(options, args):
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
         print('state')
-        #state = State(logger=logger)  
+        #state = State(logger=logger)
         aw.setWindowTitle("%s" % progname)
         aw.show()
         #state.show()
@@ -167,10 +166,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -181,13 +180,13 @@ if __name__ == '__main__':
     optprs.add_option("--interval", dest="interval", type='int',
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
+    # note: there are sv/pir plotting, but mode ag uses the same code.
     optprs.add_option("--mode", dest="mode",
                       default='pf',
                       help="Specify a plotting mode [pf|cs]")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
@@ -211,4 +210,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

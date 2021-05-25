@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import os
 import sys
 import math
@@ -20,8 +18,6 @@ from matplotlib.patches import Circle
 import matplotlib.patches as mpatches
 from matplotlib.figure import SubplotParams
 from matplotlib.artist import Artist
-
-#import matplotlib as mpl
 
 from g2base import ssdlog
 import PlBase

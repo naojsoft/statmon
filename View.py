@@ -10,7 +10,6 @@ import traceback
 
 # GUI imports
 from ginga.gw import Widgets, Desktop, GwMain
-#from PyQt4 import QtGui, QtCore
 from qtpy import QtWidgets, QtCore, QtGui
 from ginga.misc import Bunch
 

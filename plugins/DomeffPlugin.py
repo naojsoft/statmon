@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import PlBase
 import Domeff
 from qtpy import QtWidgets, QtCore

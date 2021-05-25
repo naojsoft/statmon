@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import os
 import sys
 import math
@@ -19,7 +17,6 @@ from matplotlib.lines import Line2D
 
 from g2base import ssdlog
 import PlBase
-from six.moves import zip
 
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
@@ -182,7 +179,7 @@ class Limit(LimitCanvas):
             color=self.cur_color
 
         text, val, color = self.get_val_state(current, state)
-           
+
         try:
             self.cur_anno.set_text(text)
             self.cur_anno.xy = (val, self.center_y)
@@ -267,12 +264,12 @@ def main(options, args):
                       'PIR': 'Rotator Pir', 'NSIR': 'Rotator Ns Ir',
                       'NSOPT': 'Rotator Ns Opt', 'NSIRAG': 'AgProbe Ns Ir',
                       'NSOPTAG': 'AgProbe Ns Opt', 'CSAG': 'AgProbe Cs'}
-            
+
             title = titles.get(mode)
 
             print('mode, title, ', mode, title)
 
-            
+
             if mode == 'AZ':
                 alarm = [-269.5, 269.5]
                 warn = [-260.0, 260.0 ]

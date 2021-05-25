@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import os
 import sys
 import math
 import numpy as np
 
-from qtpy import QtWidgets, QtCore, QT_VERSION 
+from qtpy import QtWidgets, QtCore, QT_VERSION
 
 if QT_VERSION.startswith('5'):
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -19,13 +17,14 @@ from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
 
 from g2base import ssdlog
+from g2cam.status.common import STATNONE, STATERROR
 import PlBase
 from error import ERROR
 
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
- 
+
 class CellCanvas(FigureCanvas):
     """ AG/SV/FMOS/AO188 Plotting """
     def __init__(self, parent=None, width=3, height=3,  logger=None):
@@ -36,7 +35,7 @@ class CellCanvas(FigureCanvas):
         # We want the axes cleared every time plot() is called
         #self.axes.hold(False)
         #self.axes.grid(True)
-        
+
         self.closed_color='black'
         self.open_color='white'
         self.onway_color='orange'
@@ -56,14 +55,14 @@ class CellCanvas(FigureCanvas):
         self.w=250
         self.h=30
         self.logger=logger
-   
+
         self.init_figure()
-  
+
     def init_figure(self):
         ''' initial drawing '''
 
         # draw cell cover
-        cell_kwargs=dict(alpha=0.7, fc=self.closed_color, ec='grey', lw=1.5) 
+        cell_kwargs=dict(alpha=0.7, fc=self.closed_color, ec='grey', lw=1.5)
         self.cell= mpatches.Rectangle((0.25, 0.75), 0.5, 0.2, **cell_kwargs)
         self.axes.add_patch(self.cell)
 
@@ -83,16 +82,16 @@ class CellCanvas(FigureCanvas):
 
 
 class CellCover(CellCanvas):
-    
+
     """A canvas that updates itself every second with a new plot."""
     def __init__(self,*args, **kwargs):
- 
+
         #super(AGPlot, self).__init__(*args, **kwargs)
         CellCanvas.__init__(self, *args, **kwargs)
 
     def update_cell(self, cell):
         ''' cell = 'TSCV.CellCover'  '''
-        self.logger.debug('updating cell=%s' %(cell))  
+        self.logger.debug('updating cell=%s' %(cell))
 
         if cell == 0x01: # cell cover open
             self.text.set_text('Cell Cover Open')
@@ -111,16 +110,16 @@ class CellCover(CellCanvas):
 
     def tick(self):
         ''' testing  mode solo '''
-        import random  
+        import random
         random.seed()
 
         indx=random.randrange(0, 8)
-        cell=[0x01, 'Unknown', None, '##STATNONE##', 0x00, '##NODATA##', '##ERROR##', 0x04]
+        cell=[0x01, 'Unknown', None, 0x00, STATNONE, STATERROR, 0x04]
         try:
             cell=cell[indx]
         except Exception:
             cell=None
-    
+
         self.update_cell(cell)
 
 
@@ -128,7 +127,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('plot', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             QtWidgets.QMainWindow.__init__(self)
@@ -175,10 +174,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -191,7 +190,7 @@ if __name__ == '__main__':
                       help="Inverval for plotting(milli sec).")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:

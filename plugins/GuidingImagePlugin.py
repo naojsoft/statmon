@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 from qtpy import QtWidgets, QtCore
 import sip
 

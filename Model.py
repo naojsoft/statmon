@@ -5,18 +5,18 @@
 #
 import time
 import threading
+import queue as Queue
 
 from g2base.remoteObjects import Monitor
 from ginga.misc import Callback
 
-# import from SOSS.status ?
-statNone = '##STATNONE##'
+from g2cam.status.common import STATNONE as statNone
 
 class StatusModel(Callback.Callbacks):
 
     def __init__(self, logger):
         super(StatusModel, self).__init__()
-        
+
         self.logger = logger
 
         self.lock = threading.RLock()
@@ -42,7 +42,7 @@ class StatusModel(Callback.Callbacks):
         with self.lock:
             for key in fetchDict.keys():
                 fetchDict[key] = self.statusDict.get(key, statNone)
-                
+
     def calc_missing_aliases(self, aliasset):
         with self.lock:
             aliases = self.statusDict.keys()
@@ -60,17 +60,33 @@ class StatusModel(Callback.Callbacks):
         try:
             bnch = Monitor.unpack_payload(payload)
 
-        except Monitor.MonitorError:
+        except Monitor.MonitorError as e:
             self.logger.error("malformed packet '%s': %s" % (
                 str(payload), str(e)))
             return
 
         if bnch.path == 'mon.status':
-            # status channel gets special treatment
-            statusInfo = bnch.value
+            # status should now be sent via consume_stream()
+            self.logger.error("Status is still being sent via the monitor")
+            # statusInfo = bnch.value
 
-            self.update_statusInfo(statusInfo)
+            # self.update_statusInfo(statusInfo)
         else:
             self.make_callback('channel-arrived', bnch.path, bnch.value)
-# END
 
+    def consume_stream(self, ev_quit, status_q):
+        # consume and ingest the status stream
+        while not ev_quit.is_set():
+            try:
+                envelope = status_q.get(block=True, timeout=1.0)
+                status_dict = envelope['status']
+                #print(status_dict)
+
+                #self.logger.debug("received values '%s'" % str(status_dict))
+                self.update_statusInfo(status_dict)
+
+            except Queue.Empty:
+                continue
+
+            except Exception as e:
+                self.logger.error("Error processing status: {}".format(e))

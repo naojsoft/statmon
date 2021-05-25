@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import PlBase
 import EnvMon
 from qtpy import QtWidgets, QtCore

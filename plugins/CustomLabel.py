@@ -1,8 +1,4 @@
-from __future__ import absolute_import
-
-from qtpy import QtCore
-from qtpy import QtWidgets
-from qtpy import QtGui
+from qtpy import QtCore, QtWidgets, QtGui
 
 from error import ERROR
 

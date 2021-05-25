@@ -1,17 +1,13 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
 import os
 
 from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
+from g2cam.status.common import STATNONE, STATERROR
 
-import six
-
-if six.PY3:
-    long = int
+long = int
 
 progname = os.path.basename(sys.argv[0])
 
@@ -20,8 +16,8 @@ class Stage(Label):
     def __init__(self, parent=None, name=None, logger=None):
         super(Stage, self).__init__(parent=parent, fs=11.5, width=125, \
                                     height=20, logger=logger )
-        self.name = name   
- 
+        self.name = name
+
     def update_stage(self, stage):
 
         self.logger.debug('stage=%s' %(str(stage)))
@@ -29,23 +25,23 @@ class Stage(Label):
         try:
             stage = float(stage)
             assert -0.0001 < stage < 0.0001  # stage=0.0
-            text = '%s Out' %self.name  
+            text = '%s Out' %self.name
             color = self.normal
-            bg = self.bg       
+            bg = self.bg
         except AssertionError:
             try:
                 assert 54.9999 < stage < 55.00001 # stage=55.0
                 text = '%s In' %self.name
                 color = self.bg
-                bg = self.normal       
+                bg = self.normal
             except AssertionError:
                 text = '%s Undef' %self.name
                 color = self.alarm
-                bg = self.bg   
+                bg = self.bg
         except Exception as e:
             text = '%s Undef' %self.name
             color = self.alarm
-            bg = self.bg   
+            bg = self.bg
         finally:
             self.setText(text)
             self.setStyleSheet("QLabel {color: %s; background-color: %s}" \
@@ -62,22 +58,22 @@ class Waveplate(QtWidgets.QWidget):
         self.stage3 = Stage(parent=parent, name='1/4 WP', logger=logger)
         self.logger = logger
 
-        self._set_layout() 
+        self._set_layout()
 
     def _set_layout(self):
         wavelayout = QtWidgets.QVBoxLayout()
-        wavelayout.setSpacing(1) 
+        wavelayout.setSpacing(1)
         wavelayout.setContentsMargins(0, 0, 0, 0)
         wavelayout.addWidget(self.stage1)
         wavelayout.addWidget(self.stage2)
-        wavelayout.addWidget(self.stage3) 
+        wavelayout.addWidget(self.stage3)
         self.setLayout(wavelayout)
-  
+
     def update_waveplate(self, stage1, stage2, stage3):
         ''' stage1=WAV.STG1_PS
             stage2=WAV.STG2_PS
             stage3=WAV.STG3_PS
-            #focus = TSCV.FOCUSINFO 
+            #focus = TSCV.FOCUSINFO
         '''
         self.logger.debug('s1=%s s2=%s s3=%s' %(str(stage1), str(stage2), str(stage3)))
         self.stage1.update_stage(stage1)
@@ -86,11 +82,11 @@ class Waveplate(QtWidgets.QWidget):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         findx = random.randrange(0, 35)
-        sindx = random.randrange(0, 3) 
+        sindx = random.randrange(0, 3)
 
         foci = [0x01000000, 0x02000000, 0x04000000, 0x08000000,
               0x10000000, 0x20000000, 0x40000000, long(0x80000000),
@@ -98,9 +94,9 @@ class Waveplate(QtWidgets.QWidget):
               0x00100000, 0x00200000, 0x00400000, 0x00800000,
               0x00000100, 0x00000200, 0x00000400, 0x00000800,
               0x00001000, 0x00002000, 0x00004000, 0x00008000,
-              0x00000001, 0x00000002, 0x00000004, 0x00000008, 
-              0x00000010, 0x00000000, 
-              "Unknown", None, '##STATNONE##', '##NODATA##', '##ERROR##']
+              0x00000001, 0x00000002, 0x00000004, 0x00000008,
+              0x00000010, 0x00000000,
+              "Unknown", None, STATNONE, STATERROR]
 
         stage = [0.0, 55.0, None]
 
@@ -118,7 +114,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -141,7 +137,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("Waveplate starting..." , options.interval)
 
         def closeEvent(self, ce):
@@ -166,10 +162,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -182,7 +178,7 @@ if __name__ == '__main__':
                       help="Inverval for plotting(milli sec).")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
@@ -206,4 +202,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-
