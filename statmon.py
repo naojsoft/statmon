@@ -288,8 +288,8 @@ def main(options, args):
             st_stream.connect()
 
         except Exception as e:
-            self.logger.error("Error setting up status stream: {}".format(e),
-                              exc_info=True)
+            logger.error("Error setting up status stream: {}".format(e),
+                         exc_info=True)
 
         # intermediary queue
         status_q = Queue.Queue()
