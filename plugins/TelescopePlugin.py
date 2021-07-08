@@ -8,29 +8,30 @@ import Telescope
 class TelescopePlugin(PlBase.Plugin):
     """ Telescope Plugin"""
 
-    aliases=['STATL.DOMESHUTTER_POS', 'TSCV.TopScreen', 'TSCL.TSFPOS', \
-             'TSCL.TSRPOS', 'TSCV.WINDSDRV', 'TSCV.WindScreen', \
-             'TSCL.WINDSPOS', 'TSCL.WINDSCMD', 'TSCL.WINDD', 'TSCL.Z', \
-             'STATL.FOC_DESCR', 'STATL.M2_DESCR', 'TSCV.FOCUSALARM', \
-             'TSCS.AZ', 'STATL.TELDRIVE', 'TSCS.EL', \
-             'TSCV.M1Cover', 'TSCV.M1CoverOnway', 'TSCV.CellCover', \
-             'TSCV.ADCONOFF_PF', 'TSCV.ADCMODE_PF', \
-             'TSCV.ADCOnOff', 'TSCV.ADCMode', 'TSCV.ADCInOut', \
-             'TSCV.ImgRotRotation', 'TSCV.ImgRotMode', 'TSCV.ImgRotType', \
-             'TSCV.INSROTROTATION_PF', 'TSCV.INSROTMODE_PF', \
-             'TSCV.InsRotRotation', 'TSCV.InsRotMode', \
-             'WAV.STG1_PS', 'WAV.STG2_PS', 'WAV.STG3_PS', \
-             'TSCV.TT_Mode', 'TSCV.TT_Drive', 'TSCV.TT_DataAvail', \
-             'TSCV.TT_ChopStat', 'TSCL.WINDS_O', \
-             'AON.LWFS.LASH', 'AON.HWFS.LASH']
+    aliases = ['STATL.DOMESHUTTER_POS', 'TSCV.TopScreen', 'TSCL.TSFPOS',
+               'TSCL.TSRPOS', 'TSCV.WINDSDRV', 'TSCV.WindScreen',
+               'TSCL.WINDSPOS', 'TSCL.WINDSCMD', 'TSCL.WINDD', 'TSCL.Z',
+               'STATL.FOC_DESCR', 'STATL.M2_DESCR', 'TSCV.FOCUSALARM',
+               'TSCS.AZ', 'STATL.TELDRIVE', 'TSCS.EL',
+               'TSCV.M1Cover', 'TSCV.M1CoverOnway', 'TSCV.CellCover',
+               'TSCV.ADCONOFF_PF', 'TSCV.ADCMODE_PF',
+               'TSCV.ADCOnOff', 'TSCV.ADCMode', 'TSCV.ADCInOut',
+               'TSCV.ImgRotRotation', 'TSCV.ImgRotMode', 'TSCV.ImgRotType',
+               'TSCV.FOCUSINFO',
+               'TSCV.INSROTROTATION_PF', 'TSCV.INSROTMODE_PF',
+               'TSCV.InsRotRotation', 'TSCV.InsRotMode',
+               'WAV.STG1_PS', 'WAV.STG2_PS', 'WAV.STG3_PS',
+               'TSCV.TT_Mode', 'TSCV.TT_Drive', 'TSCV.TT_DataAvail',
+               'TSCV.TT_ChopStat', 'TSCL.WINDS_O',
+               'AON.LWFS.LASH', 'AON.HWFS.LASH']
 
     def set_layout(self, obcp):
 
         self.logger.debug('telescope setlayout ins=%s' %(obcp))
         qtwidget = QtWidgets.QWidget()
 
-        self.telescope = Telescope.Telescope(qtwidget, obcp=obcp, \
-                                           logger=self.logger)
+        self.telescope = Telescope.Telescope(qtwidget, obcp=obcp,
+                                             logger=self.logger)
 
         self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)

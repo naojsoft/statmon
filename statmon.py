@@ -87,9 +87,11 @@ default_layout = ['seq', {},
                                    show_tabs=False), ],
                        ['ws', dict(name='middle24', height=25, stretch=0,
                                    show_tabs=False), ],
-                       ['ws', dict(name='middle25', height=350, stretch=3,
+                       ['ws', dict(name='middle25', height=25, stretch=0,
                                    show_tabs=False), ],
-                       ['ws', dict(name='middle26', height=120, stretch=1,
+                       ['ws', dict(name='middle26', height=350, stretch=3,
+                                   show_tabs=False), ],
+                       ['ws', dict(name='middle27', height=120, stretch=1,
                                    show_tabs=False), ],
                       ],
                       ['vbox', dict(width=350, stretch=1),
@@ -127,9 +129,10 @@ plugins = [
     ('domeff', 'DomeffPlugin', 'DomeffPlugin', 'middle21', ''),
     ('cal', 'CalPlugin', 'CalPlugin', 'middle23', ''),
     ('calprobe', 'CalprobePlugin', 'CalprobePlugin', 'middle24', ''),
+    ('precip', 'PrecipPlugin', 'PrecipPlugin', 'middle25', ''),
     ('target', 'TargetPlugin', 'TargetPlugin', 'middle22', ''),
-    ('envmon2', 'EnvMon2', 'EnvMon2', 'middle26', ''),
-    ('alarm', 'Alarm', 'Alarm', 'middle25', ''),
+    ('envmon2', 'EnvMon2', 'EnvMon2', 'middle27', ''),
+    ('alarm', 'Alarm', 'Alarm', 'middle26', ''),
     ('envmon3', 'EnvMon3', 'EnvMon3', 'farright1', ''),
     ]
 
@@ -355,7 +358,7 @@ if __name__ == "__main__":
                         default='monitor',
                         help="Synchronize from monitor named NAME")
     argprs.add_argument("--monchannels", dest="monchannels",
-                        default='status', metavar="NAMES",
+                        default='alarm', metavar="NAMES",
                         help="Specify monitor channels to subscribe to")
     argprs.add_argument("--monport", dest="monport", type=int,
                         help="Register monitor using PORT", metavar="PORT")

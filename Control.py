@@ -32,6 +32,7 @@ class Controller(Callback.Callbacks):
         self.ev_quit = ev_quit
         self.model = model
         self.last_update = None
+        self.last_config = {}
 
         # For callbacks
         for name in ['change-config', ]:
@@ -158,8 +159,12 @@ class Controller(Callback.Callbacks):
         d = { 'foci': statusDict['STATL.TSC_F_SELECT'],
               'inst': statusDict['FITS.SBR.MAINOBCP'],
               }
-        self.make_callback('change-config', d)
-
+        # make sure this callback is only called if the configuration has
+        # really changed
+        if (self.last_config.get('foci', None) != d['foci'] or
+            self.last_config.get('inst', None) != d['inst']):
+            self.last_config.update(d)
+            self.make_callback('change-config', d)
 
     def play_soundfile(self, filepath, format=None, priority=20):
         self.logger.debug("Subclass could override this to play sound file '%s'" % (

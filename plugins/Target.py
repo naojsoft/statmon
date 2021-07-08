@@ -7,6 +7,7 @@ from qtpy import QtCore, QtWidgets
 
 from g2base import ssdlog
 from Propid import PropIdDisplay
+from InsName import InsNameDisplay
 from Object import ObjectDisplay
 from Airmass import AirmassDisplay
 from Pa import PaDisplay
@@ -23,6 +24,7 @@ class TargetGui(QtWidgets.QWidget):
         self.obcp = obcp  # instrument 3 letter code
         self.logger = logger
         self.propid = PropIdDisplay(logger=logger)
+        self.insname = InsNameDisplay(logger=logger)
         self.object = ObjectDisplay(logger=logger)
         #self.airmass = AirmassDisplay(logger=logger)
         self.pa = PaDisplay(logger=logger)
@@ -37,6 +39,7 @@ class TargetGui(QtWidgets.QWidget):
         mainlayout.setContentsMargins(0, 0, 0, 0)
 
         mainlayout.addWidget(self.propid)
+        mainlayout.addWidget(self.insname)
         mainlayout.addWidget(self.object)
         #mainlayout.addWidget(self.airmass)
         mainlayout.addWidget(self.pa)
@@ -79,6 +82,9 @@ class Target(TargetGui):
             propid = 'FITS.{0}.PROP_ID'.format(self.obcp)
             self.propid.update_propid(propid=kargs.get(propid))
 
+            insname = 'FITS.SBR.MAINOBCP'
+            self.insname.update_insname(insname=kargs.get(insname))
+
             obj = 'FITS.{0}.OBJECT'.format(self.obcp)
             self.object.update_object(obj=kargs.get(obj))
 
@@ -108,6 +114,7 @@ class Target(TargetGui):
     def tick(self):
 
         self.propid.tick()
+        self.insname.tick()
         self.object.tick()
         #self.airmass.tick()
         self.pa.tick()

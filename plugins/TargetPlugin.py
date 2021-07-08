@@ -11,15 +11,16 @@ class TargetPlugin(PlBase.Plugin):
 
     def __set_aliases(self, ins_code):
 
-        self.aliases = ['FITS.{0}.PROP_ID'.format(ins_code), \
-                        'FITS.{0}.OBJECT'.format(ins_code), \
-                        'TSCL.INSROTPA_PF', 'STATS.ROTDIF_PF', \
-                        'TSCL.ImgRotPA', 'STATS.ROTDIF', \
-                        'TSCL.InsRotPA', 'TSCL.LIMIT_FLAG', \
-                        'TSCL.LIMIT_AZ', 'TSCL.LIMIT_EL_LOW', \
-                        'TSCL.LIMIT_EL_HIGH', 'TSCL.LIMIT_ROT', \
-                        'TSCV.PROBE_LINK', 'TSCV.FOCUSINFO', \
-                        'TSCV.FOCUSINFO2', 'TSCS.EL']
+        self.aliases = ['FITS.{0}.PROP_ID'.format(ins_code),
+                        'FITS.{0}.OBJECT'.format(ins_code),
+                        'TSCL.INSROTPA_PF', 'STATS.ROTDIF_PF',
+                        'TSCL.ImgRotPA', 'STATS.ROTDIF',
+                        'TSCL.InsRotPA', 'TSCL.LIMIT_FLAG',
+                        'TSCL.LIMIT_AZ', 'TSCL.LIMIT_EL_LOW',
+                        'TSCL.LIMIT_EL_HIGH', 'TSCL.LIMIT_ROT',
+                        'TSCV.PROBE_LINK', 'TSCV.FOCUSINFO',
+                        'TSCV.FOCUSINFO2', 'TSCS.EL',
+                        'FITS.SBR.MAINOBCP' ]
         self.logger.debug('setting aliases=%s' %self.aliases)
 
     def set_layout(self, obcp):
@@ -30,9 +31,9 @@ class TargetPlugin(PlBase.Plugin):
         self.__set_aliases(ins_code)
 
         qtwidget = QtWidgets.QWidget()
-        self.target = Target.Target(qtwidget, obcp=ins_code, \
-                                  logger=self.logger)
-       
+        self.target = Target.Target(qtwidget, obcp=ins_code,
+                                    logger=self.logger)
+
         self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)
         self.vlayout.setSpacing(0)
@@ -44,20 +45,20 @@ class TargetPlugin(PlBase.Plugin):
         obcp = d['inst']
         if obcp.startswith('#'):
             self.logger.debug('obcp is not assigned. %s' %obcp)
-            return 
+            return
 
 
-        self.logger.debug('target changing config dict=%s ins=%s' %(d, d['inst']))  
+        self.logger.debug('target changing config dict=%s ins=%s' %(d, d['inst']))
         try:
             sip.delete(self.target)
             sip.delete(self.vlayout)
-             
+
         except Exception as e:
-            self.logger.error('error: configuring layout. %s' %e)  
+            self.logger.error('error: configuring layout. %s' %e)
         else:
-            self.set_layout(obcp=obcp) 
-            controller.register_select('target', self.update, \
-                                         self.aliases)
+            self.set_layout(obcp=obcp)
+            controller.register_select('target', self.update,
+                                       self.aliases)
 
     def build_gui(self, container):
         self.root = container
@@ -69,10 +70,10 @@ class TargetPlugin(PlBase.Plugin):
             self.logger.error('error: building layout. %s' %e)
 
     def start(self):
-        self.controller.register_select('target', self.update, \
-                                         self.aliases)
+        self.controller.register_select('target', self.update,
+                                        self.aliases)
         self.controller.add_callback('change-config', self.change_config)
 
     def update(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
-        self.target.update_target(**statusDict) 
+        self.target.update_target(**statusDict)
