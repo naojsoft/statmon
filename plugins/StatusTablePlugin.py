@@ -4,7 +4,7 @@ import sip
 import PlBase
 from StatusTable import StatusTable
 import Telescope
-from cfg.INS import INSdata
+from g2cam.INS import INSdata
 
 
 class StatusTablePlugin(PlBase.Plugin):
@@ -42,7 +42,7 @@ class StatusTablePlugin(PlBase.Plugin):
     def obcp_alias(self, obcp):
 
         insdata = INSdata()
- 
+
         try:
             inscode = insdata.getCodeByName(obcp)
         except Exception as e:
@@ -82,7 +82,7 @@ class StatusTablePlugin(PlBase.Plugin):
     def update(self, statusDict):
         self.logger.info('status=%s' %str(statusDict))
         obcp = statusDict.get(self.aliases[0])
-        if not self.obcp == obcp: 
+        if not self.obcp == obcp:
             obcp = self.update_obcp(obcp)
 
         obcp_time1 = statusDict.get(self.aliases[1])
@@ -98,9 +98,9 @@ class StatusTablePlugin(PlBase.Plugin):
         self.logger.debug('obcp_time1=%s obcp_time2=%s  obcp_time3=%s obcp_time4=%s obcp_time5=%s obcp_time6=%s obcp_time7=%s obcp_time8=%s obcp_time9=%s' %(obcp_time1, obcp_time2, obcp_time3, obcp_time4, obcp_time5, obcp_time6, obcp_time7, obcp_time8, obcp_time9 ))
 
 
-        tscs_time = statusDict.get(self.aliases[10]) 
-        tscl_time = statusDict.get(self.aliases[11]) 
-        tscv_time = statusDict.get(self.aliases[12]) 
+        tscs_time = statusDict.get(self.aliases[10])
+        tscl_time = statusDict.get(self.aliases[11])
+        tscv_time = statusDict.get(self.aliases[12])
         mon_time = self.controller.last_update
 
         self.logger.info('mon last_update=%s' %str(mon_time))
@@ -111,4 +111,4 @@ class StatusTablePlugin(PlBase.Plugin):
                                             obcp_time7=obcp_time7, obcp_time8=obcp_time8, \
                                             obcp_time9=obcp_time9, \
                                             tscs_time=tscs_time, tscl_time=tscl_time, \
-                                            tscv_time=tscv_time, mon_time=mon_time) 
+                                            tscv_time=tscv_time, mon_time=mon_time)

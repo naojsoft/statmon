@@ -13,7 +13,7 @@ from qtpy.QtCore import QMutexLocker
 from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from Dummy import Dummy
 from g2base.remoteObjects import remoteObjects as ro
-from cfg.INS import INSdata
+from g2cam.INS import INSdata
 from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
@@ -25,14 +25,14 @@ class StatusTime(Label):
         super(StatusTime, self).__init__(parent=parent, fs=13, width=200,\
                                      height=25, align='vcenter', \
                                      weight='normal', logger=logger)
- 
+
         self.pretime = None
         self.timedelta = timedelta
         self.mutex = QMutex()
         self.logger = logger
 
     # def monitoring(self):
-  
+
     #     self.logger.debug('monitoring....')
     #     try:
     #         diff = time.time() - self.pretime
@@ -41,7 +41,7 @@ class StatusTime(Label):
     #         self.logger.debug('pretime is undefiend. %s' %self.pretime)
     #         if self.pretime is None:
     #             self.update_statustime(stat_time=None)
-    #     else: 
+    #     else:
     #         if diff > self.timedelta:
     #             self.logger.debug('Stuck. diff=%f' %(diff))
     #             self.logger.debug('calling update_tsc...')
@@ -53,27 +53,27 @@ class StatusTime(Label):
         self.update_statustime(stat_time=self.pretime)
 
     def update_statustime(self, stat_time, color=None):
-                  
+
         self.logger.debug('status=%s color=%s' %(str(stat_time), color))
 
         mutexLocker = QMutexLocker(self.mutex)
         #self.mutex.lock()
- 
+
         try:
             timestamp = datetime.datetime.fromtimestamp(stat_time).strftime('%Y-%m-%d %H:%M:%S')
             fc = self.normal
         except Exception as e:
             timestamp = stat_time = 'Undefined'
             fc = self.alarm
-        else: 
+        else:
             if (time.time()-stat_time) > self.timedelta:
-                fc = self.alarm   
+                fc = self.alarm
 
         #if color is not None:
         #    fc = color
 
         self.logger.debug('timestamp=%s color=%s' %(str(timestamp), color))
-        self.pretime = stat_time 
+        self.pretime = stat_time
         self.setText(timestamp)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
                            %(fc, self.bg))
@@ -83,7 +83,7 @@ class StatusTime(Label):
 class TscDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, monitortime=None, timedelta=None, label=None, logger=None):
         super(TscDisplay, self).__init__(parent)
-   
+
         self.tsc_label = Label(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', weight='normal', \
                                 logger=logger)
@@ -92,7 +92,7 @@ class TscDisplay(QtWidgets.QWidget):
         self.tsc_label.setIndent(15)
 
         self.tsc = StatusTime(parent=parent, timedelta=timedelta, logger=logger)
-        self._set_layout() 
+        self._set_layout()
 
         self.logger = logger
 
@@ -102,22 +102,22 @@ class TscDisplay(QtWidgets.QWidget):
 
     def _set_layout(self):
         objlayout = QtWidgets.QHBoxLayout()
-        objlayout.setSpacing(0) 
+        objlayout.setSpacing(0)
         objlayout.setContentsMargins(0, 0, 0, 0)
         objlayout.addWidget(self.tsc_label)
         objlayout.addWidget(self.tsc)
         self.setLayout(objlayout)
 
     def update_tsc(self, tsc_time):
-        ''' time = GEN2.STATUS.TBLTIME.TSCS  or 
+        ''' time = GEN2.STATUS.TBLTIME.TSCS  or
             time = GEN2.STATUS.TBLTIME.TSCL  or
             time = GEN2.STATUS.TBLTIME.TSCV
         '''
-        self.tsc.update_statustime(stat_time=tsc_time)    
+        self.tsc.update_statustime(stat_time=tsc_time)
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
         num = random.randrange(0, 9)
 
@@ -125,7 +125,7 @@ class TscDisplay(QtWidgets.QWidget):
             tsc_time = '##NODATA##'
         else:
             tsc_time = time.time()
- 
+
         self.update_tsc(tsc_time)
 
 
@@ -133,7 +133,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('state', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -152,13 +152,13 @@ def main(options, args):
                            timedelta=options.timedelta,  label='TSCS', logger=logger)
             l.addWidget(t)
 
-       
+
             timer = QtCore.QTimer(self)
             timer.timeout.connect(t.tick)
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("TSCS starting...", options.interval)
 
         def closeEvent(self, ce):
@@ -183,10 +183,10 @@ if __name__ == '__main__':
     # Create the base frame for the widgets
 
     from optparse import OptionParser
- 
+
     usage = "usage: %prog [options] command [args]"
     optprs = OptionParser(usage=usage, version=('%%prog'))
-    
+
     optprs.add_option("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
     optprs.add_option("--display", dest="display", metavar="HOST:N",
@@ -205,7 +205,7 @@ if __name__ == '__main__':
                       help="Specify time delta btw current and previous status receiving time.")
 
     ssdlog.addlogopts(optprs)
-    
+
     (options, args) = optprs.parse_args()
 
     if len(args) != 0:
@@ -229,5 +229,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-
-

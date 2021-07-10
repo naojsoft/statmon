@@ -3,7 +3,7 @@ from qtpy import QtWidgets, QtCore
 
 import PlBase
 import Target
-import  cfg.INS as INS
+import g2cam.INS as INS
 
 
 class TargetPlugin(PlBase.Plugin):
