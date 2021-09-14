@@ -9,18 +9,18 @@ from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
-    
+
 class Resource(Label):
     ''' Water/Oil Storage'''
     def __init__(self, parent=None, logger=None):
         super( Resource, self).__init__(parent=parent, fs=10, width=275,\
                                      height=25, align='vcenter', \
                                      weight='bold', logger=logger)
- 
+
     def update_resource(self,  resource):
         ''' resource= TSCV.WATER | TSCV.OIL  '''
-                  
-        self.logger.debug('resource=%s' %(str(resource)))
+
+        self.logger.debug(f'resource={resource}')
 
         color=self.normal
 
@@ -46,7 +46,7 @@ class WaterStorageDisplay(QtWidgets.QWidget):
     ''' WaterStorage  '''
     def __init__(self, parent=None, logger=None):
         super(WaterStorageDisplay, self).__init__(parent)
-   
+
         self.water_label = Label(parent=parent, fs=10, width=175,\
                                 height=25, align='vcenter', weight='bold', \
                                 logger=logger)
@@ -55,22 +55,22 @@ class WaterStorageDisplay(QtWidgets.QWidget):
         self.water_label.setIndent(15)
 
         self.water =  Resource(parent=parent, logger=logger)
-        self.__set_layout() 
+        self.__set_layout()
 
     def __set_layout(self):
         objlayout = QtWidgets.QHBoxLayout()
-        objlayout.setSpacing(0) 
+        objlayout.setSpacing(0)
         objlayout.setContentsMargins(0, 0, 0, 0)
         objlayout.addWidget(self.water_label)
         objlayout.addWidget(self.water)
         self.setLayout(objlayout)
 
     def update_water(self, water):
-        self.water.update_resource(resource=water)    
+        self.water.update_resource(resource=water)
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         water = random.randrange(-2, 2)
@@ -80,7 +80,7 @@ class WaterStorageDisplay(QtWidgets.QWidget):
 class OilStorageDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(OilStorageDisplay, self).__init__(parent)
-   
+
         self.oil_label = Label(parent=parent, fs=10, width=175,\
                                 height=25, align='vcenter', weight='bold', \
                                 logger=logger)
@@ -89,22 +89,22 @@ class OilStorageDisplay(QtWidgets.QWidget):
         self.oil_label.setIndent(15)
 
         self.oil = Resource(parent=parent, logger=logger)
-        self.__set_layout() 
+        self.__set_layout()
 
     def __set_layout(self):
         objlayout = QtWidgets.QHBoxLayout()
-        objlayout.setSpacing(0) 
+        objlayout.setSpacing(0)
         objlayout.setContentsMargins(0, 0, 0, 0)
         objlayout.addWidget(self.oil_label)
         objlayout.addWidget(self.oil)
         self.setLayout(objlayout)
 
     def update_oil(self, oil):
-        self.oil.update_resource(resource=oil)    
+        self.oil.update_resource(resource=oil)
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         oil = random.randrange(-2, 2)
@@ -114,27 +114,27 @@ class OilStorageDisplay(QtWidgets.QWidget):
 class ResourceDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(ResourceDisplay, self).__init__(parent)
-   
+
         self.water =  WaterStorageDisplay(parent=parent, logger=logger)
         self.oil = OilStorageDisplay(parent=parent, logger=logger)
 
-        self.__set_layout() 
+        self.__set_layout()
 
     def __set_layout(self):
         objlayout = QtWidgets.QVBoxLayout()
-        objlayout.setSpacing(1) 
+        objlayout.setSpacing(1)
         objlayout.setContentsMargins(0, 0, 0, 0)
         objlayout.addWidget(self.water)
         objlayout.addWidget(self.oil)
         self.setLayout(objlayout)
 
     def update_resource(self, water, oil):
-        self.water.update_water(water=water) 
-        self.oil.update_oil(oil=oil)    
+        self.water.update_water(water=water)
+        self.oil.update_oil(oil=oil)
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         water = oil = random.randrange(-2, 2)
@@ -147,7 +147,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('resource', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -162,7 +162,7 @@ def main(options, args):
             l = QtWidgets.QVBoxLayout(self.main_widget)
             l.setContentsMargins(0, 0, 0, 0)
             l.setSpacing(0)
- 
+
             if options.mode == 'water':
                 r = WaterStorageDisplay(parent=self.main_widget, logger=logger)
             elif options.mode == 'oil':
@@ -177,7 +177,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
 
         def closeEvent(self, ce):
@@ -186,49 +186,40 @@ def main(options, args):
     try:
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
-
     except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
 
-
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs = ArgumentParser(description="Resource status")
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--mode", dest="mode",
+    # note: there are sv/pir plotting, but mode ag uses the same code.
+    argprs.add_argument("--mode", dest="mode",
                       default='resource',
                       help="Specify a resource mode [water| oil | resource ]")
 
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display
@@ -248,4 +239,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

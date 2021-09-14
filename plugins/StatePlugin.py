@@ -8,11 +8,13 @@ import State
 class StatePlugin(PlBase.Plugin):
 
     def __set_aliases(self, obcp):
- 
-        other = ('SPCAM', 'IRCS', 'HICIAO', 'CHARIS', 'K3D', 'MOIRCS', 'FOCAS', 'COMICS', 'SWIMS', 'MIMIZUKU', 'SUKA', 'IRD', 'PFS', 'VAMPIRES')
+
+        other = ('SPCAM', 'IRCS', 'HICIAO', 'CHARIS', 'K3D', 'MOIRCS', 'FOCAS', 'COMICS', 'SWIMS', 'MIMIZUKU', 'SUKA', 'IRD', 'VAMPIRES')
         ns_opt = ('HDS',)
-        p_opt2 = ('HSC',)
+        p_opt2_hsc = ('HSC',)
+        p_opt2_pfs = ('PFS',)
         p_ir = ('FMOS',)
+
 
         if obcp in other:
             self.aliases = ['STATL.TELDRIVE', \
@@ -22,10 +24,13 @@ class StatePlugin(PlBase.Plugin):
                             'TSCL.AG1Intensity', 'STATL.AGRERR', \
                             'TSCL.SV1Intensity', 'STATL.SVRERR', \
                             'STATL.SV_CALC_MODE']
-        elif obcp in p_opt2:
+        elif obcp in p_opt2_hsc:
             self.aliases = ['STATL.TELDRIVE', \
                             'TSCL.HSC.SCAG.Intensity', 'STATL.AGRERR', \
                             'TSCL.HSC.SHAG.Intensity', 'STATL.AGRERR']
+        elif obcp in p_opt2_pfs:
+            self.aliases = ['STATL.TELDRIVE', \
+                            'TSCL.PFS.AG.Intensity', 'STATL.AGRERR']
         elif obcp in p_ir:
             self.aliases = ['STATL.TELDRIVE', \
                             'TSCL.AGFMOSIntensity', 'STATL.AGRERR']
@@ -33,20 +38,20 @@ class StatePlugin(PlBase.Plugin):
 
     def change_config(self, controller, d):
 
-        self.logger.info('changing config dict=%s ins=%s' %(d, d['inst']))  
+        self.logger.info('changing config dict=%s ins=%s' %(d, d['inst']))
 
         obcp = d['inst']
         if obcp.startswith('#'):
             self.logger.debug('obcp is not assigned. %s' %obcp)
-            return 
+            return
 
         try:
             sip.delete(self.state)
             sip.delete(self.vlayout)
         except Exception as e:
-            self.logger.error('error: deleting current layout. %s' %e)  
+            self.logger.error('error: deleting current layout. %s' %e)
         else:
-            self.set_layout(obcp=obcp)  
+            self.set_layout(obcp=obcp)
             controller.register_select('state', self.update, self.aliases)
 
     def set_layout(self, obcp):
@@ -55,7 +60,7 @@ class StatePlugin(PlBase.Plugin):
 
         qtwidget = QtWidgets.QWidget()
         self.state = State.State(parent=qtwidget, logger=self.logger)
-       
+
         self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)
         self.vlayout.setSpacing(0)
@@ -81,20 +86,20 @@ class StatePlugin(PlBase.Plugin):
         state = statusDict.get(self.aliases[0])
 
         guiding1 = ["Guiding(AG1)", "Guiding(AG2)", "Guiding(AGFMOS)", \
-                    "Guiding(AGPIR)", "Guiding(HSCSCAG)"]
+                    "Guiding(AGPIR)", "Guiding(HSCSCAG)", "Guiding(PFSAG)"]
         sv = ["Guiding(SV1)", "Guiding(SV2)"]
         guiding2 = sv + ["Guiding(HSCSHAG)"]
 
-   
+
         if state in guiding1:
             intensity = statusDict.get(self.aliases[1])
             valerr = statusDict.get(self.aliases[2])
         elif state in guiding2:
             intensity = statusDict.get(self.aliases[3])
             valerr = statusDict.get(self.aliases[4])
-        else:  # if not guiding, intensity and valerr don't matter. 
-            intensity = valerr = None              
-         
+        else:  # if not guiding, intensity and valerr don't matter.
+            intensity = valerr = None
+
         if state in sv:
             calc_mode = statusDict.get(self.aliases[5])
         else:

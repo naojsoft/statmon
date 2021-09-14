@@ -21,7 +21,7 @@ class Object(Label):
     def update_object(self, obj):
         ''' object = FITS.XXX.OBJECT '''
 
-        self.logger.debug('obj=%s' %(str(obj)))
+        self.logger.debug(f'obj={obj}')
 
         color=self.normal
 
@@ -32,7 +32,7 @@ class Object(Label):
             #text = '%s %s' %(label.ljust(15), 'Undefined'.rjust(20))
             text = '{0}'.format('Undefined')
             color = self.alarm
-            self.logger.error('error: object undef. object=%s' %(str(obj)))
+            self.logger.error(f'error: object undef. object={obj}')
 
         #self.setText('CalProbe: ')
         self.setText(text)
@@ -87,7 +87,7 @@ class ObjectDisplay(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
+    logger = ssdlog.make_logger('object', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
@@ -120,12 +120,8 @@ def main(options, args):
     try:
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
@@ -136,33 +132,31 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="Object status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
     # note: there are sv/pir plotting, but mode ag uses the same code.
-    optprs.add_option("--mode", dest="mode",
+    argprs.add_argument("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

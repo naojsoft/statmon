@@ -20,7 +20,7 @@ class Stage(Label):
 
     def update_stage(self, stage):
 
-        self.logger.debug('stage=%s' %(str(stage)))
+        self.logger.debug(f'stage={stage}')
 
         try:
             stage = float(stage)
@@ -75,7 +75,7 @@ class Waveplate(QtWidgets.QWidget):
             stage3=WAV.STG3_PS
             #focus = TSCV.FOCUSINFO
         '''
-        self.logger.debug('s1=%s s2=%s s3=%s' %(str(stage1), str(stage2), str(stage3)))
+        self.logger.debug(f's1={stage1}, s2={stage2}, s3={stage3}')
         self.stage1.update_stage(stage1)
         self.stage2.update_stage(stage2)
         self.stage3.update_stage(stage3)
@@ -113,7 +113,7 @@ class Waveplate(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
+    logger = ssdlog.make_logger('waveplate', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
@@ -148,41 +148,34 @@ def main(options, args):
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
-
     except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
 
-
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="EL status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
-
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

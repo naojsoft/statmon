@@ -23,27 +23,27 @@ class DomeShutter(Label):
         self.logger.debug('dome=%s' %(str(dome)))
 
         if dome in ERROR:
-            self.logger.error('error: dome=%s' %(str(dome)))
+            self.logger.error(f'error: dome={dome}')
             text = 'Dome Shutter Undefined'
             bg = self.alarm
             fg = self.fg
         elif dome == "OPEN": # dome shutter open
-            self.logger.debug('open dome=%s' %(str(dome)))
+            self.logger.debug(f'open dome={dome}')
             text = 'Dome Shutter Open'
             bg = self.fg
             fg = self.normal
         elif dome == "CLOSED": # dome shuuter close
-            self.logger.debug('close dome=%s' %(str(dome)))
+            self.logger.debug('close dome={dome}')
             text = 'Dome Shutter Closed'
             bg = self.bg
             fg = self.fg
         elif not dome : # dome shutter  partial
-            self.logger.debug('partial dome=%s' %(str(dome)))
+            self.logger.debug('partial dome={dome}')
             text = 'Dome Shuter Partial'
             bg = self.warn
             fg = self.fg
 
-        self.logger.debug('text=%s fg=%s bg=%s' %(text, fg, bg))
+        self.logger.debug(f'text={text}, fg={fg}, bg={bg}')
 
         self.setStyleSheet("QLabel {color: %s; background-color: %s}" %(fg, bg))
         self.setText(text)
@@ -61,7 +61,7 @@ class DomeShutter(Label):
             dome = dome[indx]
             self.update_dome(dome)
         except Exception as e:
-            self.logger.error('error: %s' %e)
+            self.logger.error(f'error: {e}')
             pass
 
 
@@ -101,12 +101,8 @@ def main(options, args):
     try:
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
@@ -117,29 +113,27 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="DomeShutter status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

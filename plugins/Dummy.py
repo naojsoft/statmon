@@ -8,7 +8,7 @@ from qtpy import QtCore, QtWidgets
 from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
-    
+
 class Dummy(QtWidgets.QLabel):
 
 #class FocusZ(QtWidgets.QWidget):
@@ -16,10 +16,10 @@ class Dummy(QtWidgets.QLabel):
     def __init__(self, parent=None, width=125, height=60, logger=None):
         super(Dummy, self).__init__(parent)
 
-        self.bg='white'
+        self.bg = 'white'
 
-        self.w=width
-        self.h=height
+        self.w = width
+        self.h = height
 
         self.logger=logger
         self.setStyleSheet("QLabel {color : white; background-color:white  }")
@@ -33,8 +33,8 @@ class Dummy(QtWidgets.QLabel):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
- 
+    logger = ssdlog.make_logger('dummy', options)
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -53,7 +53,7 @@ def main(options, args):
             l.addWidget(d)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("Dummy starting..." , options.interval)
 
         def closeEvent(self, ce):
@@ -62,12 +62,8 @@ def main(options, args):
     try:
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
@@ -79,28 +75,27 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    from argparse import ArgumentParser
+
+    argprs = ArgumentParser(description="Dummy Widget status")
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display
@@ -120,4 +115,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

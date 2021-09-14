@@ -15,17 +15,17 @@ class Shutter(Label):
         super(Shutter, self).__init__(parent=parent, fs=11.5, width=70,\
                                     height=20, logger=logger )
 
-        self.status = {'OPEN': self.alarm, 'CLOSE': self.normal} 
-              
- 
+        self.status = {'OPEN': self.alarm, 'CLOSE': self.normal}
+
+
     def shutter(self, shutter):
 
-        self.logger.debug('shutter=%s' %(str(shutter)))
+        self.logger.debug(f'shutter={shutter}')
 
         try:
             color = self.status[shutter]
             text = shutter
-        except Exception: 
+        except Exception:
             color = self.alarm
             text = 'Undef'
 
@@ -57,46 +57,46 @@ class AoShutter(QtWidgets.QWidget):
         self.hwsh = Shutter(parent=parent, logger=logger)
         self.logger = logger
 
-        self._set_layout() 
+        self._set_layout()
 
     def _set_layout(self):
         top = QtWidgets.QVBoxLayout()
 
         lwshHbox = QtWidgets.QHBoxLayout()
-        lwshHbox.setSpacing(0) 
+        lwshHbox.setSpacing(0)
         lwshHbox.setContentsMargins(0, 0, 0, 0)
         lwshHbox.addWidget(self.lwsh_label)
         lwshHbox.addWidget(self.lwsh)
 
         hwshHbox = QtWidgets.QHBoxLayout()
-        hwshHbox.setSpacing(0) 
+        hwshHbox.setSpacing(0)
         hwshHbox.setContentsMargins(0, 0, 0, 0)
         hwshHbox.addWidget(self.hwsh_label)
         hwshHbox.addWidget(self.hwsh)
 
-        top.setSpacing(1) 
+        top.setSpacing(1)
         top.setContentsMargins(0, 0, 0, 0)
         top.addLayout(lwshHbox)
         top.addLayout(hwshHbox)
         self.setLayout(top)
-  
+
     def update_aoshutter(self, lwsh, hwsh):
         ''' lwsh = AON.LWFS.LASH
             hwsh = AON.HWFS.LASH
         '''
 
-        self.logger.debug('lwsh=%s hwsh=%s' %(str(lwsh), str(hwsh)))
-   
+        self.logger.debug(f'lwsh={lwsh}, hwsh={hwsh}')
+
         self.lwsh.shutter(lwsh)
         self.hwsh.shutter(hwsh)
 
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
-        indx = random.randrange(0, 4) 
+        indx = random.randrange(0, 4)
         shutter = ['OPEN', 'CLOSE', '##NODATA##']
 
         try:
@@ -110,8 +110,8 @@ class AoShutter(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
- 
+    logger = ssdlog.make_logger('aoshutter', options)
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -134,7 +134,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
 
         def closeEvent(self, ce):
@@ -143,12 +143,8 @@ def main(options, args):
     try:
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
@@ -160,32 +156,32 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    from argparse import ArgumentParser
+
+    argprs = ArgumentParser(description="AO Shutter status")
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--mode", dest="mode",
+    # note: there are sv/pir plotting, but mode ag uses the same code.
+    argprs.add_argument("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
 
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
+
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display
@@ -205,4 +201,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

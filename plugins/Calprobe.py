@@ -23,15 +23,15 @@ class CalProbe(Label):
     def update_calprobe(self, probe):
         ''' probe = TSCL.CAL_POS '''
 
-        self.logger.debug('probe=%s' %(str(probe)))
+        self.logger.debug(f'probe={probe}')
 
         color = self.normal
         try:
-            text = '{0:+3.3f} mm'.format(probe)
+            text = f'{probe:+3.3f} mm'
         except Exception:
             text = 'Undefined'
             color = self.alarm
-            self.logger.error('error: calprobe undef. probe=%s' %(str(probe)))
+            self.logger.error(f'error: calprobe undef. probe={probe}')
 
         #self.setText('CalProbe: ')
         self.setText(text)
@@ -68,29 +68,15 @@ class CalProbeDisplay(QtWidgets.QWidget):
         import random
         random.seed()
 
-        indx = random.randrange(0, 35)
-        indx2 = random.randrange(0, 5)
-
-        foci = [0x01000000, 0x02000000, 0x04000000, 0x08000000,
-                0x10000000, 0x20000000, 0x40000000, long(0x80000000),
-                0x00010000, 0x00020000, 0x00040000, 0x00080000,
-                0x00100000, 0x00200000, 0x00400000, 0x00800000,
-                0x00000100, 0x00000200, 0x00000400, 0x00000800,
-                0x00001000, 0x00002000, 0x00004000, 0x00008000,
-                0x00000001, 0x00000002, 0x00000004, 0x00000008,
-                0x00000010, 0x00000000,
-                "Unknown", None, STATNONE, STATERROR]
-
-        foci2 = [0x01, 0x02, 0x04, "Unknown", None,
-                 STATNONE, 0x08, STATERROR]
-        try:
-            focus = foci[indx]
-            focus2 = foci2[indx2]
-        except Exception as e:
-            focus = None
-            focus2 = None
-            print(e)
         probe = random.random()*random.randrange(-20, 20)
+
+        error = [STATNONE, STATERROR]
+
+        try:
+            probe = error[int(probe)]
+        except Exception:
+            pass
+
         self.update_calprobe(probe)
 
 
@@ -141,29 +127,27 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="Calprobe status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

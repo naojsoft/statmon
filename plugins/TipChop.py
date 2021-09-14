@@ -26,8 +26,8 @@ class TipChop(Label):
            focus2=
         '''
 
-        self.logger.debug('mode=%s drive=%s  data=%s state=%s' %(str(mode), str(drive), str(data), str(state)))
-        self.logger.debug('focus=%s focus2=%s' %(str(focus), str(focus2)))
+        self.logger.debug(f'mode={mode}, drive={drive}, data={data}, state={state}')
+        self.logger.debug(f'focus={focus}, focus2={focus2}')
 
         color = self.normal
 
@@ -101,13 +101,13 @@ class TipChop(Label):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
+    logger = ssdlog.make_logger('tipchop', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=125; self.h=35;
+            self.w = 125; self.h = 35;
             self.init_ui()
 
         def init_ui(self):
@@ -136,8 +136,6 @@ def main(options, args):
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
@@ -148,30 +146,28 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="EL status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
     # note: there are sv/pir plotting, but mode ag uses the same code.
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

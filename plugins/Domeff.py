@@ -14,13 +14,12 @@ from error import *
 
 
 progname = os.path.basename(sys.argv[0])
-progversion = "0.1"
 
 
 class DomeffDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(DomeffDisplay, self).__init__(parent)
-   
+
         self.domeff_label = Label(parent=parent, fs=13, width=175,\
                                    height=25, align='vcenter', \
                                    weight='normal', logger=logger)
@@ -31,25 +30,25 @@ class DomeffDisplay(QtWidgets.QWidget):
         self.domeff_label.setText('Domeff')
         self.domeff_label.setIndent(15)
 
-        #self.propid_label.setAlignment(QtCore.Qt.AlignVCenter) 
+        #self.propid_label.setAlignment(QtCore.Qt.AlignVCenter)
 
         self.domeffwatt = DomeffWatt(parent=parent, logger=logger)
         self.domeffvolt = DomeffVolt(parent=parent, logger=logger)
-        self.__set_layout() 
+        self.__set_layout()
 
     def __set_layout(self):
         hlayout = QtWidgets.QHBoxLayout()
-        hlayout.setSpacing(0) 
+        hlayout.setSpacing(0)
         hlayout.setContentsMargins(0, 0, 0, 0)
 
         vlayout1 = QtWidgets.QVBoxLayout()
-        vlayout1.setSpacing(0) 
+        vlayout1.setSpacing(0)
         vlayout1.setContentsMargins(0, 0, 0, 0)
         vlayout1.addWidget(self.domeff_label)
         vlayout1.addWidget(self.empty_label)
 
         vlayout2 = QtWidgets.QVBoxLayout()
-        vlayout2.setSpacing(0) 
+        vlayout2.setSpacing(0)
         vlayout2.setContentsMargins(0, 0, 0, 0)
         vlayout2.addWidget(self.domeffwatt)
         vlayout2.addWidget(self.domeffvolt)
@@ -69,8 +68,8 @@ class DomeffDisplay(QtWidgets.QWidget):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
-  
+        import random
+
         indx=random.randrange(0, 5)
 
         ff_a = (1, 2, 5, None, 1)
@@ -82,17 +81,17 @@ class DomeffDisplay(QtWidgets.QWidget):
 
         ff_a_v = v
         ff_1b_v = '#Error'
-        ff_2b_v = ff_3b_v = v 
+        ff_2b_v = ff_3b_v = v
         ff_4b_v = v
 
 
- 
+
         #ff_1b, ff_2b, ff_3b, ff_4b = [None, 1 , 90, '#STATNO#']
         try:
             ff_a = ff_a[indx]
         except Exception:
             pass
-        else:  
+        else:
             self.update_domeff(ff_a, ff_1b, ff_2b, ff_3b, ff_4b,
                                ff_a_v, ff_1b_v, ff_2b_v, ff_3b_v, ff_4b_v)
 
@@ -101,8 +100,8 @@ class DomeffDisplay(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('el', options)
- 
+    logger = ssdlog.make_logger('domeff', options)
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             QtWidgets.QMainWindow.__init__(self)
@@ -147,28 +146,27 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    from argparse import ArgumentParser
+
+    argprs = ArgumentParser(description="Domeff status")
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

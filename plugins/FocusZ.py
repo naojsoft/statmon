@@ -20,22 +20,22 @@ class FocusZ(Label):
     def update_z(self, z):
         ''' z=TSCL.Z '''
 
-        self.logger.debug('z=%s' %str(z))
-        #self.text='Focus: {0:<.04f} mm'.format(z)  
+        self.logger.debug(f'z={z}')
+        #self.text='Focus: {0:<.04f} mm'.format(z)
         try:
             text = "Focus: %.4f mm" %z
             color = self.normal
         except Exception:
             text = "Focus: Undefined"
             color = self.alarm
-            self.logger.error('error: focus z undef. z=%s' %str(z))
+            self.logger.error(f'error: focus z undef. z={z}')
         self.setStyleSheet("QLabel {color :%s; background-color:%s}" \
                            %(color, self.bg) )
         self.setText(text)
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         z = random.random()*random.randrange(-20, 20)
@@ -45,8 +45,8 @@ class FocusZ(Label):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
- 
+    logger = ssdlog.make_logger('focus_z', options)
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -69,7 +69,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("FocusZ starting...", options.interval)
 
         def closeEvent(self, ce):
@@ -78,12 +78,8 @@ def main(options, args):
     try:
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
@@ -95,28 +91,27 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    from argparse import ArgumentParser
+
+    argprs = ArgumentParser(description="Focus Z status")
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display
@@ -136,4 +131,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

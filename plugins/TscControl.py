@@ -38,19 +38,19 @@ class TscControl(TscControlGui):
 
     def update_tsccontrol(self, **kargs):
 
-        self.logger.debug('updating tsccontrol. {}'.format(kargs))
+        self.logger.debug(f'updating tsccontrol. kargs={kargs}')
 
         try:
             tsclogin = kargs.get('GEN2.TSCLOGINS')
             #tsclogin = tsclogin.replace('%', '')
-            self.logger.debug('tsc login. {}'.format(tsclogin))
+            self.logger.debug(f'tsc login. {tsclogin}')
             self.tsclogin.update_tsclogin(tsclogin=tsclogin)
 
             tscmode = kargs.get('GEN2.TSCMODE')
-            self.logger.debug('tsc mode. {}'.format(tscmode))
+            self.logger.debug(f'tsc mode. {tscmode}')
             self.tscmode.update_tscmode(tscmode=tscmode)
         except Exception as e:
-            self.logger.error('error: updating tsccontrol. {}'.format(e))
+            self.logger.error(f'error: updating tsccontrol. {e}')
 
     def tick(self):
 
@@ -81,38 +81,33 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="EL status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
     # note: there are sv/pir plotting, but mode ag uses the same code.
-    optprs.add_option("--mode", dest="mode",
+    argprs.add_argument("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
 
-    optprs.add_option("--ins", dest="ins",
+    argprs.add_argument("--ins", dest="ins",
                       default='HDS',
                       help="Specify 3 character code of an instrument. e.g., HDS")
-
-
-    ssdlog.addlogopts(optprs)
-
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

@@ -184,9 +184,6 @@ class TelescopeGui(QtWidgets.QWidget):
 
         empty_shell = Dummy(height=150, logger=self.logger)
         r2layout.addWidget(empty_shell)
-
-
-
         rlayout.addLayout(r1layout)
         rlayout.addLayout(r2layout)
 
@@ -283,12 +280,12 @@ class TelescopeGui(QtWidgets.QWidget):
                  'SUKA': self.cs_layout, 'PFS': self.popt_layout, \
                  'VAMPIRES': self.nsir_layout,}
 
-        self.logger.debug('telescope focuslayout ins=%s' %self.obcp)
+        self.logger.debug(f'telescope focuslayout ins={self.obcp}')
 
         try:
             focus[self.obcp](rlayout)
         except Exception as e:
-            self.logger.error('error: setting focus layout. %s' %str(e))
+            self.logger.error(f'error: setting focus layout. {e}')
             pass
 
 class Telescope(TelescopeGui):
@@ -375,11 +372,11 @@ class Telescope(TelescopeGui):
         try:
             focus[self.obcp](**kargs)
         except Exception as e:
-            self.logger.error('error: updating focus.  %s' %str(e))
+            self.logger.error(f'error: updating focus.  {e}')
 
     def update_telescope(self, **kargs):
 
-        self.logger.debug('updating telescope. %s' %str(kargs))
+        self.logger.debug(f'updating telescope. kargs={kargs}')
 
         self.dome_shutter.update_dome(dome=kargs.get('STATL.DOMESHUTTER_POS'))
         #self.dome_shutter.update_dome(dome=kargs.get('TSCV.DomeShutter'))
@@ -479,38 +476,35 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="Telescope status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
     # note: there are sv/pir plotting, but mode ag uses the same code.
-    optprs.add_option("--mode", dest="mode",
+    argprs.add_argument("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
 
-    optprs.add_option("--ins", dest="ins",
+    argprs.add_argument("--ins", dest="ins",
                       default='HDS',
                       help="Specify an instrument name. e.g., HDS")
 
+    ssdlog.addlogopts(argprs)
 
-    ssdlog.addlogopts(optprs)
-
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

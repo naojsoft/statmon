@@ -18,8 +18,8 @@ progname = os.path.basename(sys.argv[0])
 
 class StatusTable(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
-        super(StatusTable, self).__init__(parent) 
-        
+        super(StatusTable, self).__init__(parent)
+
         self.logger = logger
 
         self.obcp = ObcpDisplay(monitortime=60000,\
@@ -40,14 +40,14 @@ class StatusTable(QtWidgets.QWidget):
         self._set_layout()
 
     def _set_layout(self):
-   
-        mainlayout = QtWidgets.QVBoxLayout()        
-        mainlayout.setSpacing(1) 
+
+        mainlayout = QtWidgets.QVBoxLayout()
+        mainlayout.setSpacing(1)
         mainlayout.setContentsMargins(0, 0, 0, 0)
 
-        mainlayout.addWidget(self.obcp)        
-        mainlayout.addWidget(self.tscs)        
-        mainlayout.addWidget(self.tscl)        
+        mainlayout.addWidget(self.obcp)
+        mainlayout.addWidget(self.tscs)
+        mainlayout.addWidget(self.tscl)
         mainlayout.addWidget(self.tscv)
         mainlayout.addWidget(self.mon)
 
@@ -60,7 +60,7 @@ class StatusTable(QtWidgets.QWidget):
                            obcp_time5, obcp_time6, obcp_time7, obcp_time8, obcp_time9, \
                            tscs_time, tscl_time, tscv_time, mon_time):
 
-        self.logger.debug('updating stat-table...') 
+        self.logger.debug('updating stat-table...')
 
         self.obcp.update_obcp(obcp=obcp, obcp_time1=obcp_time1, obcp_time2=obcp_time2, \
                               obcp_time3=obcp_time3, obcp_time4=obcp_time4, \
@@ -82,12 +82,12 @@ class StatusTable(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('telescope', options)
+    logger = ssdlog.make_logger('status_table', options)
 
 
     try:
         qApp = QtWidgets.QApplication(sys.argv)
-        tel =  StatusTable(logger=logger)  
+        tel =  StatusTable(logger=logger)
         timer = QtCore.QTimer()
         timer.timeout.connect(tel.tick)
         timer.start(options.interval)
@@ -102,38 +102,33 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs = ArgumentParser(description="EL status")
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--mode", dest="mode",
+    # note: there are sv/pir plotting, but mode ag uses the same code.
+    argprs.add_argument("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
 
-    optprs.add_option("--ins", dest="ins",
+    argprs.add_argument("--ins", dest="ins",
                       default='HDS',
                       help="Specify 3 character code of an instrument. e.g., HDS")
-
-
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display
@@ -153,4 +148,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

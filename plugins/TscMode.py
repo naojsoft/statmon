@@ -9,30 +9,30 @@ from g2base import ssdlog
 
 progname = os.path.basename(sys.argv[0])
 
-    
+
 class TscMode(Label):
     ''' TSC Mode  '''
     def __init__(self, parent=None, logger=None):
         super(TscMode, self).__init__(parent=parent, fs=13, width=50,\
                                      height=25, align='left', \
                                      weight='normal', logger=logger)
- 
+
     def update_tscmode(self, tscmode):
         ''' tscmode = GEN2.TSCMODE '''
-                  
-        self.logger.debug('tscmode={}'.format(tscmode))
+
+        self.logger.debug(f'tscmode={tscmode}')
 
         color = self.normal
 
         if not tscmode:
             text = '{0}'.format('None')
-            color = self.alarm    
+            color = self.alarm
         elif "OBS" in  tscmode:
             text = '{0}'.format(tscmode)
         else:
             text = '{0}'.format(tscmode)
             color = self.alarm
-        self.logger.debug('tscmode={} color={}'.format(tscmode, color))
+        self.logger.debug(f'tscmode={tscmode}, color={color}')
 
         self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
@@ -42,7 +42,7 @@ class TscMode(Label):
 class TscModeDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(TscModeDisplay, self).__init__(parent)
-   
+
         self.tscmode_label = Label(parent=parent, fs=13, width=30,\
                                 height=25, align='vcenter', weight='normal', \
                                 logger=logger)
@@ -50,28 +50,28 @@ class TscModeDisplay(QtWidgets.QWidget):
         self.tscmode_label.setText('TSC Priority:')
         self.tscmode_label.setIndent(15)
         self.tscmode = TscMode(parent=parent, logger=logger)
-        self.__set_layout() 
+        self.__set_layout()
 
     def __set_layout(self):
         objlayout = QtWidgets.QHBoxLayout()
-        objlayout.setSpacing(0) 
+        objlayout.setSpacing(0)
         objlayout.setContentsMargins(0, 0, 0, 0)
         objlayout.addWidget(self.tscmode_label)
         objlayout.addWidget(self.tscmode)
         self.setLayout(objlayout)
 
     def update_tscmode(self, tscmode):
-        self.tscmode.update_tscmode(tscmode)    
+        self.tscmode.update_tscmode(tscmode)
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
 
         indx = random.randrange(0, 5)
 
         tscmode = ['TSC', 'OCS', "TSC Only", '', []]
- 
+
         try:
             tscmode = tscmode[indx]
         except Exception as e:
@@ -83,8 +83,8 @@ class TscModeDisplay(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
- 
+    logger = ssdlog.make_logger('tsc_mode', options)
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
@@ -94,7 +94,6 @@ def main(options, args):
 
         def init_ui(self):
             self.resize(self.w, self.h)
-
             self.main_widget = QtWidgets.QWidget()
             l = QtWidgets.QVBoxLayout(self.main_widget)
             l.setContentsMargins(0, 0, 0, 0)
@@ -107,7 +106,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
 
         def closeEvent(self, ce):
@@ -116,49 +115,40 @@ def main(options, args):
     try:
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)  
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
-
     except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
 
-
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs = ArgumentParser(description="EL status")
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--mode", dest="mode",
+    # note: there are sv/pir plotting, but mode ag uses the same code.
+    argprs.add_argument("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
 
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display
@@ -178,4 +168,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

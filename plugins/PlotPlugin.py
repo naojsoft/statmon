@@ -15,11 +15,11 @@ class PlotPlugin(PlBase.Plugin):
 
         if obcp in self.ag:
             self.update = self.update_ag
-            self.aliases = ['STATL.TELDRIVE', 'TSCL.AG1dX', 'TSCL.AG1dY', 
+            self.aliases = ['STATL.TELDRIVE', 'TSCL.AG1dX', 'TSCL.AG1dY',
                             'TSCV.AGExpTime', 'TSCV.AG1_I_BOTTOM', 'TSCV.AG1_I_CEIL']
         elif obcp in self.ao:
             self.update = self.update_ao
-            self.aliases = ['AON.TT.TTX','AON.TT.TTY', 'AON.TT.WTTC1','AON.TT.WTTC2']   
+            self.aliases = ['AON.TT.TTX','AON.TT.TTY', 'AON.TT.WTTC1','AON.TT.WTTC2']
         elif obcp ==  self.agsv:
             self.update = self.update_twoguiding
             self.aliases = ['STATL.TELDRIVE', \
@@ -40,7 +40,21 @@ class PlotPlugin(PlBase.Plugin):
                             'TSCV.HSC.SCAG.ExpTime', 'TSCV.HSC.SHAG.ExpTime', \
                             'TSCV.HSC.SCAG.I_BOTTOM', 'TSCV.HSC.SCAG.I_CEIL', \
                             'TSCV.HSC.SHAG.I_BOTTOM', 'TSCV.HSC.SHAG.I_CEIL']
- 
+
+        elif obcp in self.pfsag:
+            self.update = self.update_pfsag
+            self.aliases = ['STATL.TELDRIVE', 'TSCL.PFS.AG.DX', 'TSCL.PFS.AG.DY',
+                            'TSCV.PFS.AG.ExpTime']
+
+
+    def update_pfsag(self, statusDict):
+        self.logger.debug('status=%s' %str(statusDict))
+        state = statusDict.get(self.aliases[0])
+        x = statusDict.get(self.aliases[1])
+        y = statusDict.get(self.aliases[2])
+        exp = statusDict.get(self.aliases[3])
+        self.plot.update_plot(state, x, y, exp)
+
     def update_ao(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
         ao1x = statusDict.get(self.aliases[0])
@@ -49,7 +63,6 @@ class PlotPlugin(PlBase.Plugin):
         ao2y = statusDict.get(self.aliases[3])
         self.plot.update_plot(ao1x, ao1y, ao2x, ao2y)
 
-
     def update_fmosag(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
         state = statusDict.get(self.aliases[0])
@@ -57,7 +70,7 @@ class PlotPlugin(PlBase.Plugin):
         y = statusDict.get(self.aliases[2])
         el = statusDict.get(self.aliases[3])
         self.plot.update_plot(state, x, y, el)
-            
+
     def update_ag(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
         state = statusDict.get(self.aliases[0])
@@ -65,7 +78,7 @@ class PlotPlugin(PlBase.Plugin):
         y = statusDict.get(self.aliases[2])
         exp = statusDict.get(self.aliases[3])
         bottom = statusDict.get(self.aliases[4])
-        ceil = statusDict.get(self.aliases[5]) 
+        ceil = statusDict.get(self.aliases[5])
         self.plot.update_plot(state=state, x=x, y=y, \
                             exptime=exp, bottom=bottom, ceil=ceil)
 
@@ -96,26 +109,26 @@ class PlotPlugin(PlBase.Plugin):
         obcp = d['inst']
         if obcp.startswith('#'):
             self.logger.debug('obcp is not assigned. %s' %obcp)
-            return 
+            return
 
 
-        self.logger.debug('plot changing config dict=%s ins=%s' %(d, d['inst']))  
+        self.logger.debug('plot changing config dict=%s ins=%s' %(d, d['inst']))
         try:
             sip.delete(self.plot)
             sip.delete(self.vlayout)
         except Exception as e:
-            self.logger.error('error: plot configuring layout. %s' %e)  
+            self.logger.error('error: plot configuring layout. %s' %e)
         else:
-            self.set_layout(obcp=obcp) 
+            self.set_layout(obcp=obcp)
             controller.register_select('plot', self.update, self.aliases)
 
 
     def set_layout(self, obcp):
 
-        self.logger.debug('plot setlayout. obcp=%s' %obcp) 
+        self.logger.debug('plot setlayout. obcp=%s' %obcp)
         self.__set_aliases(obcp)
-        self.logger.debug('plot update=%s  aliases=%s' %(self.update, self.aliases)) 
-    
+        self.logger.debug('plot update=%s  aliases=%s' %(self.update, self.aliases))
+
         qtwidget = QtWidgets.QWidget()
 
         if obcp in self.ag:
@@ -123,9 +136,12 @@ class PlotPlugin(PlBase.Plugin):
         elif obcp in self.ao:
             self.plot = Plot.NsIrPlot(qtwidget, logger=self.logger)
         elif obcp == self.agsv or obcp == self.hscag:
-            self.plot = Plot.TwoGuidingPlot(qtwidget, logger=self.logger)    
+            self.plot = Plot.TwoGuidingPlot(qtwidget, logger=self.logger)
         elif obcp == self.fmosag:
             self.plot = Plot.FmosPlot(qtwidget, logger=self.logger)
+        elif obcp in self.pfsag:
+            self.plot = Plot.PfsAgPlot(qtwidget, logger=self.logger)
+
 
         self.vlayout = QtWidgets.QVBoxLayout()
         self.vlayout.setContentsMargins(0, 0, 0, 0)
@@ -135,10 +151,10 @@ class PlotPlugin(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
-        self.hscag = 'HSC'  
+        self.hscag = 'HSC'
         self.fmosag = 'FMOS'
-        #self.pfsag = 'PFS'
-        self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'SPCAM', 'SWIMS', 'MIMIZUKU', 'SUKA', 'PFS')
+        self.pfsag = 'PFS'
+        self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'SPCAM', 'SWIMS', 'MIMIZUKU', 'SUKA')
         self.ao = ('IRCS', 'HICIAO', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES')
         self.agsv = 'HDS'
 
@@ -149,6 +165,6 @@ class PlotPlugin(PlBase.Plugin):
             self.logger.error('error: building layout. %s' %e)
 
     def start(self):
-        self.logger.debug('starting plot-updating...') 
+        self.logger.debug('starting plot-updating...')
         self.controller.register_select('plot', self.update, self.aliases)
         self.controller.add_callback('change-config', self.change_config)

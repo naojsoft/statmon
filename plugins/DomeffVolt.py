@@ -3,12 +3,9 @@
 import os
 import sys
 
-from qtpy import QtWidgets, QtCore, QT_VERSION
+from qtpy import QtWidgets, QtCore
 
-if QT_VERSION.startswith('5'):
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
@@ -48,8 +45,8 @@ class DomeffCanvas(FigureCanvas):
         #self.x_scale=[-0.007, 1.0]
         #self.y_scale=[-0.002,  1.011]
 
-        self.x_scale=[0, 1]
-        self.y_scale=[0, 1]
+        self.x_scale = [0, 1]
+        self.y_scale = [0, 1]
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
@@ -62,7 +59,7 @@ class DomeffCanvas(FigureCanvas):
         self.h = 35
         #FigureCanvas.resize(self, self.w, self.h)
 
-        self.logger=logger
+        self.logger = logger
 
         self.init_figure()
 
@@ -147,7 +144,7 @@ class DomeffVolt(DomeffCanvas):
     def _validate(self, volt):
 
         try:
-            val = '%.1fV' %volt
+            val = f'{volt:.1f}V'
             res = (val, self.normal)
         except Exception:
             val = 'Undef'
@@ -163,7 +160,7 @@ class DomeffVolt(DomeffCanvas):
             ff_3b_v = TSCL.DomeFF_3B_VOL
             ff_4b_v = TSCL.DomeFF_4B_VOL
         '''
-        self.logger.debug('updating domeff a=%s 1b=%s 2b=%s 3b=%s 4b=%s' %(str(ff_a_v), str(ff_1b_v), str(ff_2b_v), str(ff_3b_v), str(ff_4b_v)))
+        self.logger.debug(f'updating domeff a={ff_a_v}, 1b={ff_1b_v}, 2b={ff_2b_v}, 3b={ff_3b_v}, 4b={ff_4b_v}')
 
         volts = [ff_a_v, ff_1b_v, ff_2b_v, ff_3b_v, ff_4b_v]
 
@@ -207,7 +204,7 @@ class DomeffVoltDisplay(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('el', options)
+    logger = ssdlog.make_logger('domeff volt', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
@@ -253,28 +250,27 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
+    from argparse import ArgumentParser
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
+    argprs = ArgumentParser(description="Domeff Volt status")
 
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

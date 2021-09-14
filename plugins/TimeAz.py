@@ -5,7 +5,7 @@ import os
 
 from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
-from TimeEl import to_hour_min 
+from TimeEl import to_hour_min
 
 progname = os.path.basename(sys.argv[0])
 
@@ -16,19 +16,19 @@ class TimeAzLimit(Label):
         super(TimeAzLimit, self).__init__(parent=parent, fs=13, width=200,\
                                      height=25, align='vcenter', \
                                      weight='normal', logger=logger)
- 
+
     def update_azlimit(self, flag, az):
-        ''' flag = TSCL.LIMIT_FLAG 
-            az = TSCL.LIMIT_AZ 
+        ''' flag = TSCL.LIMIT_FLAG
+            az = TSCL.LIMIT_AZ
         '''
 
-        self.logger.debug('flag=%s az=%s' %(str(flag), str(az)))
+        self.logger.debug(f'flag={flag}, az={az}')
         limit_flag = 0x04
 
         limit = 721 # in minute
         color=self.normal
         #az_txt = ''
- 
+
         if flag in ERROR or az in ERROR:
             text = 'Undifined'
             color = self.alarm
@@ -39,14 +39,14 @@ class TimeAzLimit(Label):
                     limit = az
 
             if limit > 720.0: # plenty of time. 12 hours
-                text = '--h --m' 
+                text = '--h --m'
             elif limit <= 1: # 0 to 1 minute left
                 color = self.alarm
                 hm  = to_hour_min(limit)
-                text = '%s <= 1m' %(hm) 
+                text = '%s <= 1m' %(hm)
             elif limit > 30: # 30 to 720 min left
                 hm = to_hour_min(limit)
-                text = '%s' %(hm)  
+                text = '%s' %(hm)
             else: # 1 to 30 min left
                 color = self.warn
                 hm = to_hour_min(limit)
@@ -59,7 +59,7 @@ class TimeAzLimit(Label):
 class TimeAzLimitDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(TimeAzLimitDisplay, self).__init__(parent)
-   
+
         self.timelimit_label = Label(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', \
                                 weight='normal', logger=logger)
@@ -68,11 +68,11 @@ class TimeAzLimitDisplay(QtWidgets.QWidget):
         self.timelimit_label.setIndent(15)
 
         self.azlimit = TimeAzLimit(parent=parent, logger=logger)
-        self._set_layout() 
+        self._set_layout()
 
     def _set_layout(self):
         azlayout = QtWidgets.QHBoxLayout()
-        azlayout.setSpacing(0) 
+        azlayout.setSpacing(0)
         azlayout.setContentsMargins(0, 0, 0, 0)
         azlayout.addWidget(self.timelimit_label)
         azlayout.addWidget(self.azlimit)
@@ -83,8 +83,8 @@ class TimeAzLimitDisplay(QtWidgets.QWidget):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
-        
+        import random
+
         indx = random.randrange(0,3)
         flag = [0, 4, 4, 'Unknown']
         flag = flag[indx]
@@ -97,13 +97,13 @@ class TimeAzLimitDisplay(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
- 
+    logger = ssdlog.make_logger('timeaz', options)
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=450; self.h=25;
+            self.w = 450; self.h = 25;
             self.init_ui()
 
         def init_ui(self):
@@ -121,7 +121,7 @@ def main(options, args):
             timer.start(options.interval)
 
             self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget) 
+            self.setCentralWidget(self.main_widget)
             self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
 
         def closeEvent(self, ce):
@@ -132,8 +132,6 @@ def main(options, args):
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
@@ -141,36 +139,33 @@ def main(options, args):
         sys.exit(0)
 
 
-
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs = ArgumentParser(description="TimeAz status")
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.  
-    optprs.add_option("--mode", dest="mode",
+    # note: there are sv/pir plotting, but mode ag uses the same code.
+    argprs.add_argument("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
 
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display
@@ -190,4 +185,3 @@ if __name__ == '__main__':
 
     else:
         main(options, args)
-

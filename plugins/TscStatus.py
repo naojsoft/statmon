@@ -31,22 +31,6 @@ class StatusTime(Label):
         self.mutex = QMutex()
         self.logger = logger
 
-    # def monitoring(self):
-
-    #     self.logger.debug('monitoring....')
-    #     try:
-    #         diff = time.time() - self.pretime
-    #         self.logger.debug('diff=%f > %f' %(diff, self.timedelta))
-    #     except Exception as e:
-    #         self.logger.debug('pretime is undefiend. %s' %self.pretime)
-    #         if self.pretime is None:
-    #             self.update_statustime(stat_time=None)
-    #     else:
-    #         if diff > self.timedelta:
-    #             self.logger.debug('Stuck. diff=%f' %(diff))
-    #             self.logger.debug('calling update_tsc...')
-    #             self.update_statustime(stat_time=self.pretime, color=self.alarm)
-
     def monitoring(self):
 
         self.logger.debug('calling update_status...')
@@ -54,7 +38,7 @@ class StatusTime(Label):
 
     def update_statustime(self, stat_time, color=None):
 
-        self.logger.debug('status=%s color=%s' %(str(stat_time), color))
+        self.logger.debug(f'status={stat_time}, color={color}')
 
         mutexLocker = QMutexLocker(self.mutex)
         #self.mutex.lock()
@@ -72,7 +56,7 @@ class StatusTime(Label):
         #if color is not None:
         #    fc = color
 
-        self.logger.debug('timestamp=%s color=%s' %(str(timestamp), color))
+        self.logger.debug(f'timestamp={timestamp}, color={color}')
         self.pretime = stat_time
         self.setText(timestamp)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
@@ -132,7 +116,7 @@ class TscDisplay(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
+    logger = ssdlog.make_logger('tsc_state', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
@@ -169,47 +153,40 @@ def main(options, args):
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
-
     except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
         sys.exit(0)
 
 
-
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="EL status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    optprs.add_option("--monitortime", dest="monitortime", type='int',
+    argprs.add_argument("--monitortime", dest="monitortime", type=int,
                       default=10000,
                       help="Monitor status arriving time in every milli secs.")
-    optprs.add_option("--timedelta", dest="timedelta", type='int',
+    argprs.add_argument("--timedelta", dest="timedelta", type=int,
                       default=10,
                       help="Specify time delta btw current and previous status receiving time.")
 
-    ssdlog.addlogopts(optprs)
-
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

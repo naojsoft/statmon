@@ -37,11 +37,17 @@ scag_seeing = 'TSCL.HSC.SCAG.StarSize'
 shag_bright = 'TSCL.HSC.SHAG.Intensity'
 shag_seeing = 'TSCL.HSC.SHAG.StarSize'
 
+
+pfsag_bright = 'TSCL.PFS.AG.Intensity'
+pfsag_seeing = 'TSCL.PFS.AG.StarSize'
+
+
 al_guiding = [ag_bright, sv_bright,  #fmos_bright,
               ag_seeing, sv_seeing,  #fmos_seeing,
               scag_bright, scag_seeing,
               shag_bright, shag_seeing,
               'GEN2.STATUS.TBLTIME.TSCL',
+              pfsag_bright, pfsag_seeing,
               ]
 
 # starting dimensions of graph window (can change with window size)
@@ -109,6 +115,10 @@ class GuidingImage(PlBase.Plugin):
             names = ['SCAG', 'SHAG']
             al_bright = [scag_bright, shag_bright]
             al_seeing = [scag_seeing, shag_seeing]
+        elif obcp == 'PFS':
+            names = ['PFSAG']
+            al_bright = [pfsag_bright]
+            al_seeing = [pfsag_seeing]
         elif obcp == 'HDS':
             # NOTE: AG is not used with HDS any more...2021 EJ
             #names = ['AG', 'SV']

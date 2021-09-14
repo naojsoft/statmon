@@ -5,13 +5,10 @@ import sys
 import math
 import numpy as np
 
-from qtpy import QtWidgets, QtCore, QT_VERSION 
+from qtpy import QtWidgets, QtCore
 
-if QT_VERSION.startswith('5'):
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-    
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle
@@ -26,16 +23,16 @@ from error import *
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
- 
+
 class AzElCanvas(FigureCanvas):
     """ Windscreen """
     def __init__(self, parent=None, width=1, height=1,  dpi=None, logger=None):
-      
+
         sub=SubplotParams(left=0.0, bottom=0, right=1, \
                           top=1, wspace=0, hspace=0)
         self.fig = Figure(figsize=(width, height), \
                           facecolor='white', subplotpars=sub)
- 
+
         #self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='white')
         #self.fig = Figure(facecolor='white')
         self.axes = self.fig.add_subplot(111)
@@ -58,14 +55,14 @@ class AzElCanvas(FigureCanvas):
         self.alarm_color = 'red'
         self.wind_color = 'blue'
 
-        # y axis values. these are fixed values. 
+        # y axis values. these are fixed values.
         #self.x_scale=[-0.007, 1.0]
         #self.y_scale=[-0.002,  1.011]
 
         self.x_scale = [0, 1]
         self.y_scale = [0, 1]
-        self.x_center = (max(self.x_scale) - min(self.x_scale) / len(self.x_scale))  
-        self.y_center = (max(self.y_scale) - min(self.y_scale) / len(self.y_scale))  
+        self.x_center = (max(self.x_scale) - min(self.x_scale) / len(self.x_scale))
+        self.y_center = (max(self.y_scale) - min(self.y_scale) / len(self.y_scale))
         self.center = 0.5
         self.new_x = 0.5
         self.new_y = 0.375
@@ -77,14 +74,14 @@ class AzElCanvas(FigureCanvas):
         #FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
-        self.w=250
-        self.h=250
+        self.w = 250
+        self.h = 250
         #FigureCanvas.resize(self, self.w, self.h)
 
-        self.logger=logger
-   
+        self.logger = logger
+
         self.init_figure()
-  
+
     def test(self, degree, radius):
 
         rad = math.radians(degree)
@@ -105,7 +102,7 @@ class AzElCanvas(FigureCanvas):
 
 
         # wind direction
-        # self.wind = self.axes.annotate('', xy=(self.center, self.center+0.4), 
+        # self.wind = self.axes.annotate('', xy=(self.center, self.center+0.4),
         #                          xytext=(self.center, self.center+0.498),
         #                          size=29.5,
         #                          arrowprops=dict(arrowstyle="wedge,tail_width=0.7", \
@@ -116,7 +113,7 @@ class AzElCanvas(FigureCanvas):
 
         # center +
         center_x = Line2D([self.center, self.center], \
-                          [self.center, self.center], 
+                          [self.center, self.center],
                           alpha=0.1, marker='+', ms=165.0, \
                           mew=1.5, mec=self.normal_color, markevery=(0,1))
         self.axes.add_line(center_x)
@@ -132,7 +129,7 @@ class AzElCanvas(FigureCanvas):
                       'E':(self.center+d_offset, self.center),\
                       'W':(self.center-d_offset, self.center)}
 
-        # dirctions 
+        # dirctions
         for key, vals in directions.items():
             self.axes.text(vals[0], vals[1], key, \
                            color='g', ha='center', va='center', \
@@ -141,7 +138,7 @@ class AzElCanvas(FigureCanvas):
 
         # subaru telescope direction
         self.subaru_radius = 0.125
-        # subaru's directions: south 0 , west 90, noroth 180, east 270/-90   
+        # subaru's directions: south 0 , west 90, noroth 180, east 270/-90
         self.subaru = mpatches.RegularPolygon((self.center, \
                                                self.center-self.subaru_radius), \
                                                3, self.subaru_radius, \
@@ -150,7 +147,7 @@ class AzElCanvas(FigureCanvas):
         self.axes.add_patch(self.subaru)
 
 
-        # subaru text        
+        # subaru text
         # self.axes.text(self.center, self.center, 'S', \
         #                color='g', ha='center', va='center', \
         #                fontsize=30, weight='bold',  \
@@ -162,7 +159,7 @@ class AzElCanvas(FigureCanvas):
                                   radius=self.subaru_radius, \
                                   alpha=1, ec="b", fc='white', lw=2.5)
         self.axes.add_patch(subaru)
-  
+
         # outter circle
         outer_c = Circle((self.center, self.center), radius=0.492, \
                          fc="None", ec=self.normal_color, lw=1.5, ls='solid',
@@ -170,14 +167,14 @@ class AzElCanvas(FigureCanvas):
         self.axes.add_patch(outer_c)
 
         # telescope elevation
-        self.el_kwargs=dict(r=0.5, theta2=180, alpha=0.5, lw=0.5, width=0.25) 
+        self.el_kwargs=dict(r=0.5, theta2=180, alpha=0.5, lw=0.5, width=0.25)
         self.el = mpatches.Wedge((self.center, self.center), theta1=90, \
                                   fc=self.normal_color, ec=self.normal_color, \
-                                  **self.el_kwargs) 
+                                  **self.el_kwargs)
         self.axes.add_patch(self.el)
 
         # light path
-        line_kwargs = dict(alpha=0.7, ls=':', lw=5 , color=self.normal_color, 
+        line_kwargs = dict(alpha=0.7, ls=':', lw=5 , color=self.normal_color,
                            ms=7.0, mew=1.0, markevery=(1,2))
 
         self.light = Line2D([0.5, 0.5], [0.5, 1],  \
@@ -186,11 +183,11 @@ class AzElCanvas(FigureCanvas):
 
         self.axes.set_ylim(min(self.y_scale), max(self.y_scale))
         self.axes.set_xlim(min(self.x_scale), max(self.x_scale))
-        # # disable default x/y axis drawing 
+        # # disable default x/y axis drawing
         #self.axes.set_xlabel(False)
         #self.axes.apply_aspect()
         self.axes.set_axis_off()
-       
+
         #self.axes.set_xscale(10)
         #self.axes.axison=False
         self.draw()
@@ -203,10 +200,10 @@ class AzElCanvas(FigureCanvas):
 
 
 class AzEl(AzElCanvas):
-    
+
     """A canvas that updates itself every second with a new plot."""
     def __init__(self,*args, **kwargs):
- 
+
         #super(AGPlot, self).__init__(*args, **kwargs)
         AzElCanvas.__init__(self, *args, **kwargs)
 
@@ -218,8 +215,8 @@ class AzEl(AzElCanvas):
     #         direction +=90 # adjust drawing north:up 0 east:left 90, west:right -90, south:bottom 180
     #         s = speed / 100.0 # for drawing speed arrow
     #         # find out new position and shpe of both wind-direction and wind-spped
-    #         b_x, b_y = self.__get_xy(degree=direction, radius=radius_outer)  
-    #         h_x, h_y = self.__get_xy(degree=direction, radius=radius_inner-s)   
+    #         b_x, b_y = self.__get_xy(degree=direction, radius=radius_outer)
+    #         h_x, h_y = self.__get_xy(degree=direction, radius=radius_inner-s)
     #     except Exception as e:
     #         self.logger.error("error: calc wind direction.  %s" %str(e))
     #     else:
@@ -234,35 +231,35 @@ class AzEl(AzElCanvas):
     #         #print self.wind.properties()['prop_tup']
     #         self.wind.remove()
 
-    #         self.wind = self.axes.annotate('', xy=(h_x, h_y), 
+    #         self.wind = self.axes.annotate('', xy=(h_x, h_y),
     #                     xytext=(b_x, b_y), size=29.5,
     #                     arrowprops=dict(arrowstyle="wedge,tail_width=0.7", \
     #                     facecolor=color, ec="none", \
     #                     alpha=0.5, patchA=None, \
     #                     relpos=(0.0, -0.1)),
     #                     horizontalalignment='center')
-    #         #print self.wind.arrowprops 
+    #         #print self.wind.arrowprops
     #         #self.wind.arrowprops['facecolor'] = self.normal_color
 
     def __update_wind(self, direction, speed):
 
-        self.logger.debug('updating wind. dir=%s  speed=%s' %(str(direction), str(speed)) )
+        self.logger.debug(f'updating wind. dir={direction}, speed={speed}')
         radius_inner = 0.429
         radius_outer = 0.49
         offset_deg = 4.7
         try:
-            #direction +=90 # adjust drawing north:up 0 east:left 90, west:right -90, south:bottom 180  
+            #direction +=90 # adjust drawing north:up 0 east:left 90, west:right -90, south:bottom 180
             rotation = 270 # north:0 east:90 west:-90 south:180
             direction = (direction + rotation) * -1 # rotate direction and then flip it
             update_speed = speed / 100.0 # for drawing speed arrow
             # find out new position and shpe of both wind-direction and wind-spped
-     
+
             a_x, a_y = self.__get_xy(degree=direction+offset_deg, radius=radius_outer)
             b_x, b_y = self.__get_xy(degree=direction-offset_deg, radius=radius_outer)
-            c_x, c_y = self.__get_xy(degree=direction, radius=radius_inner-update_speed) 
+            c_x, c_y = self.__get_xy(degree=direction, radius=radius_inner-update_speed)
 
         except Exception as e:
-            self.logger.error("error: calc wind direction.  %s" %str(e))
+            self.logger.error(f"error: calc wind direction.  {e}")
         else:
             alpha = 0.5
             warn = 7.0
@@ -289,7 +286,7 @@ class AzEl(AzElCanvas):
                 self.axes.add_patch(self.wind)
 
             except Exception as e:
-                self.logger.error('error: updating wind. %s' %e)          
+                self.logger.error(f'error: updating wind. {e}')
 
             #self.wind.set_xy=([[0.4, 0.9], [0.6, 0.9],[0.5, 0.8]])
     def __get_xy(self, degree, sign=1, radius=0):
@@ -297,8 +294,8 @@ class AzEl(AzElCanvas):
         rad = math.radians(degree)
         new_y = self.center + sign * radius * math.sin(rad)
         new_x = self.center + sign * radius * math.cos(rad)
-       
-        return (new_x, new_y) 
+
+        return (new_x, new_y)
 
     def __update_az(self, az):
 
@@ -308,7 +305,7 @@ class AzEl(AzElCanvas):
             #az += rotation # adjust drawing north:up 180 east:left -90, west:right 90, south:bottom 0
             new_x, new_y = self.__get_xy(degree=az, sign=-1, radius=self.subaru_radius)
         except Exception as e:
-            self.logger.error("error: calc subaru's direction.  %s" %str(e))
+            self.logger.error(f"error: calc subaru's direction.  {e}")
         else:
             #self.arrow.xy=(new_x, new_y)
             #self.subaru._xy=(new_x, new_y)
@@ -316,32 +313,32 @@ class AzEl(AzElCanvas):
             #self.subaru.orientation = math.radians(rotation+az)
             self.subaru.orientation = math.radians(rotation-az)
             #self.subaru.orientation = math.radians(az)
- 
+
     def __update_el(self, el, state):
 
-        color = self.normal_color 
+        color = self.normal_color
         if state == "Pointing":
             pass
-        elif (el >= self.alarm_high or el <= self.alarm_low):  
-            color = self.alarm_color 
-        elif (el >= self.warn_high or el <= self.warn_low):  
+        elif (el >= self.alarm_high or el <= self.alarm_low):
+            color = self.alarm_color
+        elif (el >= self.warn_high or el <= self.warn_low):
             color = self.warn_color
 
         try:
             Artist.remove(self.el)
             self.el = mpatches.Wedge((self.center, self.center), \
                                       theta1=180-el, \
-                                      fc=color, ec=color, **self.el_kwargs) 
+                                      fc=color, ec=color, **self.el_kwargs)
             self.axes.add_patch(self.el)
         except Exception as e:
             self.logger.error('error: updating. %s' %str(e))
             pass
-  
+
     def __update_lightpath(self, el):
 
-        try: 
+        try:
             y = math.tan(math.radians(el)) * 0.5
-            self.logger.debug('y value %s' %y)
+            self.logger.debug(f'y value {y}')
             #offset = math.fabs(offset)
         except Exception:
             pass
@@ -349,40 +346,39 @@ class AzEl(AzElCanvas):
             # TO DO think about hardcoded values
             if el > 90.0:
                 self.light.set_xdata([0.5, 1.0])
-                y = math.fabs(y)  
-            else:    
-                
+                y = math.fabs(y)
+            else:
+
                 self.light.set_xdata([0.5, 0.0])
             self.light.set_ydata([0.5, 0.495+y])
 
     def update_azel(self, az, el, winddir, windspeed, state):
         ''' az = TSCS.AZ
-            el = TSCS.EL 
+            el = TSCS.EL
             winddir = TSCL.WINDD
             windspeed = TSCL.WINDS_O
             state = STATL.TELDRIVE '''
 
-        self.logger.debug('updating az=%s el=%s winddir=%s windspeed=%s state=%s'  %(str(az), str(el), str(winddir), str(windspeed), state)) 
-
-        self.__update_el(el, state)       
-        #self.__update_wind(direction=winddir, speed=windspeed)          
+        self.logger.debug(f'updating az={az}, el={el}, winddir={winddir}, windspeed={windspeed}, state={state}')
+        self.__update_el(el, state)
+        #self.__update_wind(direction=winddir, speed=windspeed)
         self.__update_az(az)
         self.__update_lightpath(el)
-        self.__update_wind(direction=winddir, speed=windspeed)          
+        self.__update_wind(direction=winddir, speed=windspeed)
 
-        self.draw()     
+        self.draw()
 
     def tick(self, el=None):
         ''' testing solo mode '''
-        import random  
+        import random
         random.seed()
         state=["Guiding(AG1)", "Guiding(AG2)", "Unknown", "##NODATA##",
                "##ERROR##", "Guiding(SV1)","Guiding(SV2)", "Guiding(AGPIR)",
-               "Guiding(AGFMOS)", "Tracking", "Tracking(Non-Sidereal)", 
+               "Guiding(AGFMOS)", "Tracking", "Tracking(Non-Sidereal)",
                "Slewing", "Pointing", "Guiding(HSCSCAG)", "Guiding(HSCSHAG)"]
 
         # el limit is between 0 and 90,
-        if el is None: 
+        if el is None:
             el = random.random()*random.randrange(-10,150)
         indx = random.randrange(0,15)
         az = winddir = random.random()*random.randrange(-360, 360)
@@ -390,7 +386,7 @@ class AzEl(AzElCanvas):
         try:
             state=state[indx]
         except Exception:
-            state='Pointing' 
+            state='Pointing'
         self.update_azel(az, el, winddir, windspeed, state)
 
 
@@ -398,7 +394,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('el', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             QtWidgets.QMainWindow.__init__(self)
@@ -443,28 +439,27 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    from argparse import ArgumentParser
+
+    argprs = ArgumentParser(description="AZ/EL status")
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

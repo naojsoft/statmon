@@ -94,7 +94,7 @@ class ImgRotNsOpt(ImgRot):
 
     def update_imgrot(self, imgrot, mode, focus, itype):
 
-        self.logger.debug('rot=%s mode=%s  focus=%s itype=%s' %(str(imgrot), str(mode), str(focus), str(itype)))
+        self.logger.debug(f'imgrot={imgrot}, mode={mode}, focus={focus}, itype={itype}')
 
         # img-rot blue
         imrb = [0x40000000, long(0x80000000), 0x00400000, 0x00800000, 0x00008000, 0x00000001]
@@ -110,7 +110,7 @@ class ImgRotNsOpt(ImgRot):
 
             try:
                 res = itypes[itype]
-                self.logger.debug('res=%s' %res)
+                self.logger.debug('itype={res}')
             except KeyError:
                 text += '\n(type undef)'
                 color = self.warn
@@ -137,14 +137,14 @@ class ImgRotNsIr(ImgRot):
 
     def update_imgrot(self, imgrot, mode, focus, itype=None):
 
-        self.logger.debug('rot=%s mode=%s  focus=%s ' %(str(imgrot), str(mode), str(focus), ))
+        self.logger.debug(f'rot={imgrot}, mode={mode}, focus={focus}')
 
         aoin = 0x00000000
         text, color = ImgRot.update_imgrot(self, imgrot, mode, focus)
 
         if text == self.img_out:
             if focus == aoin:
-                self.logger.debug('focus ao=%s' %str(focus))
+                self.logger.debug(f'focus ao={focus}')
                 text += '\n(AO In)'
             else:
                 text += '\n(AO Out)'
@@ -155,7 +155,7 @@ class ImgRotNsIr(ImgRot):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('insrot', options)
+    logger = ssdlog.make_logger('imgrot', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
@@ -192,12 +192,8 @@ def main(options, args):
     try:
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
@@ -209,32 +205,31 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
+    from argparse import ArgumentParser
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
+    argprs = ArgumentParser(description="ImgRot status")
 
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
     # note: there are sv/pir plotting, but mode ag uses the same code.
-    optprs.add_option("--mode", dest="mode",
+    argprs.add_argument("--mode", dest="mode",
                       default='nsir',
                       help="Specify a plotting mode [nsir |nsopt]")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

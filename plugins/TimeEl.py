@@ -16,7 +16,7 @@ def to_hour_min(limit):
         h = limit // 60
         m = limit % 60
     except Exception as e:
-        self.logger.error('error: to hour min.  %s' %e)
+        self.logger.error(f'error: to hour min. {e}')
         hm = '--h --m calc error'
     else:
         hm = '%dh %dm' %(h,m)
@@ -35,7 +35,7 @@ class TimeElLimit(Label):
             low = TSCL.LIMIT_EL_LOW
             high = TSCL.LIMIT_EL_HIGH '''
 
-        self.logger.debug('flag=%s low=%s high=%s' %(str(flag), str(low), str(high)))
+        self.logger.debug(f'flag={flag}, low={low}, high={high}')
         #low_limit = 1
         #high_limit = 2
         #high_limit2 = 3
@@ -126,13 +126,13 @@ class TimeElLimitDisplay(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
+    logger = ssdlog.make_logger('timeel', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=450; self.h=25;
+            self.w = 450; self.h = 25;
             self.init_ui()
 
         def init_ui(self):
@@ -161,46 +161,41 @@ def main(options, args):
         aw = AppWindow()
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
         logger.warn('keyboard interruption....')
-        #timer.stop()
         aw.close()
         sys.exit()
 
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="TimeEl status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
     # note: there are sv/pir plotting, but mode ag uses the same code.
-    optprs.add_option("--mode", dest="mode",
+    argprs.add_argument("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

@@ -3,12 +3,9 @@
 import os
 import sys
 
-from qtpy import QtWidgets, QtCore, QT_VERSION
+from qtpy import QtWidgets, QtCore
 
-if QT_VERSION.startswith('5'):
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
@@ -64,7 +61,7 @@ class PrecipCanvas(FigureCanvas):
         self.h = 25
         #FigureCanvas.resize(self, self.w, self.h)
 
-        self.logger=logger
+        self.logger = logger
 
         self.init_figure()
 
@@ -200,7 +197,7 @@ class PrecipDisplay(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('el', options)
+    logger = ssdlog.make_logger('precip', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
@@ -238,37 +235,35 @@ def main(options, args):
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as  e:
-        print('key...board')
+        print('keyboard interruption')
         logger.info('keyboard interruption....')
         sys.exit(0)
 
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="Precip status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False,
+    argprs.add_argument("--debug", dest="debug", default=False,
                       action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

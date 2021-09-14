@@ -55,7 +55,7 @@ class ObcpDisplay(QtWidgets.QWidget):
         obcp_times = [obcp_time1, obcp_time2, obcp_time3, obcp_time4, \
                       obcp_time5, obcp_time6, obcp_time7, obcp_time8, obcp_time9]
 
-        self.logger.debug('obcp_times=%s' %str(obcp_times))
+        self.logger.debug(f'obcp_times={obcp_times}')
         try:
            latest =  [t for t in obcp_times if isinstance(t, float)]
            if len(latest) == 0:
@@ -65,7 +65,7 @@ class ObcpDisplay(QtWidgets.QWidget):
            return max(*latest)
 
         except Exception as e:
-           self.logger.error('error: finding obcp latest update time: %s' % e)
+           self.logger.error(f'error: finding obcp latest update time: {e}')
            latest = None
 
         return latest
@@ -113,13 +113,13 @@ class ObcpDisplay(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
+    logger = ssdlog.make_logger('obcp status', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             super(AppWindow, self).__init__()
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=450; self.h=25;
+            self.w = 450; self.h = 25;
             self.init_ui()
 
         def init_ui(self):
@@ -148,12 +148,8 @@ def main(options, args):
     try:
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
@@ -165,34 +161,33 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
+    from argparse import ArgumentParser
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
+    argprs = ArgumentParser(description="Obcp status")
 
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
-    optprs.add_option("--monitortime", dest="monitortime", type='int',
+    argprs.add_argument("--monitortime", dest="monitortime", type=int,
                       default=10000,
                       help="Monitor status arriving time in every milli secs.")
-    optprs.add_option("--timedelta", dest="timedelta", type='int',
+    argprs.add_argument("--timedelta", dest="timedelta", type=int,
                       default=10,
                       help="Specify time delta btw current and previous status receiving time.")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

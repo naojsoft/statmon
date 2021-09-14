@@ -5,10 +5,8 @@ import sys
 
 from qtpy import QtWidgets, QtCore, QT_VERSION
 
-if QT_VERSION.startswith('5'):
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
@@ -29,12 +27,12 @@ progversion = "0.1"
 class CalCanvas(FigureCanvas):
     """ Cal Source Canvas """
     def __init__(self, parent=None, width=1, height=1,  dpi=None, logger=None):
-      
-        sub=SubplotParams(left=0.0, bottom=0, right=1, \
+
+        sub = SubplotParams(left=0.0, bottom=0, right=1, \
                           top=1, wspace=0, hspace=0)
         self.fig = Figure(figsize=(width, height), \
                           facecolor='white', subplotpars=sub)
- 
+
         #self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='white')
         #self.fig = Figure(facecolor='white')
         self.axes = self.fig.add_subplot(111)
@@ -42,23 +40,23 @@ class CalCanvas(FigureCanvas):
         #self.axes.hold(False)
         #self.axes.grid(True)
 
-        self.limit_low=0.0
-        self.limit_high=90.0;
+        self.limit_low = 0.0
+        self.limit_high = 90.0;
 
-        self.alarm_high=89.5
-        self.alarm_low=10.0
+        self.alarm_high = 89.5
+        self.alarm_low = 10.0
 
-        self.warn_high=89.0
-        self.warn_low=15.0
+        self.warn_high = 89.0
+        self.warn_low = 15.0
 
- 
+
         self.normal = 'green'
         self.warn = 'orange'
         self.alarm = 'red'
         self.bg = 'white'
 
-        self.x_scale=[0, 1]
-        self.y_scale=[0,  2]
+        self.x_scale = [0, 1]
+        self.y_scale = [0,  2]
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
@@ -67,27 +65,27 @@ class CalCanvas(FigureCanvas):
         #FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
-        self.w=200
-        self.h=40
+        self.w = 200
+        self.h = 40
         #FigureCanvas.resize(self, self.w, self.h)
 
-        self.logger=logger
-   
+        self.logger = logger
+
         self.init_figure()
-  
+
     def init_figure(self):
         ''' initial drawing '''
 
-        common_keys = dict(va='baseline', ha="center", color=self.normal, size=12)       
+        common_keys = dict(va='baseline', ha="center", color=self.normal, size=12)
         w = 0.11
-        h = 0.6 
-   
-        kargs = dict(fc=self.bg, ec=self.normal, lw=1.5) 
+        h = 0.6
+
+        kargs = dict(fc=self.bg, ec=self.normal, lw=1.5)
         # Th-Ar1 Label
         self.axes.text(0.11, 1.2, "Th-Ar1", common_keys)
 
         # Th-Ar1 frame
-        bs = mpatches.BoxStyle("Round4", pad=0.05) 
+        bs = mpatches.BoxStyle("Round4", pad=0.05)
         self.th_ar1 = mpatches.FancyBboxPatch((0.05, 1.1), w, h, \
                                           boxstyle=bs, **kargs)
         self.axes.add_patch(self.th_ar1)
@@ -134,11 +132,11 @@ class CalCanvas(FigureCanvas):
 
         self.axes.set_ylim(min(self.y_scale), max(self.y_scale))
         self.axes.set_xlim(min(self.x_scale), max(self.x_scale))
-        # # disable default x/y axis drawing 
+        # # disable default x/y axis drawing
         #self.axes.set_xlabel(False)
         #self.axes.apply_aspect()
         self.axes.set_axis_off()
-       
+
         #self.axes.set_xscale(10)
         #self.axes.axison=False
         self.draw()
@@ -153,7 +151,7 @@ class CalCanvas(FigureCanvas):
 class Cal(CalCanvas):
     """ Cal Source """
     def __init__(self,*args, **kwargs):
- 
+
         #super(AGPlot, self).__init__(*args, **kwargs)
         CalCanvas.__init__(self, *args, **kwargs)
 
@@ -174,7 +172,7 @@ class Cal(CalCanvas):
             try:
                 val_set.remove(val)
             except KeyError:
-                pass 
+                pass
         return len(val_set)
 
     def __mask_value(self, val, focus):
@@ -187,45 +185,45 @@ class Cal(CalCanvas):
         except Exception:
             val = None
         finally:
-            return val 
+            return val
 
     def __shift_value(self, val, focus):
         ''' right shift '''
         shift = {'CS': 0, 'NSIR': 4, 'NSOPT': 2, \
                  'PF1': 4, 'PF2': 6}
- 
-        masked = self.__mask_value(val, focus)       
- 
+
+        masked = self.__mask_value(val, focus)
+
         try:
             val = masked >> shift[focus]
         except Exception:
             val = None
         finally:
-            return val  
+            return val
 
     def __update(self, lamps, num_on):
-   
-        for lamp, val in  lamps.items():  
+
+        for lamp, val in  lamps.items():
             vals = set(val.lamp)
-            num_undef = self.__num_of_undef_vals(val_set=vals)       
-             
-            self.logger.debug('lamps  %s'%vals)
-            self.logger.debug('num undef %s' %str(num_undef))
- 
+            num_undef = self.__num_of_undef_vals(val_set=vals)
+
+            self.logger.debug(f'lamps  {vals}')
+            self.logger.debug(f'num undef {num_undef}')
+
             if num_undef:
                 lamp.set_fc(self.alarm)
                 lamp.set_alpha(1)
             else:
-                self.logger.debug('val lamp %s' %str(val.lamp))
-                self.logger.debug('val amp %s' %str(val.amp)) 
+                self.logger.debug(f'val lamp {val.lamp}')
+                self.logger.debug(f'val amp {val.amp}')
                 ma = ''
                 if self.on in val.lamp:
                     lamp.set_fc(self.normal)
                     lamp.set_alpha(0.5)
                     self.logger.debug('on')
 
-                    self.logger.debug('val amp=%s' %val.amp) 
-                    
+                    self.logger.debug(f'val amp={val.amp}')
+
                     if num_on > self.on: # at least 2 lamps are on
                         lamp.set_fc(self.warn)
                         lamp.set_alpha(1)
@@ -233,11 +231,11 @@ class Cal(CalCanvas):
                         if not val.amp in ERROR:
                             ma = '%+5.3fmA' %val.amp
                         self.ma.setText(ma)
-                        self.logger.debug('amp=%s' %str(ma))
+                        self.logger.debug(f'amp={ma}')
                 else:
                     self.logger.debug('off')
                     #if not ma:
-                    #    self.ma.setText(ma) 
+                    #    self.ma.setText(ma)
                     lamp.set_fc(self.bg)
                     lamp.set_alpha(1)
 
@@ -263,7 +261,7 @@ class Cal(CalCanvas):
         # rgl1 = (rgl1_cs, rgl1_nsir)
         # rgl2 = (rgl2_cs, rgl2_nsir)
 
-        self.logger.debug('updating hct1=%s hct2=%s hal1=%s hal2=%s rgl1=%s rgl2=%s' %(hct1, hct2, hal1, hal2, rgl1, rgl2)) 
+        self.logger.debug(f'updating hct1={hct1}, hct2={hct2}, hal1={hal1}, hal2={hal2}, rgl1={rgl1}, rgl2={rgl2}')
 
         hct1_cs = self.__shift_value(hct1, focus='CS')
         hct1_nsopt = self.__shift_value(hct1, focus='NSOPT')
@@ -298,13 +296,13 @@ class Cal(CalCanvas):
                   self.hal1: bhal1, self.hal2: bhal2, \
                   self.ne: brgl1, self.ar: brgl2}
 
-        self.logger.debug('shifted hct1cs=%s htc1nsopt=%s hct1pf1=%s hct1pf2=%s'  %(str(hct1_cs), str(hct1_nsopt), str(hct1_pf1), str(hct1_pf2))) 
+        self.logger.debug('shifted hct1cs={hct1_cs}, htc1nsopt={hct1_nsopt}, hct1pf1={hct1_pf1}, hct1pf2={hct1_pf2}')
 
         lamps = [hct1_cs, hct1_nsopt, hct1_pf1, hct1_pf2, hct2_cs, hct2_nsopt, \
                  hal1_cs, hal1_nsopt, hal1_nsir, hal2_cs, hal2_nsopt, hal2_nsir, \
                  rgl1_cs, rgl1_nsir, rgl2_cs, rgl2_nsir]
 
-        num_on = lamps.count(self.on)   
+        num_on = lamps.count(self.on)
 
         self.__update(blamps, num_on)
 
@@ -314,7 +312,7 @@ class Cal(CalCanvas):
 class CalDisplay(QtWidgets.QWidget):
     def __init__(self, parent=None, logger=None):
         super(CalDisplay, self).__init__(parent)
-   
+
         self.cal_label = Label(parent=parent, fs=13, width=175,\
                                 height=25, align='vcenter', weight='normal', \
                                 logger=logger)
@@ -323,20 +321,20 @@ class CalDisplay(QtWidgets.QWidget):
         self.cal_label.setIndent(15)
 
         self.cal = Cal(parent=parent, logger=logger)
-        self.__set_layout() 
+        self.__set_layout()
 
     def __set_layout(self):
- 
+
         hlayout = QtWidgets.QHBoxLayout()
-        hlayout.setSpacing(0) 
-        hlayout.setContentsMargins(0, 0, 0, 0)  
+        hlayout.setSpacing(0)
+        hlayout.setContentsMargins(0, 0, 0, 0)
 
         vlayout = QtWidgets.QVBoxLayout()
-        vlayout.setSpacing(0) 
-        vlayout.setContentsMargins(0, 0, 0, 0) 
+        vlayout.setSpacing(0)
+        vlayout.setContentsMargins(0, 0, 0, 0)
         vlayout.addWidget(self.cal_label)
         vlayout.addWidget(self.cal.ma)
-       
+
         hlayout.addLayout(vlayout)
 
         hlayout.addWidget(self.cal)
@@ -350,9 +348,9 @@ class CalDisplay(QtWidgets.QWidget):
 
     def tick(self):
         ''' testing solo mode '''
-        import random  
+        import random
 
-        # off  
+        # off
         hct1= 'aa'; hct2= 'a'
         hal1 = hal2 = '2a'
         rgl1 = rgl2 = '22'
@@ -361,11 +359,11 @@ class CalDisplay(QtWidgets.QWidget):
         hal2 = '2a'
 
         # on
-        hct1= 'a9'; hct2 = '9' 
+        hct1= 'a9'; hct2 = '9'
 
         # test
-        #hct1= '6a'; hct2 = 'a' 
-        #hct1= 'aa'; hct2 = 'a' 
+        #hct1= '6a'; hct2 = 'a'
+        #hct1= 'aa'; hct2 = 'a'
 
 
         hct1_amp = hct2_amp = 14.86
@@ -379,7 +377,7 @@ def main(options, args):
 
     # Create top level logger.
     logger = ssdlog.make_logger('el', options)
- 
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             QtWidgets.QMainWindow.__init__(self)
@@ -424,28 +422,27 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    from argparse import ArgumentParser
+
+    argprs = ArgumentParser(description="Cal Lamp status")
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

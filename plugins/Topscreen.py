@@ -5,12 +5,9 @@ import sys
 import math
 import numpy as np
 
-from qtpy import QtWidgets, QtCore, QT_VERSION
+from qtpy import QtWidgets, QtCore
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
-if QT_VERSION.startswith('5'):
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
 from matplotlib.lines import Line2D
@@ -22,7 +19,6 @@ from g2cam.status.common import STATNONE, STATERROR
 import PlBase
 
 progname = os.path.basename(sys.argv[0])
-progversion = "0.1"
 
 
 class TopscreenCanvas(FigureCanvas):
@@ -39,27 +35,21 @@ class TopscreenCanvas(FigureCanvas):
         #self.axes.grid(True)
 
         # y axis values. these are fixed values.
-        self.y_axis=[-1.0, 0, 1]
-        self.center_y=0.0
+        self.y_axis = [-1.0, 0, 1]
+        self.center_y = 0.0
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
-
-        #FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, \
-        #                           QtWidgets.QSizePolicy.Expanding)
-        #FigureCanvas.updateGeometry(self)
-
 
         FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, \
                                    QtWidgets.QSizePolicy.Fixed)
         FigureCanvas.updateGeometry(self)
 
-
         # width/hight of widget
-        self.w=500
-        self.h=50
+        self.w = 500
+        self.h = 50
 
-        self.logger=logger
+        self.logger = logger
 
         self.init_figure()
 
@@ -72,29 +62,29 @@ class TopscreenCanvas(FigureCanvas):
     def init_figure(self):
         ''' initial drawing '''
 
-        limit=[30.3, 0] # there is a case of tscl.tsfpos=24.28, so limit is at least 24.28 + 6 = 30.28
-        front_init=16
-        self.rear1_pos=rear1_init=4
-        rear2_init=10
+        limit = [30.3, 0] # there is a case of tscl.tsfpos=24.28, so limit is at least 24.28 + 6 = 30.28
+        front_init = 16
+        self.rear1_pos=rear1_init = 4
+        rear2_init = 10
 
         # top screen front/rear length/width
-        self.screen_len=6 # 6 meter
-        screen_width=0.2
+        self.screen_len = 6 # 6 meter
+        screen_width = 0.2
 
-        self.screen_color='green'
-        self.normal_color='black'
-        self.alarm_color='red'
+        self.screen_color = 'green'
+        self.normal_color = 'black'
+        self.alarm_color = 'red'
 
         # front/rear top screen
-        ts_kwargs=dict(alpha=0.8, fc=self.screen_color, \
+        ts_kwargs = dict(alpha=0.8, fc=self.screen_color, \
                        ec=self.screen_color, lw=1, )
-        self.front=mpatches.Rectangle((front_init, screen_width - screen_width), \
+        self.front = mpatches.Rectangle((front_init, screen_width - screen_width), \
                                       self.screen_len, screen_width, **ts_kwargs)
 
-        self.rear1=mpatches.Rectangle((rear1_init, screen_width*2), \
+        self.rear1 = mpatches.Rectangle((rear1_init, screen_width*2), \
                                       self.screen_len, screen_width, \
                                       **ts_kwargs)
-        self.rear2=mpatches.Rectangle((rear2_init, screen_width), \
+        self.rear2 = mpatches.Rectangle((rear2_init, screen_width), \
                                       self.screen_len, screen_width, \
                                       **ts_kwargs)
 
@@ -103,16 +93,16 @@ class TopscreenCanvas(FigureCanvas):
         self.axes.add_patch(self.rear2)
 
         # draw x-axis line
-        line_kwargs=dict(alpha=0.7, ls='-', lw=0.7 , color=self.screen_color,
+        line_kwargs = dict(alpha=0.7, ls='-', lw=0.7 , color=self.screen_color,
                          marker='|', ms=10.0, mew=2, markevery=(0,1))
 
         offset_drawing = 0.04
-        middle=[max(limit)-offset_drawing, min(limit)+offset_drawing]
-        line=Line2D(middle, [self.center_y]*len(middle), **line_kwargs)
+        middle = [max(limit)-offset_drawing, min(limit)+offset_drawing]
+        line = Line2D(middle, [self.center_y]*len(middle), **line_kwargs)
         self.axes.add_line(line)
 
         # draw text
-        self.text=self.axes.text(0.5, 0.2, 'Initializing', \
+        self.text = self.axes.text(0.5, 0.2, 'Initializing', \
                                  va='baseline', ha='center', \
                                  transform = self.axes.transAxes, \
                                              color=self.normal_color, \
@@ -144,43 +134,41 @@ class Topscreen(TopscreenCanvas):
             front = TSCL.TSFPOS
             rear = TSCL.TSRPOS
         '''
-        free=0x10
-        link=0x0C
-        color=self.normal_color
+        free = 0x10
+        link = 0x0C
+        color = self.normal_color
 
-        self.logger.debug('mode=%s' %(mode))
+        self.logger.debug(f'mode={mode}')
 
         if mode in ERROR:
-            mode='Top Screen Undefined'
-            color=self.alarm_color
+            mode = 'Top Screen Undefined'
+            color = self.alarm_color
         elif mode & free:
-            mode='Top Screen Free'
+            mode = 'Top Screen Free'
         elif mode & link:
-            mode='Top Screen Link'
+            mode = 'Top Screen Link'
         else:
-            mode='Top Screen Mode Undef'
-            color=self.alarm_color
+            mode = 'Top Screen Mode Undef'
+            color = self.alarm_color
 
         self.text.set_text(mode)
         self.text.set_color(color)
 
-        self.logger.debug('updating pre_rear1=%s' %(self.rear1_pos))
+        self.logger.debug(f'updating pre_rear1={self.rear1_pos}')
 
         try:
             if rear < self.rear1_pos:
-                self.rear1_pos=rear
+                self.rear1_pos = rear
             elif ((self.rear1_pos+self.screen_len) < rear):
-                self.rear1_pos=rear-self.screen_len
-            self.logger.debug('updating front=%s rear1=%s rear2=%s' \
-                              %(front, self.rear1_pos, rear))
+                self.rear1_pos = rear-self.screen_len
+            self.logger.debug(f'updating front={front}, rear1={self.rear1_pos}, rear2={rear}')
 
             self.front.set_x(front)
             self.rear1.set_x(self.rear1_pos)
             self.rear2.set_x(rear)
 
         except Exception as e:
-            self.logger.error('error: front=%s rear=%s. %s' \
-                              %(str(front), str(rear), e))
+            self.logger.error(f'error: front={front}, rear={rear}. {e}')
 
         self.draw()
 
@@ -189,15 +177,15 @@ class Topscreen(TopscreenCanvas):
         import random
         random.seed()
 
-        mode=[32, "Unknown", 31,  None, 11, STATNONE, 12, 30, STATERROR]
+        mode = [32, "Unknown", 31,  None, 11, STATNONE, 12, 30, STATERROR]
         #  range is limit+-100,
-        indx=random.randrange(0, 10)
+        indx = random.randrange(0, 10)
         try:
-            mode=mode[indx]
+            mode = mode[indx]
         except Exception:
-            mode=30
-        front=random.randrange(0, 24)
-        rear=random.randrange(0, 14)
+            mode = 30
+        front = random.randrange(0, 24)
+        rear = random.randrange(0, 14)
 
         self.update_topscreen(mode, front, rear)
 
@@ -205,13 +193,13 @@ class Topscreen(TopscreenCanvas):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('plot', options)
+    logger = ssdlog.make_logger('topscreen', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             QtWidgets.QMainWindow.__init__(self)
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=500; self.h=40;
+            self.w = 500; self.h = 40;
             self.setup()
 
         def setup(self):
@@ -250,29 +238,27 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="Topscreen status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

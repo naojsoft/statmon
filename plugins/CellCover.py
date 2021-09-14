@@ -5,12 +5,10 @@ import sys
 import math
 import numpy as np
 
-from qtpy import QtWidgets, QtCore, QT_VERSION
+from qtpy import QtWidgets, QtCore
 
-if QT_VERSION.startswith('5'):
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
 from matplotlib.lines import Line2D
@@ -36,10 +34,10 @@ class CellCanvas(FigureCanvas):
         #self.axes.hold(False)
         #self.axes.grid(True)
 
-        self.closed_color='black'
-        self.open_color='white'
-        self.onway_color='orange'
-        self.alarm_color='red'
+        self.closed_color = 'black'
+        self.open_color = 'white'
+        self.onway_color = 'orange'
+        self.alarm_color = 'red'
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
@@ -52,9 +50,9 @@ class CellCanvas(FigureCanvas):
                                    QtWidgets.QSizePolicy.Fixed)
 
         # width/hight of widget
-        self.w=250
-        self.h=30
-        self.logger=logger
+        self.w = 250
+        self.h = 30
+        self.logger = logger
 
         self.init_figure()
 
@@ -62,12 +60,12 @@ class CellCanvas(FigureCanvas):
         ''' initial drawing '''
 
         # draw cell cover
-        cell_kwargs=dict(alpha=0.7, fc=self.closed_color, ec='grey', lw=1.5)
+        cell_kwargs = dict(alpha=0.7, fc=self.closed_color, ec='grey', lw=1.5)
         self.cell= mpatches.Rectangle((0.25, 0.75), 0.5, 0.2, **cell_kwargs)
         self.axes.add_patch(self.cell)
 
         # draw text
-        self.text=self.axes.text(0.5, 0.5, 'Initializing', \
+        self.text = self.axes.text(0.5, 0.5, 'Initializing', \
                                  va='top', ha='center', \
                                  transform=self.axes.transAxes, fontsize=11)
 
@@ -91,7 +89,7 @@ class CellCover(CellCanvas):
 
     def update_cell(self, cell):
         ''' cell = 'TSCV.CellCover'  '''
-        self.logger.debug('updating cell=%s' %(cell))
+        self.logger.debug(f'updating cell={cell}')
 
         if cell == 0x01: # cell cover open
             self.text.set_text('Cell Cover Open')
@@ -113,12 +111,12 @@ class CellCover(CellCanvas):
         import random
         random.seed()
 
-        indx=random.randrange(0, 8)
-        cell=[0x01, 'Unknown', None, 0x00, STATNONE, STATERROR, 0x04]
+        indx = random.randrange(0, 8)
+        cell = [0x01, 'Unknown', None, 0x00, STATNONE, STATERROR, 0x04]
         try:
-            cell=cell[indx]
+            cell = cell[indx]
         except Exception:
-            cell=None
+            cell = None
 
         self.update_cell(cell)
 
@@ -126,7 +124,7 @@ class CellCover(CellCanvas):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('plot', options)
+    logger = ssdlog.make_logger('cellcover', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
@@ -173,28 +171,28 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
+    from argparse import ArgumentParser
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
+    argprs = ArgumentParser(description="CellCover status")
 
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

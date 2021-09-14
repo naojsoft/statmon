@@ -23,7 +23,7 @@ class Pa(object):
             cmd_diff = math.fabs(float(cmd_diff))
         except Exception as e:
             cmd_diff = None
-            self.logger.debug('error: cmd_diff to float. %s' %(str(e)))
+            self.logger.debug(f'error: cmd_diff to float. {e}')
         finally:
             return cmd_diff
 
@@ -32,7 +32,7 @@ class Pa(object):
         try:
             pa = ((pa + 540.0) % 360.0) - 180.0
         except Exception as e:
-            self.logger.debug('error: pa calc. %s' %(str(e)))
+            self.logger.debug(f'error: pa calc. {e}')
             pa = None
         finally:
             return pa
@@ -90,7 +90,7 @@ class PaDisplay(QtWidgets.QWidget):
         else:
             text = '{0}'.format('Undefined')
             color =  self.pa_val.alarm
-            self.logger.error('error: pa=%s cmd_diff=%s' %(str(pa), str(cmd_diff)))
+            self.logger.error(f'error: pa={pa}, cmd_diff={cmd_diff}')
 
         #self.setText('CalProbe: ')
         self.pa_val.setText(text)
@@ -113,7 +113,7 @@ class PaDisplay(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('state', options)
+    logger = ssdlog.make_logger('pa', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
@@ -146,12 +146,8 @@ def main(options, args):
     try:
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
@@ -163,28 +159,27 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
+    from argparse import ArgumentParser
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
+    argprs = ArgumentParser(description="Pa status")
 
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

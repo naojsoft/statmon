@@ -5,12 +5,9 @@ import sys
 import math
 import numpy as np
 
-from qtpy import QtWidgets, QtCore, QT_VERSION
+from qtpy import QtWidgets, QtCore
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
-if QT_VERSION.startswith('5'):
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
 from matplotlib.lines import Line2D
@@ -21,9 +18,8 @@ from g2base import ssdlog
 import PlBase
 
 progname = os.path.basename(sys.argv[0])
-progversion = "0.1"
 
- 
+
 class M1Canvas(FigureCanvas):
     """ M1 Mirror """
     def __init__(self, parent=None, width=3, height=3,  logger=None):
@@ -52,22 +48,22 @@ class M1Canvas(FigureCanvas):
         #FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
-        self.w=250
-        self.h=70
-        self.logger=logger
+        self.w = 250
+        self.h = 70
+        self.logger = logger
 
         self.init_figure()
-  
+
     def init_figure(self):
         ''' initial drawing '''
 
         # draw mirror
-        m1_kwargs=dict(alpha=0.7, fc=self.closed_color, ec='grey', lw=2) 
-        self.m1 = mpatches.Wedge((0.5, 0.4), 0.495, 180, 360, **m1_kwargs) 
+        m1_kwargs = dict(alpha=0.7, fc=self.closed_color, ec='grey', lw=2)
+        self.m1 = mpatches.Wedge((0.5, 0.4), 0.495, 180, 360, **m1_kwargs)
         self.axes.add_patch(self.m1)
 
         # draw text
-        self.text=self.axes.text(0.5, 0.5, 'Initializing', va='baseline', \
+        self.text = self.axes.text(0.5, 0.5, 'Initializing', va='baseline', \
                                  ha='center', \
                                  transform=self.axes.transAxes, fontsize=13)
 
@@ -82,53 +78,51 @@ class M1Canvas(FigureCanvas):
 
 
 class M1Cover(M1Canvas):
-    
+
     """A canvas that updates itself every second with a new plot."""
     def __init__(self,*args, **kwargs):
- 
+
         #super(AGPlot, self).__init__(*args, **kwargs)
         M1Canvas.__init__(self, *args, **kwargs)
 
     def update_m1cover(self, m1cover, m1cover_onway):
-        ''' m1cover = TSCV.M1Cover 
-            m1cover_onway = TSCV.M1CoverOnway ''' 
+        ''' m1cover = TSCV.M1Cover
+            m1cover_onway = TSCV.M1CoverOnway '''
 
-        self.logger.debug('updating m1cover=%s m1_onway=%s' %(str(m1cover), str(m1cover_onway)))  
-        self.logger.debug('m1cover type={}'.format(type(m1cover)))  
-
+        self.logger.debug(f'updating m1cover={m1cover}, m1cover_type={type(m1cover)}, m1_onway={m1cover_onway}')
 
         try:
             if m1cover in ERROR:
                 self.m1.set_facecolor(self.alarm_color)
-                self.text.set_text('M1 Cover Undef') 
+                self.text.set_text('M1 Cover Undef')
             elif m1cover_onway in ERROR:
                 self.m1.set_facecolor(self.alarm_color)
-                self.text.set_text('M1 Cover OnWay Undef') 
+                self.text.set_text('M1 Cover OnWay Undef')
             elif m1cover_onway == 0x01: # m1 cover onway-open
                 self.m1.set_facecolor(self.onway_color)
-                self.text.set_text('M1 Cover OnWay-Open') 
+                self.text.set_text('M1 Cover OnWay-Open')
             elif m1cover_onway == 0x02: # m1 cover onway-close
                 self.m1.set_facecolor(self.onway_color)
-                self.text.set_text('M1 Cover OnWay-Closed') 
+                self.text.set_text('M1 Cover OnWay-Closed')
             elif (m1cover & 0x5555555555555555555555) == 0x1111111111111111111111:
                 self.m1.set_facecolor(self.open_color)
-                self.text.set_text('M1 Cover Open') 
+                self.text.set_text('M1 Cover Open')
             elif (m1cover & 0x5555555555555555555555) == 0x4444444444444444444444:
                 self.m1.set_facecolor(self.closed_color)
-                self.text.set_text('M1 Cover Closed') 
+                self.text.set_text('M1 Cover Closed')
             else:
                 self.m1.set_facecolor(self.onway_color)
-                self.text.set_text('M1 Cover Partial') 
+                self.text.set_text('M1 Cover Partial')
         except Exception as e:
-            self.logger.error('Error: M1 cover. {}'.format(e))
-        
+            self.logger.error(f'Error: M1 cover. {e}')
+
         self.draw()
 
     def tick(self):
         ''' testing  mode solo '''
-        import random  
+        import random
         random.seed()
- 
+
         indx=random.randrange(0, 4)
         m1cover = [0x1111111111111111111111, 'Unknown',  None, 0x4444444444444444444444]
 
@@ -146,14 +140,14 @@ class M1Cover(M1Canvas):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('plot', options)
- 
+    logger = ssdlog.make_logger('m1cover', options)
+
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
             QtWidgets.QMainWindow.__init__(self)
             self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=250
-            self.h=20
+            self.w = 250
+            self.h = 20
             self.setup()
 
         def setup(self):
@@ -192,29 +186,27 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
- 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-    
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs = ArgumentParser(description="M1cover status")
+
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
-    
-    (options, args) = optprs.parse_args()
+    ssdlog.addlogopts(argprs)
+
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

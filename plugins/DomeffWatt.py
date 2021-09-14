@@ -3,12 +3,9 @@
 import os
 import sys
 
-from qtpy import QtWidgets, QtCore, QT_VERSION
+from qtpy import QtWidgets, QtCore
 
-if QT_VERSION.startswith('5'):
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
@@ -63,7 +60,7 @@ class DomeffCanvas(FigureCanvas):
         self.h = 25
         #FigureCanvas.resize(self, self.w, self.h)
 
-        self.logger=logger
+        self.logger = logger
 
         self.init_figure()
 
@@ -158,7 +155,7 @@ class DomeffWatt(DomeffCanvas):
             ff_3b = TSCV.DomeFF_3B
             ff_4b = TSCV.DomeFF_4B
         '''
-        self.logger.debug('updating domeff a=%s 1b=%s 2b=%s 3b=%s 4b=%s' %(str(ff_a), str(ff_1b), str(ff_2b), str(ff_3b), str(ff_4b)))
+        self.logger.debug(f'updating domeff a={ff_a}, 1b={ff_1b}, 2b={ff_2b}, 3b={ff_3b}, 4b={ff_4b}')
 
         # somehow, right shift is required for certain statas aliases
         # before shifting, converting hex to int is also done in this method
@@ -166,14 +163,14 @@ class DomeffWatt(DomeffCanvas):
         ff_2b =  self._shift_value(ff_2b, shift=4)
         ff_4b =  self._shift_value(ff_4b)
 
-        self.logger.debug('shifted value a=%s 1b=%s 2b=%s 3b=%s 4b=%s' %(str(ff_a), str(ff_1b), str(ff_2b), str(ff_3b), str(ff_4b)))
+        self.logger.debug(f'shifted value a={ff_a}, 1b={ff_1b}, 2b={ff_2b}, 3b={ff_3b}, 4b={ff_4b}')
 
         num_on = [ff_a, ff_1b, ff_2b, ff_3b, ff_4b].count(self.on)
-        self.logger.debug("number of on's=%d" %num_on )
+        self.logger.debug(f"number of on {num_on}")
 
         vals = set([ff_1b, ff_2b, ff_3b, ff_4b])
         num_undef = self._num_of_undef_vals(val_set=vals)
-        self.logger.debug("number of undef's=%d" %num_undef)
+        self.logger.debug(f"number of undef={num_undef}")
         six00W = (ff_1b, ff_2b, ff_3b, ff_4b)
 
         self.logger.debug(f'ff_a={ff_a}, six00W={six00W}, num_undef={num_undef}, num_on={num_on}')
@@ -256,7 +253,7 @@ class DomeffWattDisplay(QtWidgets.QWidget):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('el', options)
+    logger = ssdlog.make_logger('domeff watt', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
@@ -302,28 +299,27 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
+    from argparse import ArgumentParser
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
+    argprs = ArgumentParser(description="Domeff Watt status")
 
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

@@ -5,12 +5,9 @@ import sys
 import math
 import numpy as np
 
-from qtpy import QtWidgets, QtCore, QT_VERSION
+from qtpy import QtWidgets, QtCore
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
-if QT_VERSION.startswith('5'):
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
 from matplotlib.lines import Line2D
@@ -152,7 +149,7 @@ class Limit(LimitCanvas):
         try:
             text = '%.1f' %val
         except Exception as e:
-            self.logger.error('error: value not number=%s %s' %(str(val), str(e)))
+            self.logger.error(f'error: value not number={val}.  {e}')
             text = 'No Data'
             color = self.alarm_color
             val = 0
@@ -172,7 +169,7 @@ class Limit(LimitCanvas):
 
     def update_limit(self, current , cmd, state=None):
 
-        self.logger.debug('updating cur=%s cmd=%s state=%s' %(current, cmd, state))
+        self.logger.debug('updating current={current}, cmd={cmd} ,state={state}')
 
         # ignore alarm/warning if el in pointing
         if state and state.strip()=='Pointing':
@@ -189,7 +186,7 @@ class Limit(LimitCanvas):
             self.bbox['facecolor'] = color
             self.cur_anno.set_bbox(self.bbox)
         except Exception as e:
-            self.logger.error('error: setting current value. %s' %e)
+            self.logger.error(f'error: setting current value. {e}')
             pass
 
         text, val, color = self.get_val_state(cmd)
@@ -200,7 +197,7 @@ class Limit(LimitCanvas):
             self.cmd_anno.set_x(val)
             #self.cmd_anno.set_y(self.y_cmdoffset)
         except Exception as e:
-            self.logger.error('error: setting cmd value. %s' %e)
+            self.logger.error(f'error: setting cmd value. {e}')
             pass
 
         self.draw()
@@ -243,7 +240,7 @@ class ElLimit(Limit):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('plot', options)
+    logger = ssdlog.make_logger('limit', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
@@ -345,31 +342,29 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="Limit status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
     # note: there are sv/pir plotting, but mode ag uses the same code.
-    optprs.add_option("--mode", dest="mode",
+    argprs.add_argument("--mode", dest="mode",
                       default='az',
                       help="Specify a plotting mode [az|el|popt|popt2|pir|cs|nsir|nsopt|nsirag|nsoptag|csag]")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     # Are we debugging this?
     if options.debug:

@@ -5,12 +5,9 @@ import sys
 import math
 import numpy as np
 
-from qtpy import QtWidgets, QtCore, QT_VERSION
+from qtpy import QtWidgets, QtCore
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
-if QT_VERSION.startswith('5'):
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
@@ -22,7 +19,6 @@ import PlBase
 from error import *
 
 progname = os.path.basename(sys.argv[0])
-progversion = "0.1"
 
 
 class WindscreenCanvas(FigureCanvas):
@@ -75,7 +71,7 @@ class WindscreenCanvas(FigureCanvas):
         self.ts_len = 6
         self.ts_width = 0.1
 
-        self.logger=logger
+        self.logger = logger
 
         self.init_figure()
 
@@ -229,8 +225,7 @@ class Windscreen(WindscreenCanvas):
             el = TSCS.EL
         '''
 
-        self.logger.debug('updating drv=%s ws=%s cmd=%s  pos=%s' \
-                          %(drv, windscreen, cmd,  pos))
+        self.logger.debug(f'updating drv={drv}, ws={windscreen}, cmd={cmd}, pos={pos}')
 
         msg, color=self.__msg(drv, windscreen, cmd, pos)
 
@@ -255,7 +250,7 @@ class Windscreen(WindscreenCanvas):
         windscreen = ["Unknown", 0x01,  None, STATNONE, 0x02,
                       STATERROR]
 
-        indx = random.randrange(0, 7)
+        indx = random.randrange(0, 6)
         #  0 ~ 14.9m
         pos = random.random()*random.randrange(0, 16)
         cmd = random.random()*random.randrange(0, 16)
@@ -272,7 +267,7 @@ class Windscreen(WindscreenCanvas):
 def main(options, args):
 
     # Create top level logger.
-    logger = ssdlog.make_logger('plot', options)
+    logger = ssdlog.make_logger('windscreen', options)
 
     class AppWindow(QtWidgets.QMainWindow):
         def __init__(self):
@@ -317,29 +312,27 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="Windsc status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

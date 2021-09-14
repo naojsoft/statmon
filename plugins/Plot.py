@@ -4,25 +4,14 @@ import sys, os
 import math
 import threading
 
-from qtpy import QtWidgets, QtCore, QtGui, QT_VERSION
-if QT_VERSION.startswith('5'):
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from qtpy import QtWidgets, QtCore, QtGui
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-
 from matplotlib.axes import Axes
-
-#from pylab import *
 from matplotlib.patches import Circle
-#from matplotlib.patches import Rectangle
 from matplotlib.artist import Artist
 from matplotlib.lines import Line2D
-
 from matplotlib.widgets import Button
-#import matplotlib.patches as mpatches
-
-#import matplotlib.lines as lines
 from matplotlib.figure import SubplotParams
 
 from g2base.Bunch import Bunch
@@ -61,21 +50,9 @@ class PlotCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        #FigureCanvas.setSizePolicy(self,
-        #                           QtGui.QSizePolicy.Expanding,
-        #                           QtGui.QSizePolicy.Expanding)
-        #FigureCanvas.setSizePolicy(self,
-        #                           QtGui.QSizePolicy.Fixed,
-        #                           QtGui.QSizePolicy.Fixed)
-
-
         FigureCanvas.updateGeometry(self)
 
-        self.logger=logger
-
-        #self.fig.canvas.mpl_connect('button_press_event', self.test)
-        #self.fig.canvas.mpl_connect('pick_event', self.onpick)
-
+        self.logger = logger
         self.init_figure()
 
     def zoomin(self):
@@ -116,7 +93,7 @@ class PlotCanvas(FigureCanvas):
             (circle, x_axis, y_axis, y_label)=self.get_scales()
             (scale_min, scale_max)=self.get_min_max_scale()
         except Exception as e:
-            self.logger.error('error: getting scales. %s' %e)
+            self.logger.error(f'error: getting scales. {e}')
             return
 
         # the arrow from previous plotting to current plotting
@@ -206,7 +183,7 @@ class PlotCanvas(FigureCanvas):
             (circle, x_axis, y_axis, y_label)=self.get_scales()
             (min_val, max_val)=self.get_min_max_scale()
         except Exception as e:
-            self.logger.error('error: getting scales. %s' %e)
+            self.logger.error(f'error: getting scales. {e}')
             return
 
         # re-set x/y-axis
@@ -345,7 +322,7 @@ class Plot(PlotCanvas):
                 self.arrow.xy=(cur.x, cur.y)
                 self.arrow.xytext=(pre.x, pre.y)
             except Exception as e:
-                self.logger.warn('warn: drawing path. %s' %e)
+                self.logger.warn(f'warn: drawing path. {e}')
                 pass
 
     def redraw_point(self):
@@ -361,7 +338,7 @@ class Plot(PlotCanvas):
             #  extracting the lastest record fails if a plotting is the first time. but it's ok
             except Exception as e:
                 pre=None
-                self.logger.warn('warn: %s' %str(e))
+                self.logger.warn(f'warn: {e}')
                 pass
         #return pre
 #        plot_path()
@@ -387,13 +364,13 @@ class Plot(PlotCanvas):
 
     def update_plot(self, x , y):
         ''' update plotting '''
-        self.logger.debug('x=%s y=%s' %(x,y))
+        self.logger.debug(f'x={x}, y={y}')
 
         try:
             x *= 0.001
             y *= 0.001
         except Exception as e:
-            self.logger.warn('warn: x, y are not digits. %s' %e)
+            self.logger.warn(f'warn: x, y are not digits. {e}')
             return
 
         #pre=self.redraw_point()
@@ -488,18 +465,18 @@ class Ao1Plot(Plot):
 
         if (x >= self.alarm or x <= -self.alarm) or \
            (y >= self.alarm or y <= -self.alarm):
-            circle=Circle(xy=(x,y), radius=self.plot_radius, \
-                              fc=self.alarm_color, ec='none', fill=True, alpha=1)
-            color=self.alarm_color
+            circle = Circle(xy=(x,y), radius=self.plot_radius, \
+                                fc=self.alarm_color, ec='none', fill=True, alpha=1)
+            color = self.alarm_color
         elif (self.warn <= x or x <= -self.warn) or \
              (self.warn <= y  or y <= -self.warn):
-            circle=Circle(xy=(x,y), radius=self.plot_radius, \
-                          fc=self.warn_color, ec='none', fill=True, alpha=1)
-            color=self.warn_color
+            circle = Circle(xy=(x,y), radius=self.plot_radius, \
+                            fc=self.warn_color, ec='none', fill=True, alpha=1)
+            color = self.warn_color
         else:
-            circle=Circle(xy=(x,y), radius=self.plot_radius, \
+            circle = Circle(xy=(x,y), radius=self.plot_radius, \
                           fc=self.plot_color, ec='none', fill=True, alpha=1)
-            color=self.record_color
+            color = self.record_color
 
         self.axes.add_patch(circle)
 
@@ -533,31 +510,31 @@ class Ao2Plot(Plot):
 
         # those values are measured not to waggle redrawn circles when a widget is reconfigured
         #self.scale=([-5.6, 5.6],)
-        self.scale=([-0.6, 10.6],)
+        self.scale = ([-0.6, 10.6],)
         # the radius of inner/outer circle
-        self.circle=([3.0, 5.0],)
+        self.circle = ([3.0, 5.0],)
         # y axis values
         #self.y_axis=([-5.0, -3.0, 0.0, 3.0,  5.0],)
-        self.y_axis=([0, 2.0, 5.0, 8.0,  10.0],)
+        self.y_axis = ([0, 2.0, 5.0, 8.0,  10.0],)
         # x axis values
-        self.x_axis=([0, 2.0, 5.0, 8.0,  10.0],)
+        self.x_axis = ([0, 2.0, 5.0, 8.0,  10.0],)
         #self.x_axis=([-5.0, -3.0, 0.0, 3.0,  5.0],)
         # y axis labels
         #self.y_label=([-5.0, -3.0, 'VL', 3.0,  5.0],)
-        self.y_label=([0.0, 2.0, '5.0(V)', 8.0,  10.0],)
+        self.y_label = ([0.0, 2.0, '5.0(V)', 8.0,  10.0],)
         self.reconfigure()
 
 
     def plot_point(self, x, y):
         if (x >= self.alarm_high or x <= self.alarm_low) or \
            (y >= self.alarm_high or y <= self.alarm_low):
-            circle=Circle(xy=(x,y), radius=self.plot_radius, \
-            fc=self.alarm_color, ec="none", fill=True, alpha=1)
-            color=self.alarm_color
+            circle = Circle(xy=(x,y), radius=self.plot_radius, \
+            fc = self.alarm_color, ec="none", fill=True, alpha=1)
+            color = self.alarm_color
         else:
-            circle=Circle(xy=(x,y), radius=self.plot_radius, \
-            fc=self.plot_color, ec="none", fill=True, alpha=1)
-            color=self.record_color
+            circle = Circle(xy=(x,y), radius=self.plot_radius, \
+            fc = self.plot_color, ec="none", fill=True, alpha=1)
+            color = self.record_color
 
         self.axes.add_patch(circle)
 
@@ -569,32 +546,11 @@ class Ao2Plot(Plot):
         return plot
 
 
-    # def update_plot(self, x , y):
-    #     self.logger.debug('updating ao2 x=%s y=%s' %(x,y))
-    #     # make sure that x/y are digits not string
-    #     try:
-    #         x*=1000.0
-    #         y*=1000.0
-    #     except Exception:
-    #         pass
-    #     else:
-    #         Plot.update_plot(self, x , y)
-
-    # def tick(self):
-    #     ''' testing solo mode '''
-    #     import random
-    #     random.seed()
-
-    #     x=random.random()*random.randrange(0, 15)
-    #     y=random.random()*random.randrange(0,15)
-    #     self.update_plot(x,y)
-
-
 class Buttons(QtWidgets.QWidget):
     def __init__(self, parent=None, plot=None, logger=None):
         super(Buttons, self).__init__(parent)
         self.plot=plot
-        self.logger=logger
+        self.logger = logger
 
     @property
     def ao_layout(self):
@@ -640,7 +596,7 @@ class FmosPlot(QtWidgets.QWidget):
         self.plot = Plot(parent=parent, logger=logger)
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
 
-        self.logger=logger
+        self.logger = logger
 
         w, h = (350, 400)
         self.setFixedSize(w, h)
@@ -675,14 +631,14 @@ class FmosPlot(QtWidgets.QWidget):
         self.setLayout(layout)
 
     def update_plot(self, state, x, y, el):
-        self.logger.debug('state=%s x=%s y=%s el=%s' %(state, x, y, el))
+        self.logger.debug(f'state={state}, x={x}, y={y}, el={el}')
         fmos_guiding="Guiding(AGFMOS)"
 
         try:
             x = 1000.0 *  math.cos(math.radians(el)) * x
             y *= 1000.0
         except Exception as e:
-            self.logger.error('error: x,y,el %s' %e)
+            self.logger.error(f'error: x,y,el {e}')
         else:
             if state == fmos_guiding:
                 self.logger.debug('fmos guiding...')
@@ -702,14 +658,9 @@ class NsIrPlot(QtWidgets.QWidget):
 
         self.ao2 = Ao2Plot(parent=parent, logger=logger)
         self.buttons2 = Buttons(parent=parent, plot=self.ao2, logger=logger)
-
-
-        self.logger=logger
-
+        self.logger = logger
         w, h = (350, 750)
         self.setFixedSize(w, h)
-
-
         self.set_gui()
 
     def tick(self):
@@ -738,11 +689,11 @@ class NsIrPlot(QtWidgets.QWidget):
 
     def update_plot(self, ao1x, ao1y, ao2x, ao2y):
 
-        self.logger.debug('ao1x=%s ao1y=%s ao2x=%s ao2y=%s' %(ao1x, ao1y, ao2x, ao2y))
+        self.logger.debug(f'ao1x={ao1x}, ao1y={ao1y}, ao2x={ao2x}, ao2y={ao2y}')
 
         try:
-            ao1x*=1000.0
-            ao1y*=1000.0
+            ao1x *= 1000.0
+            ao1y *= 1000.0
         except Exception:
             self.logger.debug('error: ao1 calc ')
             pass
@@ -750,13 +701,77 @@ class NsIrPlot(QtWidgets.QWidget):
             self.ao1.update_plot(ao1x , ao1y)
 
         try:
-            ao2x*=1000.0
-            ao2y*=1000.0
+            ao2x *= 1000.0
+            ao2y *= 1000.0
         except Exception:
             pass
         else:
             self.ao2.update_plot(ao2x , ao2y)
 
+
+class PfsAgPlot(QtWidgets.QWidget):
+    '''  PfsAg Guiding  '''
+    def __init__(self, parent=None, logger=None):
+        super(PfsAgPlot, self).__init__(parent)
+
+        self.plot = Plot(parent=parent, logger=logger)
+        self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
+        self.exptime = Exptime(parent=parent, logger=logger)
+        #self.threshold = Threshold(parent=parent, logger=logger)
+        self.empty = Dummy(width=60, height=25,  logger=logger)
+        #self.empty1 = Dummy(width=1, height=25,  logger=logger)
+        self.logger = logger
+
+        w, h = (350, 400)
+        self.setFixedSize(w, h)
+
+        self.set_gui()
+
+    def tick(self):
+
+        import random
+
+        state = ["Guiding(PFSAG)", "Guiding(PFSAG)", "Guiding(PFSAG)", "##ERROR##", ]
+        sindx = random.randrange(0,4)
+        state = state[sindx]
+        x = random.random()*random.randrange(-800,800)
+        y = random.random()*random.randrange(-800,800)
+        exptime = random.random()*random.randrange(0, 40000)
+        self.update_plot(state, x, y, exptime)
+
+    def set_gui(self):
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.setSpacing(1)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.plot)
+
+        hlayout = QtWidgets.QHBoxLayout()
+        hlayout.setSpacing(2)
+        hlayout.addWidget(self.exptime)
+        hlayout.addWidget(self.empty)
+        layout.addLayout(hlayout)
+
+        layout.addLayout(self.buttons.layout)
+        self.setLayout(layout)
+
+    def update_plot(self, state, x, y, exptime):
+        self.logger.debug(f'state={state}, x={x}, y={y}')
+        pfsag_guiding = ("Guiding(PFSAG)",)
+
+        if state in pfsag_guiding:
+            self.logger.debug('pfsag guiding...')
+            self.plot.update_plot(x, y)
+            self.exptime.update_exptime(exptime)
+            #self.threshold.update_threshold(bottom, ceil)
+        else:
+            self.logger.debug('no guiding...')
+            self.plot.clear()
+            self.exptime.clear()
+            #self.threshold.clear()
+            
+
+            
 
 class AgPlot(QtWidgets.QWidget):
     '''  Ag Guiding  '''
@@ -807,9 +822,9 @@ class AgPlot(QtWidgets.QWidget):
         self.setLayout(layout)
 
     def update_plot(self, state, x, y, exptime, bottom, ceil):
-        self.logger.debug('state=%s x=%s y=%s' %(state, x, y))
-        ag_guiding=("Guiding(AG)",  "Guiding(AG1)", "Guiding(AG2)", "Guiding(HSCSHAG)",
-                    "Guiding(HSCSCAG)")
+        self.logger.debug(f'state={state}, x={x}, y={y}')
+        ag_guiding = ("Guiding(AG)",  "Guiding(AG1)", "Guiding(AG2)", "Guiding(HSCSHAG)",
+                      "Guiding(HSCSCAG)")
 
         if state in ag_guiding:
             self.logger.debug('ag guiding...')
@@ -866,17 +881,17 @@ class TwoGuidingPlot(QtWidgets.QWidget):
         guiding2 = ("Guiding(SV1)", "Guiding(SV2)", "Guiding(HSCSHAG)")
 
         if state in guiding1:
-            self.logger.debug('state=%s guiding1...' %state)
+            self.logger.debug(f'state={state} guiding1...')
             self.plot.update_plot(guiding1_x, guiding1_y)
             self.exptime.update_exptime(exptime=guiding1_exp)
             self.threshold.update_threshold(bottom=guiding1_bottom, ceil=guiding1_ceil)
         elif state in guiding2:
-            self.logger.debug('state=%s guiding2...' %state)
+            self.logger.debug(f'state={state} guiding2...')
             self.plot.update_plot(guiding2_x, guiding2_y)
             self.exptime.update_exptime(exptime=guiding2_exp)
             self.threshold.update_threshold(bottom=guiding2_bottom, ceil=guiding2_ceil)
         else:
-            self.logger.debug('state=%s no guiding...' %state)
+            self.logger.debug(f'state={state} no guiding...')
             self.plot.clear()
             self.exptime.clear()
             self.threshold.clear()
@@ -907,76 +922,6 @@ class TwoGuidingPlot(QtWidgets.QWidget):
                     guiding2_bottom, guiding2_ceil)
 
 
-# class NsOptPlot(QtWidgets.QWidget):
-#     ''' Ns Opt AG/SV Guiding  '''
-#     def __init__(self, parent=None, logger=None):
-#         super(NsOptPlot, self).__init__(parent)
-
-#         self.plot = Plot(parent=parent, logger=logger)
-#         self.exptime = Exptime(parent=parent, logger=logger)
-#         self.threshold = Threshold(parent=parent, logger=logger)
-#         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
-#         self.logger = logger
-#         self.set_gui()
-
-#     def tick(self):
-
-#         import random
-#         random.seed()
-
-#         state = ["Guiding(AG)", "Guiding(AG1)", "Guiding(AG2)",
-#                  "Guiding(SV)", "Guiding(SV1)","Guiding(SV2)",  "Slewing"]
-
-#         sindx = random.randrange(0,7)
-#         state = state[sindx]
-#         x = random.random()*random.randrange(-800,800)
-#         y = random.random()*random.randrange(-800,800)
-#         exp = random.random()*random.randrange(0, 40000)
-#         bottom = random.randrange(0, 30000)
-#         ceil = random.randrange(30000, 70000)
-#         self.update_plot(state=state, ag_x=x, ag_y=y, sv_x=x, sv_y=y, \
-#                          ag_exp=exp, sv_exp=exp, ag_bottom=bottom, \
-#                          ag_ceil=ceil, sv_bottom=bottom, sv_ceil=ceil)
-
-#     def set_gui(self):
-
-#         layout = QtWidgets.QVBoxLayout()
-#         layout.setSpacing(1)
-#         layout.setMargin(0)
-#         layout.addWidget(self.plot)
-#         hlayout = QtWidgets.QHBoxLayout()
-#         hlayout.setSpacing(2)
-#         hlayout.addWidget(self.exptime)
-#         hlayout.addWidget(self.threshold)
-#         layout.addLayout(hlayout)
-
-#         layout.addLayout(self.buttons.layout)
-#         self.setLayout(layout)
-
-#     def update_plot(self, state, ag_x, ag_y, sv_x, sv_y, \
-#                     ag_exp, sv_exp, ag_bottom, ag_ceil, sv_bottom, sv_ceil):
-#         self.logger.debug('state=%s x=%s y=%s bottom=%s ceil=%s ' \
-#                           %(state, ag_x, ag_y, ag_bottom, ag_ceil))
-#         ag_guiding = ("Guiding(AG)",  "Guiding(AG1)", "Guiding(AG2)")
-#         sv_guiding = ("Guiding(SV)", "Guiding(SV1)","Guiding(SV2)")
-
-#         if state in ag_guiding:
-#             self.logger.debug('ag guiding...')
-#             self.plot.update_plot(ag_x, ag_y)
-#             self.exptime.update_exptime(exptime=ag_exp)
-#             self.threshold.update_threshold(bottom=ag_bottom, ceil=ag_ceil)
-#         elif state in sv_guiding:
-#             self.logger.debug('sv guiding...')
-#             self.plot.update_plot(sv_x, sv_y)
-#             self.exptime.update_exptime(exptime=sv_exp)
-#             self.threshold.update_threshold(bottom=sv_bottom, ceil=sv_ceil)
-#         else:
-#             self.logger.debug('no guiding...')
-#             self.plot.clear()
-#             self.exptime.clear()
-#             self.threshold.clear()
-
-
 def main(options, args):
 
     # Create top level logger.
@@ -1005,6 +950,8 @@ def main(options, args):
                 plot = TwoGuidingPlot(self.main_widget, logger=logger)
             elif options.mode == 'nsir':
                 plot = NsIrPlot(self.main_widget, logger=logger)
+            elif options.mode == 'pfs':
+                plot = PfsAgPlot(self.main_widget, logger=logger)
             else:
                 logger.error('error: mode=%s' %options.mode)
                 sys.exit(1)
@@ -1040,33 +987,31 @@ def main(options, args):
 
 if __name__ == '__main__':
     # Create the base frame for the widgets
+    from argparse import ArgumentParser
 
-    from optparse import OptionParser
+    argprs = ArgumentParser(description="Plot status")
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
-
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
     # note: there are sv/pir plotting, but mode ag uses the same code.
-    optprs.add_option("--mode", dest="mode",
+    argprs.add_argument("--mode", dest="mode",
                       default='ag',
-                      help="Specify a plotting mode [ag | nsopt | nsir | fmos]")
+                      help="Specify a plotting mode [ag | nsopt | nsir | fmos | pfs]")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display

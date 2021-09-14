@@ -23,10 +23,11 @@ class Airmass(Label):
 
     def get_airmass(self, el):
 
+        #am = None
         try:
             assert 1.0 <= el <=179.0
-        except AssertionError as e:
-            self.logger.debug('error: airmass el range. %s' %(str(e)))
+        except Exception as e:
+            self.logger.debug(f'error: airmass el range. {e}')
             am = None
         else:
             zd = 90.0 - el
@@ -40,7 +41,7 @@ class Airmass(Label):
     def update_airmass(self, el):
         ''' el = TSCS.EL '''
 
-        self.logger.debug('airmass el=%s' %(str(el)))
+        self.logger.debug(f'airmass el={el}')
 
         color=self.normal
         airmass = self.get_airmass(el)
@@ -50,7 +51,7 @@ class Airmass(Label):
         else:
             text = '{0}'.format('Undefined')
             color = self.alarm
-            self.logger.error('error: airmass=%s' %(str(airmass)))
+            self.logger.error(f'error: airmass={airmass}')
 
         #self.setText('CalProbe: ')
         self.setText(text)
@@ -131,12 +132,8 @@ def main(options, args):
     try:
         qApp = QtWidgets.QApplication(sys.argv)
         aw = AppWindow()
-        print('state')
-        #state = State(logger=logger)
         aw.setWindowTitle("%s" % progname)
         aw.show()
-        #state.show()
-        print('show')
         sys.exit(qApp.exec_())
 
     except KeyboardInterrupt as e:
@@ -148,32 +145,31 @@ def main(options, args):
 if __name__ == '__main__':
     # Create the base frame for the widgets
 
-    from optparse import OptionParser
+    from argparse import ArgumentParser
 
-    usage = "usage: %prog [options] command [args]"
-    optprs = OptionParser(usage=usage, version=('%%prog'))
+    argprs = ArgumentParser(description="Airmass status")
 
-    optprs.add_option("--debug", dest="debug", default=False, action="store_true",
+    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
                       help="Enter the pdb debugger on main()")
-    optprs.add_option("--display", dest="display", metavar="HOST:N",
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    optprs.add_option("--profile", dest="profile", action="store_true",
+    argprs.add_argument("--profile", dest="profile", action="store_true",
                       default=False,
                       help="Run the profiler on main()")
-    optprs.add_option("--interval", dest="interval", type='int',
+    argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
     # note: there are sv/pir plotting, but mode ag uses the same code.
-    optprs.add_option("--mode", dest="mode",
+    argprs.add_argument("--mode", dest="mode",
                       default='ag',
                       help="Specify a plotting mode [ag | sv | pir | fmos]")
 
-    ssdlog.addlogopts(optprs)
+    ssdlog.addlogopts(argprs)
 
-    (options, args) = optprs.parse_args()
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
 
     if len(args) != 0:
-        optprs.error("incorrect number of arguments")
+        argprs.error("incorrect number of arguments")
 
     if options.display:
         os.environ['DISPLAY'] = options.display
