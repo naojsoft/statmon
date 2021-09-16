@@ -26,8 +26,6 @@ class MonDisplay(QtWidgets.QWidget):
                                 height=25, align='vcenter', weight='normal', \
                                 logger=logger)
 
-        #self.insdata = INSdata()
-
         self.mon_label.setText('%s:' %label)
         self.mon_label.setIndent(15)
 

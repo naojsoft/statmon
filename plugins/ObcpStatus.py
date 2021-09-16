@@ -27,7 +27,6 @@ class ObcpDisplay(QtWidgets.QWidget):
                                 logger=logger)
 
         self.logger = logger
-        #self.insdata = INSdata()
 
         self.obcp_label.setText('OBCP:')
         self.obcp_label.setIndent(15)
