@@ -28,7 +28,7 @@ al_envmon = dict(windd = ['TSCL.WINDD', 'STATS.AZ_ADJ'],
                  winds = ['TSCL.WINDS_O', 'TSCL.WINDS_I'],
                  temp = ['TSCL.TEMP_O', 'TSCL.TEMP_I'],
                  humid = ['STATL.HUMI_O.MEAN', 'TSCL.HUMI_I'],
-                 m1dew = ['TSCL.M1_TEMP', 'STATL.DEW_POINT_O'],
+                 m1dew = ['TSCL.M1_TEMP', 'STATL.DEW_POINT_CATWALK.MEAN'],
                  topring = ['TSCL.TOPRING_WINDS_F', 'TSCL.TOPRING_WINDS_R'],
                  misc = ['GEN2.STATUS.TBLTIME.TSCL'])
 
