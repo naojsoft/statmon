@@ -43,7 +43,7 @@ defaultServiceName = 'statmon'
 version = "20120405.0"
 
 default_layout = ['seq', {},
-                  ['vbox', dict(name='toplvl', width=2400, height=1100),
+                  ['vbox', dict(name='toplvl', width=2400, height=1300),
                    ['hbox', dict(name='menubox', stretch=0)],
                    ['vbox', dict(stretch=1),
                     ['ws', dict(name='top', show_tabs=False,
@@ -55,7 +55,7 @@ default_layout = ['seq', {},
                                   show_tabs=False), ],
                       ['ws', dict(name='left2', height=350, stretch=0,
                                   show_tabs=False), ],
-                      ['ws', dict(name='left3', height=280, stretch=3,
+                      ['ws', dict(name='left3', height=450, stretch=3,
                                   show_tabs=False),],
                       ['ws', dict(name='left4', height=80, stretch=1,
                                   show_tabs=False),],

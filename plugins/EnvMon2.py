@@ -94,7 +94,7 @@ class EnvMon2(PlBase.Plugin):
             if alias in self.alias_d:
                 # create a array for this alias if we don't have one
                 if alias not in self.cst:
-                    self.cst[alias] = np.zeros((0, 2), dtype=np.float)
+                    self.cst[alias] = np.zeros((0, 2), dtype=float)
 
                 points = self.cst[alias]
                 bnch = self.alias_d[alias]

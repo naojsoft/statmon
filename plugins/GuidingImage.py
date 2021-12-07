@@ -14,7 +14,6 @@ from ginga.plot.plotaide import PlotAide
 from ginga.canvas.types import plots as gplots
 from ginga.plot import time_series as tsp
 from ginga.plot import data_source as dsp
-from ginga.misc import Bunch
 
 from qtpy import QtWidgets, QtCore, QtGui
 import sip
@@ -37,12 +36,27 @@ scag_seeing = 'TSCL.HSC.SCAG.StarSize'
 shag_bright = 'TSCL.HSC.SHAG.Intensity'
 shag_seeing = 'TSCL.HSC.SHAG.StarSize'
 
-
 pfsag_bright = 'TSCL.PFS.AG.Intensity'
 pfsag_seeing = 'TSCL.PFS.AG.StarSize'
 
+# For "guiding error" plot
+ag_error_x = 'TSCL.AG1dX'
+ag_error_y = 'TSCL.AG1dY'
 
-al_guiding = [ag_bright, sv_bright,  #fmos_bright,
+sv_error_x = 'TSCL.SV1DX'
+sv_error_y = 'TSCL.SV1DY'
+
+hsc_error_x = 'TSCL.HSC.SCAG.DX'
+hsc_error_y = 'TSCL.HSC.SCAG.DY'
+
+pfs_error_x = 'TSCL.PFS.AG.DX'
+pfs_error_y = 'TSCL.PFS.AG.DY'
+
+al_guiding = [ag_error_x, ag_error_y,
+              sv_error_x, sv_error_y,
+              hsc_error_x, hsc_error_y,
+              pfs_error_x, pfs_error_y,
+              ag_bright, sv_bright,  #fmos_bright,
               ag_seeing, sv_seeing,  #fmos_seeing,
               scag_bright, scag_seeing,
               shag_bright, shag_seeing,
@@ -103,6 +117,7 @@ class GuidingImage(PlBase.Plugin):
             sip.delete(w)
             #w.deleteLater()
 
+        names_err = ['X', 'Y']
         if obcp is None or obcp.startswith('#') or obcp in self.ao:
             self.logger.debug("OBCP ({}) is not a guiding instrument".format(obcp))
             return
@@ -113,10 +128,12 @@ class GuidingImage(PlBase.Plugin):
         ##     seeing = [fmos_seeing]
         elif obcp == 'HSC':
             names = ['SCAG', 'SHAG']
+            al_error = [hsc_error_x, hsc_error_y]
             al_bright = [scag_bright, shag_bright]
             al_seeing = [scag_seeing, shag_seeing]
         elif obcp == 'PFS':
             names = ['PFSAG']
+            al_error = [pfs_error_x, pfs_error_y]
             al_bright = [pfsag_bright]
             al_seeing = [pfsag_seeing]
         elif obcp == 'HDS':
@@ -125,11 +142,13 @@ class GuidingImage(PlBase.Plugin):
             #al_bright = [ag_bright, sv_bright]
             #al_seeing = [ag_seeing, sv_seeing]
             names = ['SV']
+            al_error = [sv_error_x, sv_error_y]
             al_bright = [sv_bright]
             al_seeing = [sv_seeing]
         else:
             # other guiding instrument
             names = ['AG']
+            al_error = [ag_error_x, ag_error_y]
             al_bright = [ag_bright]
             al_seeing = [ag_seeing]
 
@@ -140,6 +159,12 @@ class GuidingImage(PlBase.Plugin):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(2)
         w.setLayout(layout)
+
+        res = make_plot(self.alias_d, self.logger, dims,
+                        names_err, al_error, num_pts,
+                        y_acc=np.mean, title="Error")
+        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.plots.guiding_error = res
 
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_bright, num_pts,
@@ -183,7 +208,7 @@ class GuidingImage(PlBase.Plugin):
         for alias in aliases:
             # create a chest item for this alias if we don't have one
             if alias not in self.cst:
-                self.cst[alias] = np.zeros((0, 2), dtype=np.float)
+                self.cst[alias] = np.zeros((0, 2), dtype=float)
 
         obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
         self.configure_plots(obcp)

@@ -106,6 +106,9 @@ class EnvMon(PlBase.Plugin):
         layout.addWidget(res.widget.get_widget(), stretch=1)
         self.plots.m1_and_dew = res
 
+        plot_bg = res.aide.get_plot_decor('plot_bg')
+        plot_bg.check_warning = self.check_warning_m1dew
+
         names = ["Front", "Rear"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['topring'], num_pts,
@@ -117,6 +120,26 @@ class EnvMon(PlBase.Plugin):
         cross_connect_plots(self.plots.values())
 
         self.gui_up = True
+
+    def check_warning_m1dew(self):
+        """custom warning check for m1 dew point."""
+        bnch = self.plots.m1_and_dew
+        m1, dew = bnch.sources
+
+        # peek at last point of data sources for M1 and Dew Pt
+        m_pt = m1.peek()
+        d_pt = dew.peek()
+        if m_pt is None or d_pt is None:
+            return
+        t, m1_temp_C = m_pt
+        t, dew_pt_temp_C = d_pt
+        self.logger.info(f"m1: {m1_temp_C} dew: {dew_pt_temp_C}")
+
+        plot_bg = bnch.aide.get_plot_decor('plot_bg')
+        if m1_temp_C - dew_pt_temp_C <= 2.0:
+            plot_bg.warning()
+        else:
+            plot_bg.normal()
 
     def start(self):
         aliases = []
@@ -134,7 +157,7 @@ class EnvMon(PlBase.Plugin):
             if alias in self.alias_d:
                 # create a array for this alias if we don't have one
                 if alias not in self.cst:
-                    self.cst[alias] = np.zeros((0, 2), dtype=np.float)
+                    self.cst[alias] = np.zeros((0, 2), dtype=float)
 
                 points = self.cst[alias]
                 bnch = self.alias_d[alias]

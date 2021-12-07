@@ -131,7 +131,7 @@ class EnvMon3(PlBase.Plugin):
             if alias in self.alias_d:
                 # create an array for this alias if we don't have one
                 if alias not in self.cst:
-                    self.cst[alias] = np.zeros((0, 2), dtype=np.float)
+                    self.cst[alias] = np.zeros((0, 2), dtype=float)
 
                 points = self.cst[alias]
                 bnch = self.alias_d[alias]
@@ -254,7 +254,7 @@ def make_plot(alias_d, logger, dims, names, aliases, num_pts,
                              linewidth=2.0, coord='data')
         aide.add_plot(psrc)
 
-        buf = np.zeros((num_pts, 2), dtype=np.float)
+        buf = np.zeros((num_pts, 2), dtype=float)
         dsrc = dsp.XYDataSource(buf, overwrite=True, none_for_empty=True)
         dsrc.plot = psrc
         srcs.append(dsrc)
