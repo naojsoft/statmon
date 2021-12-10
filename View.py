@@ -23,7 +23,7 @@ class ViewError(Exception):
     pass
 
 class Viewer(GwMain.GwMain, Widgets.Application):
-     
+
     def __init__(self, logger, ev_quit):
         # Create the top level Qt app
         Widgets.Application.__init__(self, logger=logger)
@@ -35,7 +35,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         # read in any module-level style sheet
         if os.path.exists(rc_file):
             self.app.setStyleSheet(rc_file)
-        
+
         # defaults for height and width
         self.default_height = min(900, self.screen_ht - 100)
         self.default_width  = min(1600, self.screen_wd)
@@ -55,7 +55,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
 
         # dictionary of plugins
         self.plugins = {}
-        
+
 
     def build_toplevel(self, layout):
         # Dynamically create the desktop layout
@@ -67,7 +67,6 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         self.w.root = root
         # TEMP: temporarily needed until "all-closed" callback from Desktop is working
         root.add_callback('close', self.quit)
-        root.set_title("StatMon")
 
         # Add menubar and menus, if desired
         self.add_menus()
@@ -79,8 +78,8 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         self.add_statusbar()
 
         return root
-    
-        
+
+
     def add_menus(self):
         """Subclass should override this to create a custom menu bar
         or to omit a menu bar.
@@ -103,7 +102,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         """Sets the title of the top level window.
         """
         self.w.root.set_title(text)
-        
+
     def load_plugin(self, pluginName, moduleName, className, wsName, tabName):
 
         widget = QtWidgets.QWidget()
@@ -114,9 +113,9 @@ class Viewer(GwMain.GwMain, Widgets.Application):
                            name=canonicalName, officialname=pluginName,
                            modulename=moduleName, classname=className,
                            wsname=wsName, tabname=tabName, widget=widget)
-        
+
         self.plugins[pluginName] = bnch
-        
+
         try:
             module = self.mm.loadModule(moduleName)
 
@@ -152,22 +151,22 @@ class Viewer(GwMain.GwMain, Widgets.Application):
                 (type, value, tb) = sys.exc_info()
                 tb_str = "\n".join(traceback.format_tb(tb))
                 self.logger.error("Traceback:\n%s" % (tb_str))
-                
+
             except Exception as e:
                 tb_str = "Traceback information unavailable."
                 self.logger.error(tb_str)
-                
+
             vbox = QtWidgets.QVBoxLayout()
             vbox.setContentsMargins(4, 4, 4, 4)
             vbox.setSpacing(0)
             widget.setLayout(vbox)
-            
+
             textw = QtWidgets.QTextEdit()
             textw.append(str(e) + '\n')
             textw.append(tb_str)
             textw.setReadOnly(True)
             vbox.addWidget(textw, stretch=1)
-                
+
             self.ds.add_tab(wsName, Widgets.wrap(widget), 2, tabName)
 
     def close_plugin(self, pluginName):
@@ -177,7 +176,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         self.logger.info('calling remove_tab() for plugin %s' % (pluginName))
         self.ds.remove_tab(bnch.wsTabName)
         return True
-     
+
     def close_all_plugins(self):
         for pluginName in self.plugins:
             try:
@@ -185,18 +184,18 @@ class Viewer(GwMain.GwMain, Widgets.Application):
             except Exception as e:
                 self.logger.error('Exception while calling stop for plugin %s: %s' % (pluginName, e))
         return True
-    
+
     def reload_plugin(self, pluginName):
         pInfo = self.plugins[pluginName]
         try:
             self.close_plugin(pluginName)
         except:
             pass
-        
+
         return self.load_plugin(pInfo.officialname, pInfo.modulename,
                                 pInfo.classname, pInfo.wsname,
                                 pInfo.tabname)
-        
+
     def statusMsg(self, msg, duration=None, iserror=False):
         """Send a message to the status bar.  If (duration) is specified
         then the message will disappear after that many seconds.
@@ -256,13 +255,13 @@ class Viewer(GwMain.GwMain, Widgets.Application):
     ##     except Exception as e:
     ##         self.logger.error(str(e))
     ##         # TODO: traceback!
-        
+
     ##     done = False
     ##     while not done:
     ##         #print "PROCESSING IN-BAND"
     ##         # Process "in-band" Qt events
     ##         try:
-    ##             future = self.gui_queue.get(block=True, 
+    ##             future = self.gui_queue.get(block=True,
     ##                                         timeout=timeout)
 
     ##             # Execute the GUI method
@@ -285,14 +284,14 @@ class Viewer(GwMain.GwMain, Widgets.Application):
     ##             finally:
     ##                 pass
 
-                    
+
     ##         except Queue.Empty:
     ##             done = True
-                
+
     ##         except Exception as e:
     ##             self.logger.error("Main GUI loop error: %s" % str(e))
     ##             #pass
-                
+
     ##     # Process "out-of-band" events
     ##     #print "PROCESSING OUT-BAND"
     ##     try:
@@ -305,7 +304,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
     ####################################################
     # CALLBACKS
     ####################################################
-    
+
     def quit(self, *args):
         """Quit the application.
         """

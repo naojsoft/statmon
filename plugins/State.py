@@ -16,9 +16,9 @@ class State(Label):
 
         self.fg='white'
         self.bg='green'
-        super(State, self).__init__(parent=parent, fs=23, width=350, \
-                                    height=75, fg='white', \
-                                    bg='green', fixsize=True, logger=logger )
+        super(State, self).__init__(parent=parent, fs=23,
+                                    fg='white', bg='green',
+                                    logger=logger)
 
     def update_state(self, state, intensity, valerr, calc_mode=None):
         ''' state = STATL.TELDRIVE,

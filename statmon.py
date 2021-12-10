@@ -236,6 +236,7 @@ def main(options, args):
 
     # Build desired layout
     statmon.build_toplevel(layout=default_layout)
+    statmon.w.root.set_title("StatMon")
     for w in statmon.ds.toplevels:
         w.show()
 

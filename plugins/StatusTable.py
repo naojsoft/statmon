@@ -51,7 +51,7 @@ class StatusTable(QtWidgets.QWidget):
         mainlayout.addWidget(self.tscv)
         mainlayout.addWidget(self.mon)
 
-        mainlayout.addWidget(Dummy(height=700, logger=self.logger))
+        mainlayout.addWidget(Dummy(logger=self.logger))
 
         self.setLayout(mainlayout)
 
