@@ -3,9 +3,11 @@
 import sys
 import os
 
-from CustomLabel import Label, QtCore, QtWidgets, ERROR
 from g2base import ssdlog
 from g2cam.status.common import STATNONE, STATERROR
+
+from CustomLabel import Label, QtCore, QtWidgets
+from error import ERROR
 
 progname = os.path.basename(sys.argv[0])
 
@@ -36,10 +38,6 @@ class TimeElLimit(Label):
             high = TSCL.LIMIT_EL_HIGH '''
 
         self.logger.debug(f'flag={flag}, low={low}, high={high}')
-        #low_limit = 1
-        #high_limit = 2
-        #high_limit2 = 3
-
         low_limit = 0x01
         high_limit = 0x02
 
@@ -48,17 +46,27 @@ class TimeElLimit(Label):
         el_txt = ''
 
         if flag in ERROR or low in ERROR or high in ERROR:
-            text = 'Undifined'
+            text = 'Undefined'
             color = self.alarm
         else:
             if flag & low_limit:
-                if low < limit:
-                    el_txt = "(Low)"
-                    limit = low
-            #elif flag is high_limit or flag is high_limit2:
+                #<-- low value has been calculated
+                if flag & high_limit:
+                    #<-- high value has ALSO been calculated
+                    # need to figure out which one to report
+                    if low < high and low < limit:
+                        el_txt = "(Low)"
+                        limit = low
+                    elif high < limit:
+                        el_txt = "(High)"
+                        limit = high
+                else:
+                    if low < limit:
+                        el_txt = "(Low)"
+                        limit = low
+
             elif flag & high_limit:
-                # high limit seems to be either flag=2 or flag=3
-                # need to confirm it.
+                #<-- high value has been calculated
                 if high < limit:
                     el_txt = "(High)"
                     limit = high
@@ -68,14 +76,14 @@ class TimeElLimit(Label):
             elif limit <= 1: # 0 to 1 minute left
                 color = self.alarm
                 hm  = to_hour_min(limit)
-                text = '%s <= 1m %s' %(hm, el_txt)
+                text = '%s <= 1m %s' % (hm, el_txt)
             elif limit > 30: # 30 to 720 min left
                 hm = to_hour_min(limit)
-                text = '%s %s' %(hm, el_txt)
+                text = '%s %s' % (hm, el_txt)
             else: # 1 to 30 min left
                 color = self.warn
                 hm = to_hour_min(limit)
-                text = '%s <= 30m %s' %(hm, el_txt)
+                text = '%s <= 30m %s' % (hm, el_txt)
 
         self.setText(text)
         self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \

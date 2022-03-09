@@ -55,24 +55,16 @@ class Target(TargetGui):
 
     def get_pa_status(self):
 
-        try:
-            pa, cmd_diff = {'SUP': ('TSCL.INSROTPA_PF', 'STATS.ROTDIF_PF'), \
-                'FMS': ('TSCL.INSROTPA_PF', 'STATS.ROTDIF_PF'), \
-                'HSC': ('TSCL.INSROTPA_PF', 'STATS.ROTDIF_PF'), \
-                'HDS': ('TSCL.ImgRotPA', 'STATS.ROTDIF'), \
-                'HIC': ('TSCL.ImgRotPA', 'STATS.ROTDIF'), \
-                'IRC': ('TSCL.ImgRotPA', 'STATS.ROTDIF'), \
-                'K3D': ('TSCL.ImgRotPA', 'STATS.ROTDIF'), \
-                'MCS': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
-                'FCS': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
-                'SUK': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
-                'SWS': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
-                'MMZ': ('TSCL.InsRotPA', 'STATS.ROTDIF'), \
-                'COM': ('TSCL.InsRotPA', 'STATS.ROTDIF')}[self.obcp]
-        except Exception:
-            pa = cmd_diff = None
-        finally:
-            return (pa, cmd_diff)
+        # TODO: redo this in Derive.py (status)
+        if self.obcp in ['HSC', 'PFS']:
+            # PF
+            return ('TSCL.INSROTPA_PF', 'STATS.ROTDIF_PF')
+        elif self.obcp in ['FCS', 'MCS', 'SWS', 'MMZ', 'COM']:
+            # Cass
+            return ('TSCL.InsRotPA', 'STATS.ROTDIF')
+        else:
+            # NS_IR and NS_OPT instruments
+            return ('TSCL.ImgRotPA', 'STATS.ROTDIF')
 
     def update_target(self, **kargs):
 

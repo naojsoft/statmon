@@ -30,7 +30,7 @@ class TimeAzLimit(Label):
         #az_txt = ''
 
         if flag in ERROR or az in ERROR:
-            text = 'Undifined'
+            text = 'Undefined'
             color = self.alarm
         else:
             if flag & limit_flag:

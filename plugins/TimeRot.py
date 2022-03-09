@@ -36,7 +36,7 @@ class TimeRotLimit(Label):
         rot_txt = ''
 
         if flag in ERROR or rot in ERROR or link in ERROR:
-            text = 'Undifined'
+            text = 'Undefined'
             color = self.alarm
         else:
             if not (flag & limit_flag_bigrot) \
