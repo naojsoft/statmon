@@ -19,7 +19,6 @@ from g2base import ssdlog
 from Exptime import Exptime
 from Threshold import Threshold
 from Dummy import Dummy
-from six.moves import zip
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
@@ -769,9 +768,9 @@ class PfsAgPlot(QtWidgets.QWidget):
             self.plot.clear()
             self.exptime.clear()
             #self.threshold.clear()
-            
 
-            
+
+
 
 class AgPlot(QtWidgets.QWidget):
     '''  Ag Guiding  '''
