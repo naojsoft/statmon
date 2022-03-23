@@ -39,7 +39,7 @@ class DomeShutter(Label):
             fg = self.fg
         elif not dome : # dome shutter  partial
             self.logger.debug('partial dome={dome}')
-            text = 'Dome Shuter Partial'
+            text = 'Dome Shutter Partial'
             bg = self.warn
             fg = self.fg
 
