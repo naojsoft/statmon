@@ -74,7 +74,7 @@ class InsNameDisplay(QtWidgets.QWidget):
         indx = random.randrange(0, 9)
 
         insname = ['HSC', None, 'PFS', 'VGW', "HDS",
-                  STATNONE, 'IRD', STATERROR]
+                   STATNONE, 'IRD', STATERROR, 'SCEXAO']
 
         try:
             insname = insname[indx]

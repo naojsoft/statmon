@@ -73,16 +73,11 @@ class RotLimitPlugin(PlBase.Plugin):
 
     def __set_aliases(self, obcp):
 
-        # instrument on prime/cs/ns focus
-        pf = ('SPCAM', 'HSC', 'FMOS', 'PFS')
-        cs = ('MOIRCS', 'FOCAS', 'COMICS', 'SWIMS', 'MIMIZUKU', 'SUKA')
-        ns = ('IRCS', 'HDS', 'HICIAO', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES')
-
-        if obcp in pf:
+        if obcp in PlBase.pf_inst:
             self.aliases = ['TSCS.INSROTPOS_PF', 'TSCS.INSROTCMD_PF']
-        elif obcp in cs:
+        elif obcp in PlBase.cs_inst:
             self.aliases = ['TSCS.INSROTPOS', 'TSCS.INSROTCMD']
-        elif obcp in ns:
+        elif obcp in PlBase.ns_inst:
             self.aliases = ['TSCS.ImgRotPos', 'TSCS.IMGROTCMD']
         else:
             self.aliases = [None, None]
@@ -106,7 +101,9 @@ class RotLimitPlugin(PlBase.Plugin):
                  'MOIRCS': ('Rotator Cs',  (-260.0, 260.0), (-269.5, 269.5), (-270.0, 270.0)),
                  'FOCAS': ('Rotator Cs',  (-260.0, 260.0), (-269.5, 269.5), (-270.0, 270.0)),
                  'SUKA': ('Rotator Cs',  (-260.0, 260.0), (-269.5, 269.5), (-270.0, 270.0)),
-                 'VAMPIRES': ('Rotator Ns Ir', (-175.0, 175.0), (-179.5, 179.5), (-180.0, 180.0)),}
+                 'VAMPIRES': ('Rotator Ns Ir', (-175.0, 175.0), (-179.5, 179.5), (-180.0, 180.0)),
+                 'SCEXAO': ('Rotator Ns Ir', (-175.0, 175.0), (-179.5, 179.5), (-180.0, 180.0)),
+        }
 
         try:
             self.title, self.warn, self.alarm, self.limit = limit[obcp]
@@ -223,8 +220,10 @@ class ProbeLimitPlugin(PlBase.Plugin):
 
         self.popt = 'SPCAM'
         self.pir = 'FMOS'
-        self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'HDS', 'SWIMS', 'MIMIZUKU', 'SUKA')
-        self.ao = ('IRCS', 'HICIAO', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES')
+        # telescope (non-instrument) guiders
+        self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'HDS', 'SWIMS', 'MIMIZUKU',
+                   'SUKA')
+        self.ao = PlBase.ao_inst
         self.popt2 = ('HSC', 'PFS')
 
         self.root = container
@@ -323,209 +322,3 @@ class Probe2LimitPlugin(ProbeLimitPlugin):
         self.register_name = 'probe2limit'
         self.controller.register_select(self.register_name, self.update, self.aliases)
         self.controller.add_callback('change-config', self.change_config)
-
-
-
-
-
-# class Probe1LimitPlugin(PlBase.Plugin):
-#     """ AG Probe R/X Limit  """
-
-#     def __set_aliases(self, obcp):
-
-#         if obcp in self.ag_r:
-#             self.aliases = ['TSCV.AGR', 'TSCL.AG_R_CMD']
-#         elif obcp == self.popt_x:
-#             self.aliases = ['TSCL.AGPF_Y', 'TSCL.AGPF_Y_CMD']
-#         elif obcp == self.pir_x:
-#             self.aliases = ['TSCL.AGPIR_Y', 'TSCL.AGPIR_Y_CMD']
-#         else:
-#             self.aliases = [None, None]
-
-#     def __set_limit(self, obcp):
-
-#         # instrument name: title, warn, alarm,  limit
-#         limit = {'SPCAM': ('Ag-X Popt', (0.0, 170.0), (0.0, 170.0), (0.0, 170.0)),
-#                  'FMOS': ('Ag-X Pir', (-9.0, 239.0), (-10.0, 240.0), (-10.0, 240.0)),
-#                  'HDS': ('Ag_R Ns Opt', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),
-#                  'COMICS': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),
-#                  'MOIRCS': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),
-#                  'FOCAS': ('Ag-R Cs', (0.0, 140.0), (0.0, 140.0), (-5.0, 145.0)),}
-
-#         try:
-#             self.title, self.warn, self.alarm, self.limit = limit[obcp]
-#         except Exception as e:
-#             self.logger.error('error: seting limit. %s' %e)
-#             self.title, self.warn, self.alarm, self.limit = None
-
-#     def set_layout(self, obcp):
-
-#         self.__set_aliases(obcp)
-#         self.__set_limit(obcp)
-
-#         self.logger.debug('probe-limit r/x. obcp=%s aliases=%s  title=%s' %(obcp, self.aliases, self.title))
-
-#         qtwidget = QtWidgets.QWidget()
-
-#         width = 350
-#         self.limit_probe1 = Limit.Limit(parent=qtwidget, title=self.title, \
-#                                         alarm=self.alarm, warn=self.warn, \
-#                                         limit=self.limit, width=width, logger=self.logger)
-
-#         self.vlayout = QtWidgets.QVBoxLayout()
-#         self.vlayout.setContentsMargins(0, 0, 0, 0)
-#         self.vlayout.setSpacing(0)
-#         self.vlayout.addWidget(self.limit_probe1, stretch=1)
-#         self.root.setLayout(self.vlayout)
-
-#     def change_config(self, controller, d):
-
-#         self.logger.debug('probe-limit r/x changing config dict=%s ins=%s' %(d, d['inst']))
-
-#         obcp = d['inst']
-#         if obcp.startswith('#'):
-#             self.logger.debug('obcp is not assigned. %s' %obcp)
-#             return
-
-#         try:
-#             if not (self.obcp in self.ao or self.obcp == self.hsc):
-#                 sip.delete(self.limit_probe1)
-#                 sip.delete(self.vlayout)
-#         except Exception as e:
-#             self.logger.error('error: deleting current layout. %s' %e)
-#         else:
-#             if not (obcp in self.ao or obcp == self.hsc):
-#                 self.set_layout(obcp=obcp)
-#                 controller.register_select('probe1limit', self.update, self.aliases)
-#         finally:
-#             self.obcp = obcp
-
-#     def build_gui(self, container):
-
-#         self.popt_x = 'SPCAM'
-#         self.pir_x = 'FMOS'
-#         self.ag_r = ('MOIRCS', 'FOCAS', 'COMICS', 'HDS',)
-#         self.ao = ('IRCS', 'HICIAO', 'K3D', )
-#         self.hsc = 'HSC'
-
-#         self.root = container
-
-#         try:
-#             self.obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
-#             self.set_layout(obcp=self.obcp)
-#         except Exception as e:
-#             self.logger.error('error: building layout. %s' %e)
-
-#     def start(self):
-#         if not (self.obcp in self.ao or self.obcp == self.hsc):
-#             self.controller.register_select('probe1limit', self.update, self.aliases)
-#         self.controller.add_callback('change-config', self.change_config)
-
-#     def update(self, statusDict):
-#         self.logger.debug('status=%s' %str(statusDict))
-
-#         cur = statusDict.get(self.aliases[0])
-#         cmd = statusDict.get(self.aliases[1])
-#         self.limit_probe1.update_limit(current=cur, cmd=cmd)
-
-
-# class Probe2LimitPlugin(PlBase.Plugin):
-#     """ AG Probe Theta/Y Limit  """
-
-#     def __set_aliases(self, obcp):
-
-#         if obcp in self.ag_theta:
-#             self.aliases = ['TSCV.AGTheta', 'TSCL.AG_THETA_CMD']
-#         elif obcp == self.popt_y:
-#             self.aliases = ['TSCL.AGPF_Y', 'TSCL.AGPF_Y_CMD']
-#         elif obcp == self.pir_y:
-#             self.aliases = ['TSCL.AGPIR_Y', 'TSCL.AGPIR_Y_CMD']
-#         else:
-#             self.aliases = [None, None]
-
-#     def __set_limit(self, obcp):
-
-#         # instrument name: title, warn, alarm,  limit
-#         limit = {'SPCAM': ('Ag-Y Popt', (-20.0, 20.0), (-20.0, 20.0), (-20.0, 20.0)),
-#                  'FMOS': ('Ag-Y Pir', (-40.0, 40.0), (-40.0, 40.0), (-40.0, 40.0)),
-#                  'HDS': ('Ag_Theta Ns Opt', (-270.0, 270.0), (-270.0, 270.0), (-270.0, 270.0)),
-#                  'COMICS': ('Ag-Theta Cs', (-185.0, 185.0), (-185.0, 185.0), (-185.0, 185.0)),
-#                  'MOIRCS': ('Ag-Theta Cs', (-185.0, 185.0), (-185.0, 185.0), (-185.0, 185.0)),
-#                  'FOCAS': ('Ag-Theta Cs', (-185.0, 185.0), (-185.0, 185.0), (-185.0, 185.0)),}
-
-#         try:
-#             self.title, self.warn, self.alarm, self.limit = limit[obcp]
-#         except Exception as e:
-#             self.logger.error('error: seting limit. %s' %e)
-#             self.title, self.warn, self.alarm, self.limit = None
-
-#     def set_layout(self, obcp):
-
-#         self.__set_aliases(obcp)
-#         self.__set_limit(obcp)
-
-#         self.logger.debug('probe-limit theta/y. obcp=%s aliases=%s  title=%s' %(obcp, self.aliases, self.title))
-
-#         qtwidget = QtWidgets.QWidget()
-
-#         width = 350
-#         self.limit_probe2 = Limit.Limit(parent=qtwidget, title=self.title, \
-#                                         alarm=self.alarm, warn=self.warn, \
-#                                         limit=self.limit, width=width, logger=self.logger)
-
-#         self.vlayout = QtWidgets.QVBoxLayout()
-#         self.vlayout.setContentsMargins(0, 0, 0, 0)
-#         self.vlayout.setSpacing(0)
-#         self.vlayout.addWidget(self.limit_probe2, stretch=1)
-#         self.root.setLayout(self.vlayout)
-
-#     def change_config(self, controller, d):
-
-#         self.logger.debug('probe-limit theta/y changing config dict=%s ins=%s' %(d, d['inst']))
-
-#         obcp = d['inst']
-#         if obcp.startswith('#'):
-#             self.logger.debug('obcp is not assigned. %s' %obcp)
-#             return
-
-#         try:
-#             if not (self.obcp in self.ao or self.obcp == self.hsc):
-#                 self.logger.debug('probe-limit deleteing %s' %obcp)
-#                 sip.delete(self.limit_probe2)
-#                 sip.delete(self.vlayout)
-#         except Exception as e:
-#             self.logger.error('error: deleting current layout. %s' %e)
-#         else:
-#             if not (obcp in self.ao or obcp == self.hsc):
-#                 self.set_layout(obcp=obcp)
-#                 controller.register_select('probe2limit', self.update, self.aliases)
-#         finally:
-#             self.obcp = obcp
-
-#     def build_gui(self, container):
-
-#         self.popt_y = 'SPCAM'
-#         self.pir_y = 'FMOS'
-#         self.ag_theta = ('MOIRCS', 'FOCAS', 'COMICS', 'HDS',)
-#         self.ao = ('IRCS', 'HICIAO', 'K3D', )
-#         self.hsc = 'HSC'
-
-#         self.root = container
-
-#         try:
-#             self.obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
-#             self.set_layout(obcp=self.obcp)
-#         except Exception as e:
-#             self.logger.error('error: building layout. %s' %e)
-
-#     def start(self):
-#         if not (self.obcp in self.ao or self.obcp == self.hsc):
-#             self.controller.register_select('probe2limit', self.update, self.aliases)
-#         self.controller.add_callback('change-config', self.change_config)
-
-#     def update(self, statusDict):
-#         self.logger.debug('status=%s' %str(statusDict))
-
-#         cur = statusDict.get(self.aliases[0])
-#         cmd = statusDict.get(self.aliases[1])
-#         self.limit_probe2.update_limit(current=cur, cmd=cmd)

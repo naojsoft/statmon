@@ -9,7 +9,7 @@ class StatePlugin(PlBase.Plugin):
 
     def __set_aliases(self, obcp):
 
-        other = ('SPCAM', 'IRCS', 'HICIAO', 'CHARIS', 'K3D', 'MOIRCS', 'FOCAS', 'COMICS', 'SWIMS', 'MIMIZUKU', 'SUKA', 'IRD', 'VAMPIRES')
+        other = ('SPCAM', 'IRCS', 'HICIAO', 'CHARIS', 'K3D', 'MOIRCS', 'FOCAS', 'COMICS', 'SWIMS', 'MIMIZUKU', 'SUKA', 'IRD', 'VAMPIRES', 'SCEXAO')
         ns_opt = ('HDS',)
         p_opt2_hsc = ('HSC',)
         p_opt2_pfs = ('PFS',)

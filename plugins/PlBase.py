@@ -1,15 +1,25 @@
 #
 # PlBase.py -- Base class for StatMon plugins
-# 
-#[ Eric Jeschke (eric@naoj.org) --
-#  Last edit: Thu Apr  5 13:20:15 HST 2012
-#]
+#
+# E. Jeschke
 #
 """
 This class implements the base class for StatMon plugins.  You can add any
 convenience methods or classes that would be generally useful across
 different plugins.
 """
+
+# instrument on prime/cs/ns focus
+pf_inst = ['SPCAM', 'HSC', 'FMOS', 'PFS']
+cs_inst = ['MOIRCS', 'FOCAS', 'COMICS', 'SWIMS', 'MIMIZUKU', 'SUKA']
+ns_inst = ['IRCS', 'HDS', 'HICIAO', 'K3D', 'CHARIS', 'IRD',
+           'VAMPIRES', 'SCEXAO']
+# These are AO188 instruments
+ao_inst = ['AO188', 'IRCS', 'HICIAO', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES',
+           'SCEXAO']
+# These are auto-guiding instruments
+ag_inst = ['MOIRCS', 'FOCAS', 'COMICS', 'HDS', 'SWIMS', 'MIMIZUKU',
+           'HSC', 'PFS', 'SUKA']
 
 class PluginError(Exception):
     pass
@@ -28,10 +38,9 @@ class Plugin(object):
 
     def start(self):
         raise PluginError("Subclass should override this method!")
-        
+
     def stop(self):
         # Subclass can override this method, but doesn't have to
         pass
 
 #END
-

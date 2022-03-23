@@ -1,7 +1,7 @@
 #
 # GuidingImage.py -- Guiding Image plugin for StatMon
 #
-# Eric Jeschke (eric@naoj.org)
+# E. Jeschke
 #
 import os
 import time
@@ -85,9 +85,6 @@ plot_colors = ['darkviolet', 'palegreen4']
 
 class GuidingImage(PlBase.Plugin):
 
-    # TODO: this needs to be configured elsewhere and read in here
-    ao = ['IRCS', 'HICIAO', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES']
-
     def build_gui(self, container):
         self.root = container
 
@@ -118,7 +115,7 @@ class GuidingImage(PlBase.Plugin):
             #w.deleteLater()
 
         names_err = ['X', 'Y']
-        if obcp is None or obcp.startswith('#') or obcp in self.ao:
+        if obcp is None or obcp.startswith('#') or obcp in PlBase.ao_inst:
             self.logger.debug("OBCP ({}) is not a guiding instrument".format(obcp))
             return
         # NOTE: FMOS decommissioned...2021 EJ

@@ -265,7 +265,7 @@ class TelescopeGui(QtWidgets.QWidget):
         ''' spcam/hsc: insrot,adc
             fmos: insrot
             hds:  imgrot,adc
-            ircs/hiciao/k3d/charis/vampires: imgrot,waveplate
+            ircs/hiciao/k3d/charis/vampires/scexao: imgrot,waveplate
             comics: insrot,tipchop
             focas: insrot,adc
             moircs insrot
@@ -278,7 +278,7 @@ class TelescopeGui(QtWidgets.QWidget):
                  'SWIMS': self.csir_layout, 'MIMIZUKU' : self.csir_layout, \
                  'FOCAS': self.csopt_layout, 'COMICS': self.csir_layout, \
                  'SUKA': self.cs_layout, 'PFS': self.popt_layout, \
-                 'VAMPIRES': self.nsir_layout,}
+                 'VAMPIRES': self.nsir_layout, 'SCEXAO': self.nsir_layout}
 
         self.logger.debug(f'telescope focuslayout ins={self.obcp}')
 
@@ -367,12 +367,12 @@ class Telescope(TelescopeGui):
                  'SWIMS':  self.update_cs, 'MIMIZUKU' :  self.update_cs, \
                  'FOCAS': self.update_csopt, 'COMICS': self.update_csir, \
                  'SUKA': self.update_cs, 'PFS': self.update_popt, \
-                 'VAMPIRES': self.update_nsir,}
+                 'VAMPIRES': self.update_nsir, 'SCEXAO': self.update_nsir}
 
         try:
             focus[self.obcp](**kargs)
         except Exception as e:
-            self.logger.error(f'error: updating focus.  {e}')
+            self.logger.error(f'error: updating focus. obcp={self.obcp}.  {e}')
 
     def update_telescope(self, **kargs):
 
@@ -442,9 +442,9 @@ class Telescope(TelescopeGui):
 
         if self.obcp in ('MOIRCS', 'FOCAS', 'SPCAM', 'HSC', 'COMICS', 'FMOS', 'SWIMS', 'MIMIZUKU', 'SUKA', 'PFS'):
             self.insrot.tick()
-        if self.obcp in ('HDS', 'HICIAO', 'IRCS', 'K3D', 'CHARIS', 'VAMPIRES'):
+        if self.obcp in ('HDS', 'HICIAO', 'IRCS', 'K3D', 'CHARIS', 'VAMPIRES', 'SCEXAO'):
             self.imgrot.tick()
-        if self.obcp in ('HICIAO', 'IRCS', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES'):
+        if self.obcp in ('HICIAO', 'IRCS', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES',  'SCEXAO'):
             self.waveplate.tick()
             self.aoshutter.tick()
         if self.obcp in ('HDS', 'FOCAS', 'SPCAM', 'HSC', 'PFS'):

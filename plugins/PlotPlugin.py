@@ -1,6 +1,6 @@
 #
-# Takeshi Inagaki
-# Eric Jeschke (eric@naoj.org)
+# T. Inagaki
+# E. Jeschke
 #
 from qtpy import QtWidgets, QtGui, QtCore
 import sip
@@ -154,8 +154,9 @@ class PlotPlugin(PlBase.Plugin):
         self.hscag = 'HSC'
         self.fmosag = 'FMOS'
         self.pfsag = 'PFS'
-        self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'SPCAM', 'SWIMS', 'MIMIZUKU', 'SUKA')
-        self.ao = ('IRCS', 'HICIAO', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES')
+        self.ag = ('MOIRCS', 'FOCAS', 'COMICS', 'SPCAM', 'SWIMS', 'MIMIZUKU',
+                   'SUKA')
+        self.ao = PlBase.ao_inst
         self.agsv = 'HDS'
 
         try:
