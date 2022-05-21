@@ -64,6 +64,11 @@ al_guiding = [ag_error_x, ag_error_y,
               pfsag_bright, pfsag_seeing,
               ]
 
+al_error = [ag_error_x, ag_error_y,
+            sv_error_x, sv_error_y,
+            hsc_error_x, hsc_error_y,
+            pfs_error_x, pfs_error_y]
+
 # starting dimensions of graph window (can change with window size)
 dims = (500, 200)
 
@@ -90,7 +95,7 @@ class GuidingImage(PlBase.Plugin):
 
         self.alias_d = {}
         self.plots = Bunch.Bunch()
-        self.cst = None
+        # self.cst = None
         self.update_time = time.time()
         self.save_time = time.time()
 
@@ -180,32 +185,32 @@ class GuidingImage(PlBase.Plugin):
 
         self.root_layout.addWidget(w, stretch=1)
 
-        t = time.time()
+        # t = time.time()
 
-        for alias in self.alias_d.keys():
-            points = self.cst[alias]
-            bnch = self.alias_d[alias]
-            bnch.dsrc.set_points(points)
-            dsp.update_plot_from_source(bnch.dsrc, bnch.plot,
-                                        update_limits=True)
+        # for alias in self.alias_d.keys():
+        #     points = self.cst[alias]
+        #     bnch = self.alias_d[alias]
+        #     bnch.dsrc.set_points(points)
+        #     dsp.update_plot_from_source(bnch.dsrc, bnch.plot,
+        #                                 update_limits=True)
 
-            bnch.aide.zoom_limit_x(t - show_last_time, t)
+        #     bnch.aide.zoom_limit_x(t - show_last_time, t)
 
-        self.update_plots()
+        # self.update_plots()
 
     def start(self):
         aliases = al_guiding
 
-        env2file = os.path.join(os.environ['GEN2COMMON'], 'db',
-                                "statmon_guidingimage.cst")
-        self.cst = Chest(path=env2file)
+        # env2file = os.path.join(os.environ['GEN2COMMON'], 'db',
+        #                         "statmon_guidingimage.cst")
+        # self.cst = Chest(path=env2file)
 
         t = time.time()
 
-        for alias in aliases:
-            # create a chest item for this alias if we don't have one
-            if alias not in self.cst:
-                self.cst[alias] = np.zeros((0, 2), dtype=float)
+        # for alias in aliases:
+        #     # create a chest item for this alias if we don't have one
+        #     if alias not in self.cst:
+        #         self.cst[alias] = np.zeros((0, 2), dtype=float)
 
         obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
         self.configure_plots(obcp)
@@ -214,7 +219,8 @@ class GuidingImage(PlBase.Plugin):
         self.controller.add_callback('change-config', self.change_config)
 
     def stop(self):
-        self.update_persist()
+        #self.update_persist()
+        pass
 
     def change_config(self, controller, d):
         """This get's called if we have a change in configuration
@@ -235,6 +241,8 @@ class GuidingImage(PlBase.Plugin):
                 if alias in statusDict:
                     val = statusDict[alias]
                     if isinstance(val, float):
+                        if alias in al_error:
+                            val *= 0.001
                         pt = (t, val)
 
                         bnch = self.alias_d[alias]
@@ -248,10 +256,10 @@ class GuidingImage(PlBase.Plugin):
             if secs_since >= update_interval:
                 self.update_plots()
 
-            secs_since = t - self.save_time
-            self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))
-            if t - self.save_time >= save_interval:
-                self.update_persist()
+            # secs_since = t - self.save_time
+            # self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))
+            # if t - self.save_time >= save_interval:
+            #     self.update_persist()
 
         except Exception as e:
             self.logger.error("error updating from status: {}".format(e),
@@ -266,24 +274,24 @@ class GuidingImage(PlBase.Plugin):
         t1 = time.time()
         self.logger.debug("time to update plots {0:.4f} sec".format(t1 - t))
 
-    def update_persist(self):
-        t = time.time()
-        self.save_time = t
-        self.logger.debug('persisting data')
-        # Ugh. It seems we have to reassign the arrays into the chest
-        # every time, otherwise the additions to the array do not persist
-        # in the chest when it is flushed
-        # Double Ugh. Seems Chest does not have an update() method
-        for alias, bnch in self.alias_d.items():
-            self.cst[alias] = bnch.dsrc.get_points()
+    # def update_persist(self):
+    #     t = time.time()
+    #     self.save_time = t
+    #     self.logger.debug('persisting data')
+    #     # Ugh. It seems we have to reassign the arrays into the chest
+    #     # every time, otherwise the additions to the array do not persist
+    #     # in the chest when it is flushed
+    #     # Double Ugh. Seems Chest does not have an update() method
+    #     for alias, bnch in self.alias_d.items():
+    #         self.cst[alias] = bnch.dsrc.get_points()
 
-        try:
-            self.cst.flush()
-        except Exception as e:
-            self.logger.error("Error saving chest file: {}".format(e),
-                              exc_info=True)
-        t1 = time.time()
-        self.logger.debug("time to persist data {0:.4f} sec".format(t1 - t))
+    #     try:
+    #         self.cst.flush()
+    #     except Exception as e:
+    #         self.logger.error("Error saving chest file: {}".format(e),
+    #                           exc_info=True)
+    #     t1 = time.time()
+    #     self.logger.debug("time to persist data {0:.4f} sec".format(t1 - t))
 
     def __str__(self):
         return 'guidingimage'
