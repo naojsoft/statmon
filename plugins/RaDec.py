@@ -1,7 +1,7 @@
 #
 # RaDec.py -- RA/DEC plugin for StatMon
 #
-# Eric Jeschke (eric@naoj.org)
+# E. Jeschke
 #
 import time
 import math

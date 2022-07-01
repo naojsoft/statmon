@@ -1,7 +1,7 @@
 #
 # Model.py -- Model for StatMon.
 #
-# Eric Jeschke (eric@naoj.org)
+# E. Jeschke
 #
 import time
 import threading

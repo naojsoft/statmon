@@ -20,12 +20,12 @@ class Label(QtWidgets.QLabel):
         self.height = height
         self.logger = logger
 
-        self.font = QtGui.QFont(font, fs)
+        self.font = QtGui.QFont(font, int(fs))
         fontweight = {'normal': QtGui.QFont.Normal, 'bold':QtGui.QFont.Bold}
         self.font.setWeight(fontweight[weight])
         self.setText('Initializing')
-        align = {'center': QtCore.Qt.AlignCenter, \
-                 'left': QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, \
+        align = {'center': QtCore.Qt.AlignCenter,
+                 'left': QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter,
                  'right': QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter,
                  'vcenter': QtCore.Qt.AlignVCenter}[align]
         self.setAlignment(align)
@@ -40,7 +40,7 @@ class Label(QtWidgets.QLabel):
         if frame:
             #self.setFrameStyle(QtWidgets.QFrame.StyledPanel | QtWidgets.QFrame.Raised)
             self.setFrameStyle(QtWidgets.QFrame.Box | QtWidgets.QFrame.Raised)
-            self.setLineWidth(linewidth)
+            self.setLineWidth(int(linewidth))
             self.setMidLineWidth(midlinewidth)
         self.setStyleSheet("QLabel {color :%s; background-color:%s }" %(self.fg, self.bg))
 

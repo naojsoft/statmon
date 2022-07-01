@@ -1,7 +1,7 @@
 #
 # EnvMon3.py -- Environmental monitor #3 plugin for StatMon
 #
-# Eric Jeschke (eric@naoj.org)
+# E. Jeschke
 #
 import os
 import time
@@ -17,8 +17,6 @@ from ginga.plot import data_source as dsp
 from ginga.misc import Bunch
 
 from qtpy import QtWidgets, QtCore, QtGui
-
-from chest import Chest
 
 import PlBase
 
@@ -120,9 +118,14 @@ class EnvMon3(PlBase.Plugin):
         for name, _aliases in al_envmon3.items():
             aliases.extend(_aliases)
 
-        env3file = os.path.join(os.environ['GEN2COMMON'], 'db',
-                                "statmon_envmon3.cst")
-        self.cst = Chest(path=env3file)
+        self.save_file = os.path.join(os.environ['GEN2COMMON'], 'db',
+                                      "statmon_envmon3.npy")
+        try:
+            d = np.load(self.save_file, allow_pickle=True)
+            self.cst = dict(d[()])
+        except Exception as e:
+            self.logger.error("Couldn't open persist file: {}".format(e))
+            self.cst = dict()
 
         t = time.time()
 
@@ -203,9 +206,9 @@ class EnvMon3(PlBase.Plugin):
             self.cst[alias] = bnch.dsrc.get_points()
 
         try:
-            self.cst.flush()
+            np.save(self.save_file, self.cst, allow_pickle=True)
         except Exception as e:
-            self.logger.error("Error saving chest file: {}".format(e),
+            self.logger.error("Error saving array state: {}".format(e),
                               exc_info=True)
         t1 = time.time()
         self.logger.debug("time to persist data {0:.4f} sec".format(t1 - t))

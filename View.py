@@ -1,7 +1,7 @@
 #
 # Viewer.py -- Qt display handler for StatMon.
 #
-# Eric Jeschke (eric@naoj.org)
+# E. Jeschke
 #
 # stdlib imports
 import sys, os

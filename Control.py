@@ -1,7 +1,7 @@
 #
 # Control.py -- Controller for StatMon.
 #
-# Eric Jeschke (eric@naoj.org)
+# E. Jeschke
 #
 # stdlib imports
 import sys, os
@@ -125,8 +125,7 @@ class Controller(Callback.Callbacks):
 
                 except Exception as e:
                     self.logger.error("Error making callback to '%s': %s" % (
-                        cbkey, str(e)))
-                    # TODO: log traceback
+                        cbkey, str(e)), exc_info=True)
 
         end_time = time.time()
         elapsed = end_time - start_time
@@ -243,7 +242,7 @@ class Controller(Callback.Callbacks):
         # Mark our thread id
         self.gui_thread_id = thread.get_ident()
 
-        while not self.ev_quit.isSet():
+        while not self.ev_quit.is_set():
             self.update_pending(timeout=timeout)
 
 # END

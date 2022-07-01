@@ -1,7 +1,7 @@
 #
 # Debug.py -- Debugging plugin for StatMon
-# 
-# Eric Jeschke (eric@naoj.org)
+#
+# E. Jeschke
 #
 import PlBase
 
@@ -16,7 +16,7 @@ class Debug(PlBase.Plugin):
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(2)
         container.setLayout(layout)
-        
+
         self.msgFont = QtGui.QFont("Fixed", 14)
         tw = QtWidgets.QTextEdit()
         tw.setReadOnly(True)
@@ -24,7 +24,7 @@ class Debug(PlBase.Plugin):
         self.tw = tw
         self.history = []
         self.histmax = 10
-         
+
         sw = QtWidgets.QScrollArea()
         sw.setWidgetResizable(True)
         sw.setWidget(self.tw)
@@ -41,13 +41,13 @@ class Debug(PlBase.Plugin):
 
     def closePlugin(self, plname):
         self.view.close_plugin(plname)
-        return True    
+        return True
 
     def reloadPlugin(self, plname):
         #self.view.close_plugin(plname)
         self.view.reload_plugin(plname)
         return True
-            
+
     def reloadModule(self, name):
         self.controller.mm.loadModule(name)
         return True
@@ -69,14 +69,14 @@ class Debug(PlBase.Plugin):
         self.history = self.history[-self.histmax:]
         # Update text widget
         self.tw.setText('\n'.join(self.history))
-        
+
     def command_cb(self, w):
         # TODO: implement a readline/history type function
         cmdstr = str(w.text()).strip()
         self.command(cmdstr)
         w.setText("")
-        
+
     def __str__(self):
         return 'debug'
-    
+
 #END

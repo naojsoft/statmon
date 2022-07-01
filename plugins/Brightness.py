@@ -1,8 +1,8 @@
 #
 # EnvMon.py -- Environment plugin for StatMon
 #
-# Takeshi Inagaki (tinagaki@naoj.org)
-# Eric Jeschke (eric@naoj.org)
+# T. Inagaki
+# E. Jeschke
 #
 import time
 import math
