@@ -1,5 +1,4 @@
-from qtpy import QtWidgets, QtCore
-import sip
+from ginga.gw import Widgets
 
 import PlBase
 import Limit
@@ -11,18 +10,16 @@ class AzLimitPlugin(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
 
-        qtwidget = QtWidgets.QWidget()
         title = 'AZ'
         alarm = [-269.5, 269.5]
         warn = [-260.0, 260.0 ]
         limit = [-270.0, 270.0]
-        self.limit = Limit.Limit(parent=qtwidget, title=title, alarm=alarm, warn=warn, limit=limit, logger=self.logger)
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(self.limit, stretch=1)
-        container.setLayout(layout)
+        self.limit = Limit.Limit(title=title, alarm=alarm, warn=warn,
+                                 limit=limit, logger=self.logger)
+        self.root.add_widget(Widgets.wrap(self.limit), stretch=1)
 
     def start(self):
         self.controller.register_select('azlimit', self.update, AzLimitPlugin.aliases)
@@ -40,8 +37,9 @@ class ElLimitPlugin(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
 
-        qtwidget = QtWidgets.QWidget()
         title = 'EL'
         marker = 15.0
         marker_txt = 15.0
@@ -49,12 +47,8 @@ class ElLimitPlugin(PlBase.Plugin):
         alarm = [10.0,89.5]
         limit = [10.0, 90.0]
 
-        self.limit = Limit.Limit(parent=qtwidget, title=title, alarm=alarm, warn=warn, limit=limit, marker=marker, marker_txt=marker_txt, logger=self.logger)
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(self.limit,stretch=1)
-        container.setLayout(layout)
+        self.limit = Limit.Limit(title=title, alarm=alarm, warn=warn, limit=limit, marker=marker, marker_txt=marker_txt, logger=self.logger)
+        self.root.add_widget(Widgets.wrap(self.limit), stretch=1)
 
     def start(self):
         self.controller.register_select('ellimit', self.update, ElLimitPlugin.aliases)
@@ -65,7 +59,6 @@ class ElLimitPlugin(PlBase.Plugin):
         cmd = statusDict.get(ElLimitPlugin.aliases[1])
         state=statusDict.get(ElLimitPlugin.aliases[2])
         self.limit.update_limit(current=cur, cmd=cmd, state=state)
-
 
 
 class RotLimitPlugin(PlBase.Plugin):
@@ -118,16 +111,12 @@ class RotLimitPlugin(PlBase.Plugin):
 
         self.logger.debug('rotator-limit setlayout. obcp=%s aliases=%s  title=%s' %(obcp, self.aliases, self.title))
 
-        qtwidget = QtWidgets.QWidget()
+        self.limit_rot = Limit.Limit(title=self.title, alarm=self.alarm,
+                                     warn=self.warn, limit=self.limit,
+                                     logger=self.logger)
 
-        self.limit_rot = Limit.Limit(parent=qtwidget, title=self.title, alarm=self.alarm, \
-                                 warn=self.warn, limit=self.limit, logger=self.logger)
-
-        self.vlayout = QtWidgets.QVBoxLayout()
-        self.vlayout.setContentsMargins(0, 0, 0, 0)
-        self.vlayout.setSpacing(0)
-        self.vlayout.addWidget(self.limit_rot, stretch=1)
-        self.root.setLayout(self.vlayout)
+        self.root.remove_all(delete=True)
+        self.root.add_widget(Widgets.wrap(self.limit_rot), stretch=1)
 
     def change_config(self, controller, d):
 
@@ -138,18 +127,14 @@ class RotLimitPlugin(PlBase.Plugin):
             self.logger.debug('obcp is not assigned. %s' %obcp)
             return
 
-        try:
-            sip.delete(self.limit_rot)
-            sip.delete(self.vlayout)
-        except Exception as e:
-            self.logger.error('error: deleting current layout. %s' %e)
-        else:
-            self.set_layout(obcp=obcp)
-            controller.register_select('rotlimit', self.update, self.aliases)
+        self.set_layout(obcp=obcp)
+        controller.register_select('rotlimit', self.update, self.aliases)
 
     def build_gui(self, container):
 
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
 
         try:
             obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
@@ -180,18 +165,13 @@ class ProbeLimitPlugin(PlBase.Plugin):
 
         self.logger.debug('probe-limit obcp=%s aliases=%s title=%s' %(obcp, self.aliases, self.title))
 
-        qtwidget = QtWidgets.QWidget()
-
         width = 350
-        self.limit_probe = Limit.Limit(parent=qtwidget, title=self.title, \
-                                        alarm=self.alarm, warn=self.warn, \
-                                        limit=self.limit, width=width, logger=self.logger)
-
-        self.vlayout = QtWidgets.QVBoxLayout()
-        self.vlayout.setContentsMargins(0, 0, 0, 0)
-        self.vlayout.setSpacing(0)
-        self.vlayout.addWidget(self.limit_probe, stretch=1)
-        self.root.setLayout(self.vlayout)
+        self.limit_probe = Limit.Limit(title=self.title,
+                                       alarm=self.alarm, warn=self.warn,
+                                       limit=self.limit, width=width,
+                                       logger=self.logger)
+        self.root.remove_all(delete=True)
+        self.root.add_widget(Widgets.wrap(self.limit_probe), stretch=1)
 
     def change_config(self, controller, d):
 
@@ -204,14 +184,14 @@ class ProbeLimitPlugin(PlBase.Plugin):
 
         try:
             if not (self.obcp in self.ao or self.obcp in self.popt2):
-                sip.delete(self.limit_probe)
-                sip.delete(self.vlayout)
+                self.root.remove_all(delete=True)
         except Exception as e:
             self.logger.error('error: deleting current layout. %s' %e)
         else:
             if not (obcp in self.ao or obcp in self.popt2):
                 self.set_layout(obcp=obcp)
-                controller.register_select(self.register_name, self.update, self.aliases)
+                controller.register_select(self.register_name, self.update,
+                                           self.aliases)
         finally:
             self.obcp = obcp
 
@@ -227,6 +207,8 @@ class ProbeLimitPlugin(PlBase.Plugin):
         self.popt2 = ('HSC', 'PFS')
 
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
 
         try:
             self.obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')

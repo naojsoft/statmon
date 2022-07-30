@@ -1,6 +1,6 @@
 import PlBase
 import Domeff
-from qtpy import QtWidgets, QtCore
+from ginga.gw import Widgets
 
 
 class DomeffPlugin(PlBase.Plugin):
@@ -13,20 +13,16 @@ class DomeffPlugin(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
 
-        qtwidget = QtWidgets.QWidget()
+        self.domeff=Domeff.DomeffDisplay(logger=self.logger)
 
-        self.domeff=Domeff.DomeffDisplay(qtwidget, logger=self.logger)
-       
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(self.domeff,stretch=1)
-        container.setLayout(layout)
- 
+        self.root.add_widget(Widgets.wrap(self.domeff), stretch=1)
+
     def start(self):
-        self.controller.register_select('domeff', self.update, \
-                                         DomeffPlugin.aliases)
+        self.controller.register_select('domeff', self.update,
+                                        DomeffPlugin.aliases)
 
     def update(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
@@ -44,11 +40,9 @@ class DomeffPlugin(PlBase.Plugin):
 
 
 
-            self.domeff.update_domeff(ff_a=ff_a, ff_1b=ff_1b, ff_2b=ff_2b,\
-                                      ff_3b=ff_3b, ff_4b=ff_4b, \
-                                      ff_a_v=ff_a_v, ff_1b_v=ff_1b_v, ff_2b_v=ff_2b_v,\
-                                      ff_3b_v=ff_3b_v, ff_4b_v=ff_4b_v) 
+            self.domeff.update_domeff(ff_a=ff_a, ff_1b=ff_1b, ff_2b=ff_2b,
+                                      ff_3b=ff_3b, ff_4b=ff_4b,
+                                      ff_a_v=ff_a_v, ff_1b_v=ff_1b_v, ff_2b_v=ff_2b_v,
+                                      ff_3b_v=ff_3b_v, ff_4b_v=ff_4b_v)
         except Exception as e:
             self.logger.error('error: updating status. %s' %str(e))
-            
-

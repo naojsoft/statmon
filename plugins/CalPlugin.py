@@ -1,6 +1,6 @@
 import PlBase
 import Cal
-from qtpy import QtWidgets, QtGui, QtCore
+from ginga.gw import Widgets
 
 class CalPlugin(PlBase.Plugin):
     """ Cal Source Plugin """
@@ -13,17 +13,13 @@ class CalPlugin(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
 
-        qtwidget = QtWidgets.QWidget()
+        self.cal = Cal.CalDisplay(logger=self.logger)
 
-        self.cal=Cal.CalDisplay(qtwidget, logger=self.logger)
-       
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(self.cal, stretch=1)
-        container.setLayout(layout)
- 
+        self.root.add_widget(Widgets.wrap(self.cal), stretch=1)
+
     def start(self):
         self.controller.register_select('cal', self.update, \
                                          CalPlugin.aliases)
@@ -49,5 +45,3 @@ class CalPlugin(PlBase.Plugin):
                                 hal1_amp=hal1_amp, hal2_amp=hal2_amp)
         except Exception as e:
             self.logger.error('error: updating status. %s' %str(e))
-            
-

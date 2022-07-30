@@ -1,6 +1,8 @@
+from ginga.gw import Widgets
+from qtpy import QtWidgets, QtCore
+
 import PlBase
 import Precip
-from qtpy import QtWidgets, QtCore
 
 
 class PrecipPlugin(PlBase.Plugin):
@@ -14,11 +16,9 @@ class PrecipPlugin(PlBase.Plugin):
 
         self.precip = Precip.PrecipDisplay(qtwidget, logger=self.logger)
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(self.precip, stretch=1)
-        container.setLayout(layout)
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
+        self.root.add_widget(Widgets.wrap(self.precip), stretch=0)
 
     def start(self):
         self.controller.register_select('precip', self.update,

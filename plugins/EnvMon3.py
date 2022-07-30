@@ -7,16 +7,14 @@ import os
 import time
 import numpy as np
 
-import ginga.toolkit as ginga_toolkit
 from ginga.misc import Bunch
-from ginga.gw import Viewers
+from ginga.gw import Viewers, Widgets
 from ginga.plot.plotaide import PlotAide
 from ginga.canvas.types import plots as gplots
 from ginga.plot import time_series as tsp
 from ginga.plot import data_source as dsp
-from ginga.misc import Bunch
 
-from qtpy import QtWidgets, QtCore, QtGui
+from qtpy import QtCore, QtGui
 
 import PlBase
 
@@ -65,20 +63,16 @@ class EnvMon3(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
-        #self.root.setStyleSheet("QWidget { background: lightblue }")
+        self.root.set_margins(2, 2, 2, 2)
+        self.root.set_spacing(2)
 
-        #self.deques = {}
         self.alias_d = {}
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(2, 2, 2, 2)
-        layout.setSpacing(2)
-        container.setLayout(layout)
-
-        lbl = QtWidgets.QLabel("Catwalk Sensors")
-        lbl.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        lbl.setFont(QtGui.QFont('DejaVu Sans', 12, QtGui.QFont.Bold))
-        layout.addWidget(lbl, stretch=0)
+        lbl = Widgets.Label("Catwalk Sensors")
+        w = lbl.get_widget()
+        w.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        w.setFont(QtGui.QFont('DejaVu Sans', 12, QtGui.QFont.Bold))
+        self.root.add_widget(lbl, stretch=0)
 
         self.plots = Bunch.Bunch()
         self.update_time = time.time()
@@ -89,7 +83,7 @@ class EnvMon3(PlBase.Plugin):
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon3['cat_temp'], num_pts,
                         y_acc=np.mean, title="Temp (C)")
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.catwalk_temp = res
 
         #y_rng = (0.0, 100.0)
@@ -98,7 +92,7 @@ class EnvMon3(PlBase.Plugin):
                         names, al_envmon3['cat_rh'], num_pts,
                         y_acc=np.mean, title="RH (%)",
                         warn_y=70, alert_y=80)
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.catwalk_rh = res
 
         #y_rng = (-30.0, 50.0)
@@ -106,7 +100,7 @@ class EnvMon3(PlBase.Plugin):
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon3['cat_dew'], num_pts,
                         y_acc=np.mean, title="Dew Pt")
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.catwalk_dew = res
 
         cross_connect_plots(self.plots.values())
@@ -232,6 +226,7 @@ def make_plot(alias_d, logger, dims, names, aliases, num_pts,
     viewer.set_background('white')
     viewer.set_foreground('black')
     viewer.set_enter_focus(True)
+    viewer.get_widget().resize(win_wd, win_ht)
 
     # our plot
     aide = PlotAide(viewer)

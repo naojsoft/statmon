@@ -7,16 +7,12 @@ import os
 import time
 import numpy as np
 
-import ginga.toolkit as ginga_toolkit
-from ginga.misc import Bunch
-from ginga.gw import Viewers
+from ginga.gw import Viewers, Widgets
 from ginga.plot.plotaide import PlotAide
 from ginga.canvas.types import plots as gplots
 from ginga.plot import time_series as tsp
 from ginga.plot import data_source as dsp
 from ginga.misc import Bunch
-
-from qtpy import QtWidgets, QtCore, QtGui
 
 import PlBase
 from EnvMon3 import cross_connect_plots, make_plot
@@ -51,14 +47,11 @@ class EnvMon2(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
-        #self.root.setStyleSheet("QWidget { background: lightblue }")
+        self.root.set_margins(2, 2, 2, 2)
+        self.root.set_spacing(2)
 
         self.alias_sets = [al_ctr_winds, al_misc]
         self.alias_d = {}
-
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(2, 2, 2, 2)
-        container.setLayout(layout)
 
         self.plots = Bunch.Bunch()
         self.update_time = time.time()
@@ -69,7 +62,7 @@ class EnvMon2(PlBase.Plugin):
                         names, al_ctr_winds, num_pts,
                         y_acc=np.mean, title="Wind Speed Center",
                         alert_y=2.0)
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.windspeed_center = res
 
         cross_connect_plots(self.plots.values())

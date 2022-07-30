@@ -105,7 +105,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
 
     def load_plugin(self, pluginName, moduleName, className, wsName, tabName):
 
-        widget = QtWidgets.QWidget()
+        widget = Widgets.VBox()
 
         # Record plugin info
         canonicalName = pluginName.lower()
@@ -136,7 +136,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
 
             # Add the widget to a workspace and save the tab name in
             # case we need to delete the widget later on.
-            dsTabBnch = self.ds.add_tab(wsName, Widgets.wrap(widget), 2, tabName)
+            dsTabBnch = self.ds.add_tab(wsName, widget, 2, tabName)
             dsTabName = dsTabBnch.tabname
             self.plugins[pluginName].setvals(wsTabName=dsTabName)
 
@@ -156,18 +156,12 @@ class Viewer(GwMain.GwMain, Widgets.Application):
                 tb_str = "Traceback information unavailable."
                 self.logger.error(tb_str)
 
-            vbox = QtWidgets.QVBoxLayout()
-            vbox.setContentsMargins(4, 4, 4, 4)
-            vbox.setSpacing(0)
-            widget.setLayout(vbox)
+            textw = Widgets.TextArea(editable=False, wrap=True)
+            textw.set_text(str(e) + '\n')
+            textw.append_text(tb_str)
+            widget.add_widget(textw, stretch=1)
 
-            textw = QtWidgets.QTextEdit()
-            textw.append(str(e) + '\n')
-            textw.append(tb_str)
-            textw.setReadOnly(True)
-            vbox.addWidget(textw, stretch=1)
-
-            self.ds.add_tab(wsName, Widgets.wrap(widget), 2, tabName)
+            self.ds.add_tab(wsName, widget, 2, tabName)
 
     def close_plugin(self, pluginName):
         bnch = self.plugins[pluginName]
@@ -202,9 +196,9 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         """
         # TODO: turn background of bar red for duration if iserror==True
         if duration:
-            self.w.status.showMessage(msg, duration*1000)
+            self.w.status.set_message(msg, duration=duration)
         else:
-            self.w.status.showMessage(msg)
+            self.w.status.set_message(msg)
 
     def error(self, text, duration=None):
         """Convenience function to log an error to the error log and also

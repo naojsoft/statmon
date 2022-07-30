@@ -9,14 +9,11 @@ import numpy as np
 
 import ginga.toolkit as ginga_toolkit
 from ginga.misc import Bunch
-from ginga.gw import Viewers
+from ginga.gw import Widgets, Viewers
 from ginga.plot.plotaide import PlotAide
 from ginga.canvas.types import plots as gplots
 from ginga.plot import time_series as tsp
 from ginga.plot import data_source as dsp
-
-from qtpy import QtWidgets, QtCore, QtGui
-import sip
 
 import PlBase
 from EnvMon3 import cross_connect_plots, make_plot
@@ -90,17 +87,13 @@ class GuidingImage(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
+        self.root.set_margins(2, 2, 2, 2)
 
         self.alias_d = {}
         self.plots = Bunch.Bunch()
         # self.cst = None
         self.update_time = time.time()
         self.save_time = time.time()
-
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(2, 2, 2, 2)
-        self.root.setLayout(layout)
-        self.root_layout = layout
 
         self.sub_widget = None
         self.gui_up = True
@@ -114,8 +107,8 @@ class GuidingImage(PlBase.Plugin):
         w = self.sub_widget
         if w is not None:
             self.sub_widget = None
-            sip.delete(w)
-            #w.deleteLater()
+            self.root.remove(w)
+            w.delete()
 
         names_err = ['X', 'Y']
         if obcp is None or obcp.startswith('#') or obcp in PlBase.ao_inst:
@@ -152,36 +145,33 @@ class GuidingImage(PlBase.Plugin):
             al_bright = [ag_bright]
             al_seeing = [ag_seeing]
 
-        w = QtWidgets.QWidget()
+        w = Widgets.VBox()
         self.sub_widget = w
-
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(2)
-        w.setLayout(layout)
+        w.set_margins(0, 0, 0, 0)
+        w.set_spacing(2)
 
         res = make_plot(self.alias_d, self.logger, dims,
                         names_err, al_error, num_pts,
                         y_acc=np.mean, title="Error")
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        w.add_widget(res.widget, stretch=1)
         self.plots.guiding_error = res
 
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_bright, num_pts,
                         y_acc=np.mean, title="Brightness")
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        w.add_widget(res.widget, stretch=1)
         self.plots.brightness = res
 
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_seeing, num_pts,
                         y_acc=np.mean, title="Seeing",
                         warn_y=1.0)
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        w.add_widget(res.widget, stretch=1)
         self.plots.seeing = res
 
         cross_connect_plots(self.plots.values())
 
-        self.root_layout.addWidget(w, stretch=1)
+        self.root.add_widget(w, stretch=1)
 
         # t = time.time()
 

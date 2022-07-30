@@ -10,8 +10,10 @@ import astro.wcs as wcs
 from datetime import datetime
 from dateutil import tz
 
+from ginga.qtw import Widgets
 from ginga.qtw import QtHelp
 from ginga.misc import Bunch
+
 from qtpy import QtWidgets, QtCore, QtGui
 
 import PlBase
@@ -57,16 +59,18 @@ class RaDec(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
-        self.root.setStyleSheet("QWidget { background: lightblue }")
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
+        self.root.get_widget().setStyleSheet("QWidget { background: lightblue }")
 
         self.labels = (('ra', al_ra, al_ra_cmd), ('dec', al_dec, al_dec_cmd),
                        ('az', al_az, al_az_cmd), ('el', al_el, al_el_cmd),
                        ('rot', al_rot, al_rot_cmd), ('airmass', al_el, al_el))
 
-        layout = QtWidgets.QHBoxLayout()
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(2)
-        container.setLayout(layout)
+        hbox = Widgets.HBox()
+        hbox.set_margins(4, 4, 4, 4)
+        hbox.set_spacing(2)
+        self.root.add_widget(hbox, stretch=0)
 
         #self.bigfont = QtWidgets.QFont("Arial Black", 28)
         #fontfamily = "DejaVu Sans Mono"
@@ -84,7 +88,7 @@ class RaDec(PlBase.Plugin):
         bnch.lb.setFont(self.smfont)
         bnch.lb.setText("Commanded")
         bnch.lt.setFont(self.smfont)
-        layout.addWidget(bnch.box, stretch=0)
+        hbox.add_widget(Widgets.wrap(bnch.box), stretch=0)
         self.w['rowhdr'] = bnch
 
         for name, alias1, alias2 in self.labels:
@@ -97,8 +101,8 @@ class RaDec(PlBase.Plugin):
                 bnch.lm.setText(name)
                 bnch.lb.setFont(self.midfont)
             bnch.lt.setFont(self.smfont)
-            layout.addWidget(bnch.box, stretch=0)
-            layout.addStretch(stretch=1)
+            hbox.add_widget(Widgets.wrap(bnch.box), stretch=0)
+            hbox.get_widget().layout().addStretch(stretch=1)
             self.w[name] = bnch
 
         self.w.ra.lt.setText("RA (2000.0)")
@@ -198,21 +202,24 @@ class Times(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
-        self.root.setStyleSheet("QWidget { background: lightblue }")
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
+        self.root.get_widget().setStyleSheet("QWidget { background: lightblue }")
 
         self.labels = [ 'ut', 'hst', 'lst', 'ha' ]
         self.hst_tz = tz.gettz('US/Hawaii')
 
-        layout = QtWidgets.QHBoxLayout()
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(0)
-        container.setLayout(layout)
+        hbox = Widgets.HBox()
+        hbox.set_margins(4, 4, 4, 4)
+        hbox.set_spacing(2)
+        self.root.add_widget(hbox, stretch=0)
 
         fontfamily = "Monospace"
         self.bigfont = QtGui.QFont(fontfamily, 24)
 
         self.w = Bunch.Bunch()
 
+        layout = hbox.get_widget().layout()
         layout.addStretch(stretch=1)
         for name in self.labels:
             w = QtWidgets.QLabel()

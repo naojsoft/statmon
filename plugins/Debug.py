@@ -5,36 +5,27 @@
 #
 import PlBase
 
-from qtpy import QtWidgets, QtGui, QtCore
+from ginga.gw import Widgets
 
 class Debug(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
+        self.root.set_margins(4, 4, 4, 4)
+        self.root.set_spacing(2)
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(2)
-        container.setLayout(layout)
-
-        self.msgFont = QtGui.QFont("Fixed", 14)
-        tw = QtWidgets.QTextEdit()
-        tw.setReadOnly(True)
-        tw.setCurrentFont(self.msgFont)
+        self.msgFont = "Fixed"
+        tw = Widgets.TextArea(editable=False)
+        tw.set_font(self.msgFont, size=14)
         self.tw = tw
         self.history = []
         self.histmax = 10
 
-        sw = QtWidgets.QScrollArea()
-        sw.setWidgetResizable(True)
-        sw.setWidget(self.tw)
+        self.root.add_widget(tw, stretch=1)
 
-        layout.addWidget(sw, stretch=1)
-        sw.show()
-
-        self.entry = QtWidgets.QLineEdit()
-        layout.addWidget(self.entry, stretch=0)
-        self.entry.returnPressed.connect(lambda: self.command_cb(self.entry))
+        self.entry = Widgets.TextEntry()
+        self.root.add_widget(self.entry, stretch=0)
+        self.entry.add_callback('activated', lambda w: self.command_cb(self.entry))
 
     def start(self):
         pass
@@ -68,13 +59,13 @@ class Debug(PlBase.Plugin):
         # Remove all history past history size
         self.history = self.history[-self.histmax:]
         # Update text widget
-        self.tw.setText('\n'.join(self.history))
+        self.tw.set_text('\n'.join(self.history))
 
     def command_cb(self, w):
         # TODO: implement a readline/history type function
-        cmdstr = str(w.text()).strip()
+        cmdstr = str(w.get_text()).strip()
         self.command(cmdstr)
-        w.setText("")
+        w.set_text("")
 
     def __str__(self):
         return 'debug'

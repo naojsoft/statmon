@@ -9,7 +9,7 @@
 
 import os
 import threading
-from qtpy import QtWidgets, QtCore, QtGui
+from ginga.gw import Widgets
 
 from g2base.remoteObjects import remoteObjects as ro
 
@@ -24,6 +24,8 @@ class Alarm(PlBase.Plugin):
     def build_gui(self, container):
         self.firstTime = True
         self.root = container
+        self.root.set_margins(4, 4, 4, 4)
+        self.root.set_spacing(4)
         self.aliases = []
         self.previousStatusDict = None
 
@@ -31,14 +33,10 @@ class Alarm(PlBase.Plugin):
         # send messages to it
         self.alhProxy = ro.remoteObjectProxy('alarm_handler')
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(4)
-        container.setLayout(layout)
-
         # Create the GUI from the MainWindow class in alarm_gui.py
-        self.mw = AlarmGui.MainWindow('', self.alhProxy, self.logger, container)
-        layout.addWidget(self.mw, stretch=1)
+        self.mw = AlarmGui.MainWindow('', self.alhProxy, self.logger,
+                                      self.root.get_widget())
+        self.root.add_widget(Widgets.wrap(self.mw), stretch=1)
 
     def start(self):
         self.lock = threading.RLock()

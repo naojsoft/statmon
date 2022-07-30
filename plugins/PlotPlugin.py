@@ -2,8 +2,7 @@
 # T. Inagaki
 # E. Jeschke
 #
-from qtpy import QtWidgets, QtGui, QtCore
-import sip
+from ginga.gw import Widgets
 
 import PlBase
 import Plot
@@ -16,34 +15,38 @@ class PlotPlugin(PlBase.Plugin):
         if obcp in self.ag:
             self.update = self.update_ag
             self.aliases = ['STATL.TELDRIVE', 'TSCL.AG1dX', 'TSCL.AG1dY',
-                            'TSCV.AGExpTime', 'TSCV.AG1_I_BOTTOM', 'TSCV.AG1_I_CEIL']
+                            'TSCV.AGExpTime', 'TSCV.AG1_I_BOTTOM',
+                            'TSCV.AG1_I_CEIL']
         elif obcp in self.ao:
             self.update = self.update_ao
-            self.aliases = ['AON.TT.TTX','AON.TT.TTY', 'AON.TT.WTTC1','AON.TT.WTTC2']
+            self.aliases = ['AON.TT.TTX','AON.TT.TTY', 'AON.TT.WTTC1',
+                            'AON.TT.WTTC2']
         elif obcp ==  self.agsv:
             self.update = self.update_twoguiding
-            self.aliases = ['STATL.TELDRIVE', \
-                            'TSCL.AG1dX', 'TSCL.AG1dY', \
-                            'TSCL.SV1DX', 'TSCL.SV1DY', \
-                            'TSCV.AGExpTime', 'TSCV.SVExpTime',\
-                            'TSCV.AG1_I_BOTTOM', 'TSCV.AG1_I_CEIL', \
+            self.aliases = ['STATL.TELDRIVE',
+                            'TSCL.AG1dX', 'TSCL.AG1dY',
+                            'TSCL.SV1DX', 'TSCL.SV1DY',
+                            'TSCV.AGExpTime', 'TSCV.SVExpTime',
+                            'TSCV.AG1_I_BOTTOM', 'TSCV.AG1_I_CEIL',
                             'TSCV.SV1_I_BOTTOM', 'TSCV.SV1_I_CEIL']
 
         elif obcp == self.fmosag:
             self.update = self.update_fmosag
-            self.aliases = ['STATL.TELDRIVE', 'TSCL.AGFMOSdAZ', 'TSCL.AGFMOSdEL', 'TSCS.EL']
+            self.aliases = ['STATL.TELDRIVE', 'TSCL.AGFMOSdAZ',
+                            'TSCL.AGFMOSdEL', 'TSCS.EL']
         elif obcp == self.hscag:
             self.update = self.update_twoguiding
-            self.aliases = ['STATL.TELDRIVE', \
-                            'TSCL.HSC.SCAG.DX', 'TSCL.HSC.SCAG.DY', \
-                            'TSCL.HSC.SHAG.DX', 'TSCL.HSC.SHAG.DY', \
-                            'TSCV.HSC.SCAG.ExpTime', 'TSCV.HSC.SHAG.ExpTime', \
-                            'TSCV.HSC.SCAG.I_BOTTOM', 'TSCV.HSC.SCAG.I_CEIL', \
+            self.aliases = ['STATL.TELDRIVE',
+                            'TSCL.HSC.SCAG.DX', 'TSCL.HSC.SCAG.DY',
+                            'TSCL.HSC.SHAG.DX', 'TSCL.HSC.SHAG.DY',
+                            'TSCV.HSC.SCAG.ExpTime', 'TSCV.HSC.SHAG.ExpTime',
+                            'TSCV.HSC.SCAG.I_BOTTOM', 'TSCV.HSC.SCAG.I_CEIL',
                             'TSCV.HSC.SHAG.I_BOTTOM', 'TSCV.HSC.SHAG.I_CEIL']
 
         elif obcp in self.pfsag:
             self.update = self.update_pfsag
-            self.aliases = ['STATL.TELDRIVE', 'TSCL.PFS.AG.DX', 'TSCL.PFS.AG.DY',
+            self.aliases = ['STATL.TELDRIVE', 'TSCL.PFS.AG.DX',
+                            'TSCL.PFS.AG.DY',
                             'TSCV.PFS.AG.ExpTime']
 
 
@@ -79,9 +82,8 @@ class PlotPlugin(PlBase.Plugin):
         exp = statusDict.get(self.aliases[3])
         bottom = statusDict.get(self.aliases[4])
         ceil = statusDict.get(self.aliases[5])
-        self.plot.update_plot(state=state, x=x, y=y, \
-                            exptime=exp, bottom=bottom, ceil=ceil)
-
+        self.plot.update_plot(state=state, x=x, y=y,
+                              exptime=exp, bottom=bottom, ceil=ceil)
 
     def update_twoguiding(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
@@ -97,60 +99,46 @@ class PlotPlugin(PlBase.Plugin):
         guiding2_bottom = statusDict.get(self.aliases[9])
         guiding2_ceil = statusDict.get(self.aliases[10])
 
-        self.plot.update_plot(state, guiding1_x, guiding1_y, guiding2_x, guiding2_y, \
-                               guiding1_exp, guiding2_exp, \
-                               guiding1_bottom, guiding1_ceil, \
-                               guiding2_bottom, guiding2_ceil)
-
-
+        self.plot.update_plot(state, guiding1_x, guiding1_y,
+                              guiding2_x, guiding2_y,
+                              guiding1_exp, guiding2_exp,
+                              guiding1_bottom, guiding1_ceil,
+                              guiding2_bottom, guiding2_ceil)
 
     def change_config(self, controller, d):
-
         obcp = d['inst']
         if obcp.startswith('#'):
             self.logger.debug('obcp is not assigned. %s' %obcp)
             return
 
-
         self.logger.debug('plot changing config dict=%s ins=%s' %(d, d['inst']))
-        try:
-            sip.delete(self.plot)
-            sip.delete(self.vlayout)
-        except Exception as e:
-            self.logger.error('error: plot configuring layout. %s' %e)
-        else:
-            self.set_layout(obcp=obcp)
-            controller.register_select('plot', self.update, self.aliases)
-
+        self.set_layout(obcp=obcp)
+        controller.register_select('plot', self.update, self.aliases)
 
     def set_layout(self, obcp):
-
         self.logger.debug('plot setlayout. obcp=%s' %obcp)
         self.__set_aliases(obcp)
         self.logger.debug('plot update=%s  aliases=%s' %(self.update, self.aliases))
 
-        qtwidget = QtWidgets.QWidget()
-
         if obcp in self.ag:
-            self.plot = Plot.AgPlot(qtwidget, logger=self.logger)
+            self.plot = Plot.AgPlot(logger=self.logger)
         elif obcp in self.ao:
-            self.plot = Plot.NsIrPlot(qtwidget, logger=self.logger)
+            self.plot = Plot.NsIrPlot(logger=self.logger)
         elif obcp == self.agsv or obcp == self.hscag:
-            self.plot = Plot.TwoGuidingPlot(qtwidget, logger=self.logger)
+            self.plot = Plot.TwoGuidingPlot(logger=self.logger)
         elif obcp == self.fmosag:
-            self.plot = Plot.FmosPlot(qtwidget, logger=self.logger)
+            self.plot = Plot.FmosPlot(logger=self.logger)
         elif obcp in self.pfsag:
-            self.plot = Plot.PfsAgPlot(qtwidget, logger=self.logger)
+            self.plot = Plot.PfsAgPlot(logger=self.logger)
 
-
-        self.vlayout = QtWidgets.QVBoxLayout()
-        self.vlayout.setContentsMargins(0, 0, 0, 0)
-        self.vlayout.setSpacing(0)
-        self.vlayout.addWidget(self.plot, stretch=1)
-        self.root.setLayout(self.vlayout)
+        self.root.remove_all(delete=True)
+        self.root.add_widget(Widgets.wrap(self.plot), stretch=1)
 
     def build_gui(self, container):
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
+
         self.hscag = 'HSC'
         self.fmosag = 'FMOS'
         self.pfsag = 'PFS'

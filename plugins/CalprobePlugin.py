@@ -1,27 +1,23 @@
 import PlBase
 import Calprobe
-from qtpy import QtWidgets, QtCore
+from ginga.gw import Widgets
 
 class CalprobePlugin(PlBase.Plugin):
     """ Cal Source Probe Plugin """
     aliases=['TSCL.CAL_POS']
-  
+
     def build_gui(self, container):
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
 
-        qtwidget = QtWidgets.QWidget()
+        self.calprobe = Calprobe.CalProbeDisplay(logger=self.logger)
 
-        self.calprobe = Calprobe.CalProbeDisplay(qtwidget, logger=self.logger)
-       
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(self.calprobe, stretch=1)
-        container.setLayout(layout)
- 
+        self.root.add_widget(Widgets.wrap(self.calprobe), stretch=1)
+
     def start(self):
-        self.controller.register_select('calprobe', self.update, \
-                                         CalprobePlugin.aliases)
+        self.controller.register_select('calprobe', self.update,
+                                        CalprobePlugin.aliases)
 
     def update(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
@@ -31,4 +27,3 @@ class CalprobePlugin(PlBase.Plugin):
             self.calprobe.update_calprobe(probe=probe)
         except Exception as e:
             self.logger.error('error: updating status. %s' %str(e))
-            

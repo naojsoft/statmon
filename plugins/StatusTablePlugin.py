@@ -1,9 +1,8 @@
-from qtpy import QtWidgets, QtCore
-import sip
+from ginga.qtw import Widgets
+from qtpy import QtWidgets
 
 import PlBase
 from StatusTable import StatusTable
-import Telescope
 from g2cam.INS import INSdata
 
 
@@ -14,28 +13,25 @@ class StatusTablePlugin(PlBase.Plugin):
     def set_layout(self):
 
         qtwidget = QtWidgets.QWidget()
-
         self.statustable = StatusTable(parent=qtwidget, logger=self.logger)
 
-        self.vlayout = QtWidgets.QVBoxLayout()
-        self.vlayout.setContentsMargins(0, 0, 0, 0)
-        self.vlayout.setSpacing(0)
-        self.vlayout.addWidget(self.statustable, stretch=1)
-        self.root.setLayout(self.vlayout)
+        self.root.remove_all(delete=True)
+        self.root.add_widget(Widgets.wrap(qtwidget), stretch=1)
 
     def set_obcp_alias(self, inscode):
 
-        self.aliases = ['FITS.SBR.MAINOBCP', \
-                        'GEN2.STATUS.TBLTIME.{0}S0001'.format(inscode), \
-                        'GEN2.STATUS.TBLTIME.{0}S0002'.format(inscode), \
-                        'GEN2.STATUS.TBLTIME.{0}S0003'.format(inscode), \
-                        'GEN2.STATUS.TBLTIME.{0}S0004'.format(inscode), \
-                        'GEN2.STATUS.TBLTIME.{0}S0005'.format(inscode), \
-                        'GEN2.STATUS.TBLTIME.{0}S0006'.format(inscode), \
-                        'GEN2.STATUS.TBLTIME.{0}S0007'.format(inscode), \
-                        'GEN2.STATUS.TBLTIME.{0}S0008'.format(inscode), \
-                        'GEN2.STATUS.TBLTIME.{0}S0009'.format(inscode), \
-                        'GEN2.STATUS.TBLTIME.TSCS', 'GEN2.STATUS.TBLTIME.TSCL', 'GEN2.STATUS.TBLTIME.TSCV']
+        self.aliases = ['FITS.SBR.MAINOBCP',
+                        'GEN2.STATUS.TBLTIME.{0}S0001'.format(inscode),
+                        'GEN2.STATUS.TBLTIME.{0}S0002'.format(inscode),
+                        'GEN2.STATUS.TBLTIME.{0}S0003'.format(inscode),
+                        'GEN2.STATUS.TBLTIME.{0}S0004'.format(inscode),
+                        'GEN2.STATUS.TBLTIME.{0}S0005'.format(inscode),
+                        'GEN2.STATUS.TBLTIME.{0}S0006'.format(inscode),
+                        'GEN2.STATUS.TBLTIME.{0}S0007'.format(inscode),
+                        'GEN2.STATUS.TBLTIME.{0}S0008'.format(inscode),
+                        'GEN2.STATUS.TBLTIME.{0}S0009'.format(inscode),
+                        'GEN2.STATUS.TBLTIME.TSCS',
+                        'GEN2.STATUS.TBLTIME.TSCL', 'GEN2.STATUS.TBLTIME.TSCV']
 
         self.logger.info('aliases=%s' %self.aliases)
 
@@ -55,6 +51,8 @@ class StatusTablePlugin(PlBase.Plugin):
     def build_gui(self, container):
 
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
 
         try:
             self.obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')

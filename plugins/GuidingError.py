@@ -18,20 +18,7 @@ is_simulation = False
 
 # PFS auto guiding status aliases
 aliases = ['STATL.TELDRIVE', 'GEN2.STATUS.TBLTIME.TSCL',
-           'FITS.SBR.MAINOBCP',
-           # for PFS
-           'TSCL.PFS.AG.DX', 'TSCL.PFS.AG.DY',
-           'TSCL.PFS.AG.dAZ', 'TSCL.PFS.AG.dEL',
-           'TSCL.PFS.AG.Intensity', 'TSCL.PFS.AG.StarSize',
-           'TSCV.PFS.AG.ExpTime', 'TSCV.PFS.AG.CCalc',
-           'TSCV.PFS.AG.AutoGuideReady', 'TSCV.PFS.AG.CamIFAlarm',
-           'TSCV.PFS.AG.IFAlarms', 'TSCV.PFS.AG.MLP1IFAlarm',
-           # for HSC
-           'TSCL.HSC.SCAG.DX', 'TSCL.HSC.SCAG.DY',
-           # for HDS
-           'TSCL.SV1DX', 'TSCL.SV1DY',
-           # all telescope AG guiders
-           'TSCL.AG1dX', 'TSCL.AG1dY',
+           'STATL.GUIDE_ERR_DX', 'STATL.GUIDE_ERR_DY',
            ]
 
 # starting dimensions of graph window (can change with window size)
@@ -58,10 +45,6 @@ class GuidingError(PlBase.Plugin):
         # scale factor for adjusting PFS error values received
         # from the telescope to convert to arcsec
         self.scale_factor = 0.001
-
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(2, 2, 2, 2)
-        container.setLayout(layout)
 
         vbox = Widgets.VBox()
         top = Widgets.VBox()
@@ -107,9 +90,8 @@ class GuidingError(PlBase.Plugin):
 
         top.add_widget(hbox, stretch=0)
         #top.resize(500, 600)
-        w = top.get_widget()
 
-        layout.addWidget(w, stretch=1)
+        container.add_widget(top, stretch=1)
 
         self.gui_up = True
 
@@ -117,13 +99,19 @@ class GuidingError(PlBase.Plugin):
         self.controller.register_select(str(self), self.update, aliases)
 
     def update(self, statusDict):
-        t = statusDict.get('GEN2.STATUS.TBLTIME.TSCL', time.time())
+        cur_time = time.time()
+        t = statusDict.get('GEN2.STATUS.TBLTIME.TSCL', cur_time)
+        if not isinstance(t, float):
+            t = cur_time
         #t = statusDict.get('FITS.SBR.EPOCH', time.time())
-        self.logger.debug("status update t={}".format(t))
+        self.logger.info("status update t={}".format(t))
 
         try:
-            self.stat_d.update({key: statusDict[key]
-                                for key in aliases if key in statusDict})
+            print('**', statusDict)
+            upd_dct = {key: statusDict[key]
+                       for key in aliases if key in statusDict}
+            print('--', upd_dct)
+            self.stat_d.update(upd_dct)
 
             t = time.time()
             secs_since = t - self.update_time
@@ -136,17 +124,8 @@ class GuidingError(PlBase.Plugin):
                               exc_info=True)
 
     def get_errpt(self, d):
-        ins = d.get('FITS.SBR.MAINOBCP', 'SUKA').strip()
-        if ins == 'PFS':
-            err_pt = (d['TSCL.PFS.AG.DX'], d['TSCL.PFS.AG.DY'])
-        elif ins == 'HSC':
-            err_pt = (d['TSCL.HSC.SCAG.DX'], d['TSCL.HSC.SCAG.DY'])
-        elif ins == 'HDS':
-            err_pt = (d['TSCL.SV1DX'], d['TSCL.SV1DY'])
-        elif ins in ['FOCAS', 'MOIRCS', 'SWIMS', 'COMICS', 'SUKA']:
-            err_pt = (d['TSCL.AG1dX'], d['TSCL.AG1dY'])
-        else:
-            return None
+        err_pt = (d['STATL.GUIDE_ERR_DX'], d['STATL.GUIDE_ERR_DY'])
+        #err_pt = (d['TSCL.AG1dX'], d['TSCL.AG1dY'])
 
         # NOTE: required because of telescope side encoding?
         err_pt = np.array(err_pt) * self.scale_factor
@@ -170,11 +149,15 @@ class GuidingError(PlBase.Plugin):
                 if self.auto_clear:
                     self.plot.clear_plot()
 
-            err_pt = self.get_errpt(d)
-            if err_pt != self.err_pt:
-                self.err_pt = err_pt
-                if err_pt is not None:
-                    self.plot.plot_point(err_pt, t)
+            try:
+                err_pt = self.get_errpt(d)
+                if err_pt != self.err_pt:
+                    self.err_pt = err_pt
+                    if err_pt is not None:
+                        self.plot.plot_point(err_pt, t)
+
+            except Exception as e:
+                self.logger.error(f"error getting point: {e}")
 
         else:
             if tel_mode != self.tel_mode:

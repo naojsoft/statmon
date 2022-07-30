@@ -1,5 +1,4 @@
-import sip
-from qtpy import QtWidgets, QtCore
+from ginga.gw import Widgets
 
 import PlBase
 import Target
@@ -30,15 +29,10 @@ class TargetPlugin(PlBase.Plugin):
         ins_code = ins.getCodeByName(obcp)
         self.__set_aliases(ins_code)
 
-        qtwidget = QtWidgets.QWidget()
-        self.target = Target.Target(qtwidget, obcp=ins_code,
+        self.target = Target.Target(obcp=ins_code,
                                     logger=self.logger)
-
-        self.vlayout = QtWidgets.QVBoxLayout()
-        self.vlayout.setContentsMargins(0, 0, 0, 0)
-        self.vlayout.setSpacing(0)
-        self.vlayout.addWidget(self.target,stretch=1)
-        self.root.setLayout(self.vlayout)
+        self.root.remove_all(delete=True)
+        self.root.add_widget(Widgets.wrap(self.target), stretch=1)
 
     def change_config(self, controller, d):
 
@@ -49,19 +43,13 @@ class TargetPlugin(PlBase.Plugin):
 
 
         self.logger.debug('target changing config dict=%s ins=%s' %(d, d['inst']))
-        try:
-            sip.delete(self.target)
-            sip.delete(self.vlayout)
-
-        except Exception as e:
-            self.logger.error('error: configuring layout. %s' %e)
-        else:
-            self.set_layout(obcp=obcp)
-            controller.register_select('target', self.update,
-                                       self.aliases)
+        self.set_layout(obcp=obcp)
+        controller.register_select('target', self.update, self.aliases)
 
     def build_gui(self, container):
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
 
         try:
             obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')

@@ -1,3 +1,5 @@
+from ginga.gw import Widgets
+
 from qtpy import QtWidgets, QtCore
 import sip
 
@@ -45,30 +47,23 @@ class StatePlugin(PlBase.Plugin):
             self.logger.debug('obcp is not assigned. %s' %obcp)
             return
 
-        try:
-            sip.delete(self.state)
-            sip.delete(self.vlayout)
-        except Exception as e:
-            self.logger.error('error: deleting current layout. %s' %e)
-        else:
-            self.set_layout(obcp=obcp)
-            controller.register_select('state', self.update, self.aliases)
+        self.set_layout(obcp=obcp)
+        controller.register_select('state', self.update, self.aliases)
 
     def set_layout(self, obcp):
 
         self.__set_aliases(obcp)
 
-        qtwidget = QtWidgets.QWidget()
-        self.state = State.State(parent=qtwidget, logger=self.logger)
+        self.state = State.State(parent=self.root.get_widget(),
+                                 logger=self.logger)
 
-        self.vlayout = QtWidgets.QVBoxLayout()
-        self.vlayout.setContentsMargins(0, 0, 0, 0)
-        self.vlayout.setSpacing(0)
-        self.vlayout.addWidget(self.state,stretch=1)
-        self.root.setLayout(self.vlayout)
+        self.root.remove_all(delete=True)
+        self.root.add_widget(Widgets.wrap(self.state), stretch=1)
 
     def build_gui(self, container):
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
 
         try:
             obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
@@ -105,4 +100,5 @@ class StatePlugin(PlBase.Plugin):
         else:
             calc_mode = None
 
-        self.state.update_state(state=state, intensity=intensity, valerr=valerr, calc_mode=calc_mode)
+        self.state.update_state(state=self.state, intensity=intensity,
+                                valerr=valerr, calc_mode=calc_mode)

@@ -1,5 +1,4 @@
-from qtpy import QtWidgets, QtCore
-import sip
+from ginga.gw import Widgets
 
 import PlBase
 import Telescope
@@ -28,16 +27,11 @@ class TelescopePlugin(PlBase.Plugin):
     def set_layout(self, obcp):
 
         self.logger.debug('telescope setlayout ins=%s' %(obcp))
-        qtwidget = QtWidgets.QWidget()
-
-        self.telescope = Telescope.Telescope(qtwidget, obcp=obcp,
+        self.telescope = Telescope.Telescope(obcp=obcp,
                                              logger=self.logger)
 
-        self.vlayout = QtWidgets.QVBoxLayout()
-        self.vlayout.setContentsMargins(0, 0, 0, 0)
-        self.vlayout.setSpacing(0)
-        self.vlayout.addWidget(self.telescope, stretch=1)
-        self.root.setLayout(self.vlayout)
+        self.root.remove_all(delete=True)
+        self.root.add_widget(Widgets.wrap(self.telescope), stretch=1)
 
     def change_config(self, controller, d):
 
@@ -48,8 +42,6 @@ class TelescopePlugin(PlBase.Plugin):
             return
 
         try:
-            sip.delete(self.telescope)
-            sip.delete(self.vlayout)
             self.set_layout(obcp=obcp)
         except Exception as e:
             self.logger.error('error: configuring layout. %s' %e)
@@ -57,6 +49,8 @@ class TelescopePlugin(PlBase.Plugin):
     def build_gui(self, container):
 
         self.root = container
+        self.root.set_margins(0, 0, 0, 0)
+        self.root.set_spacing(0)
 
         try:
             obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')

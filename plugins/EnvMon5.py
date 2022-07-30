@@ -7,15 +7,12 @@ import os
 import time
 import numpy as np
 
-import ginga.toolkit as ginga_toolkit
-from ginga.gw import Viewers
+from ginga.gw import Viewers, Widgets
 from ginga.plot.plotaide import PlotAide
 from ginga.canvas.types import plots as gplots
 from ginga.plot import time_series as tsp
 from ginga.plot import data_source as dsp
 from ginga.misc import Bunch
-
-from qtpy import QtWidgets, QtCore, QtGui
 
 import PlBase
 from EnvMon3 import cross_connect_plots, make_plot
@@ -52,13 +49,10 @@ class EnvMon5(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
-        #self.root.setStyleSheet("QWidget { background: lightblue }")
+        self.root.set_margins(2, 2, 2, 2)
+        self.root.set_spacing(2)
 
         self.alias_d = {}
-
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(2, 2, 2, 2)
-        container.setLayout(layout)
 
         self.plots = Bunch.Bunch()
         self.update_time = time.time()
@@ -68,7 +62,7 @@ class EnvMon5(PlBase.Plugin):
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['temp'], num_pts,
                         y_acc=np.mean, title="Temperature (C)")
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.temperature = res
 
         names = ["Outside", "Dome"]
@@ -76,7 +70,7 @@ class EnvMon5(PlBase.Plugin):
                         names, al_envmon['humid'], num_pts,
                         y_acc=np.mean, title="Humidity (%)",
                         warn_y=70.0, alert_y=80.0)
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.humidity = res
 
         names = ["M1", "Dew"]
@@ -84,7 +78,7 @@ class EnvMon5(PlBase.Plugin):
                         names, al_envmon['m1dew'], num_pts,
                         y_acc=np.mean, title="M1 & Dew (C)",
                         alert_y=5.0)
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.m1_and_dew = res
 
         plot_bg = res.aide.get_plot_decor('plot_bg')
@@ -94,14 +88,14 @@ class EnvMon5(PlBase.Plugin):
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['pressure'], num_pts,
                         y_acc=np.mean, title="Atm Pressure (hPa)")
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.pressure = res
 
         names = ["Rainfall"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['rainfall'], num_pts,
                         y_acc=np.mean, title="Rainfall (mm)")
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.rainfall = res
 
         cross_connect_plots(self.plots.values())

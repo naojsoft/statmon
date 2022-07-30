@@ -7,15 +7,12 @@ import os
 import time
 import numpy as np
 
-import ginga.toolkit as ginga_toolkit
-from ginga.gw import Viewers
+from ginga.gw import Viewers, Widgets
 from ginga.plot.plotaide import PlotAide
 from ginga.canvas.types import plots as gplots
 from ginga.plot import time_series as tsp
 from ginga.plot import data_source as dsp
 from ginga.misc import Bunch
-
-from qtpy import QtWidgets, QtCore, QtGui
 
 import PlBase
 from EnvMon3 import cross_connect_plots, make_plot
@@ -54,14 +51,11 @@ class EnvMon4(PlBase.Plugin):
 
     def build_gui(self, container):
         self.root = container
-        #self.root.setStyleSheet("QWidget { background: lightblue }")
+        self.root.set_margins(2, 2, 2, 2)
+        self.root.set_spacing(2)
 
         self.alias_sets = [al_envmon[key] for key in al_envmon]
         self.alias_d = {}
-
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(2, 2, 2, 2)
-        container.setLayout(layout)
 
         self.plots = Bunch.Bunch()
         self.update_time = time.time()
@@ -71,7 +65,7 @@ class EnvMon4(PlBase.Plugin):
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['windd'], num_pts,
                         y_acc=np.mean, title="Wind Dir N:0 E:90")
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.wind_direction = res
 
         names = ["Outside", "Dome"]
@@ -79,7 +73,7 @@ class EnvMon4(PlBase.Plugin):
                         names, al_envmon['winds'], num_pts,
                         y_acc=np.mean, title="Windspeed (m/s)",
                         warn_y=7.0, alert_y=19.9)
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.wind_speed = res
 
         names = ["Roof IR(F)", "Roof Opt(F)", "Roof (R)"]
@@ -87,14 +81,14 @@ class EnvMon4(PlBase.Plugin):
                         names, al_envmon['winds_roof'], num_pts,
                         y_acc=np.mean, title="Roof Windspeed (m/s)",
                         warn_y=7.0, alert_y=19.9)
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.roof_wind_speed = res
 
         names = ["Wind Gust"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['wind_gust'], num_pts,
                         y_acc=np.mean, title="Wind Speed Gust")
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.windspeed_gust = res
 
         names = ["Front", "Rear"]
@@ -102,7 +96,7 @@ class EnvMon4(PlBase.Plugin):
                         names, al_envmon['topring'], num_pts,
                         y_acc=np.mean, title="TopRing WS",
                         alert_y=2.0)
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.topring_windspeed = res
 
         names = ["Center"]
@@ -110,7 +104,7 @@ class EnvMon4(PlBase.Plugin):
                         names, al_envmon['ctr_winds'], num_pts,
                         y_acc=np.mean, title="Wind Speed Center",
                         alert_y=2.0)
-        layout.addWidget(res.widget.get_widget(), stretch=1)
+        self.root.add_widget(res.widget, stretch=1)
         self.plots.windspeed_center = res
 
         cross_connect_plots(self.plots.values())
