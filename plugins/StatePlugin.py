@@ -100,5 +100,5 @@ class StatePlugin(PlBase.Plugin):
         else:
             calc_mode = None
 
-        self.state.update_state(state=self.state, intensity=intensity,
+        self.state.update_state(state=state, intensity=intensity,
                                 valerr=valerr, calc_mode=calc_mode)
