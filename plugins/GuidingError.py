@@ -10,7 +10,7 @@ import numpy as np
 from qtpy import QtWidgets
 
 from ginga.gw import Widgets
-from ginga.plot.xy_scatter import TimedXYScatterPlot
+from Gen2.statmon.util.xy_scatter import TimedXYScatterPlot
 
 import PlBase
 
