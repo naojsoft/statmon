@@ -117,10 +117,10 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         self.plugins[pluginName] = bnch
 
         try:
-            module = self.mm.loadModule(moduleName)
+            module = self.mm.load_module(moduleName)
 
             # Look up the module and class
-            module = self.mm.getModule(moduleName)
+            module = self.mm.get_module(moduleName)
             klass = getattr(module, className)
 
             # instantiate the class

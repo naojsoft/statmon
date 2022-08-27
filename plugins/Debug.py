@@ -40,7 +40,7 @@ class Debug(PlBase.Plugin):
         return True
 
     def reloadModule(self, name):
-        self.controller.mm.loadModule(name)
+        self.controller.mm.load_module(name)
         return True
 
     def command(self, cmdstr):
