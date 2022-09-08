@@ -158,7 +158,7 @@ class AzElCanvas(FigureCanvas):
         subaru = mpatches.Circle((self.center, self.center), \
                                   radius=self.subaru_radius, \
                                   alpha=1, ec="b", fc='white', lw=2.5)
-        self.axes.add_patch(subaru)
+
 
         # outter circle
         outer_c = Circle((self.center, self.center), radius=0.492, \
@@ -181,6 +181,9 @@ class AzElCanvas(FigureCanvas):
                             **line_kwargs)
         self.axes.add_line(self.light)
 
+
+        self.axes.add_patch(subaru)
+
         self.axes.set_ylim(min(self.y_scale), max(self.y_scale))
         self.axes.set_xlim(min(self.x_scale), max(self.x_scale))
         # # disable default x/y axis drawing
@@ -190,6 +193,10 @@ class AzElCanvas(FigureCanvas):
 
         #self.axes.set_xscale(10)
         #self.axes.axison=False
+
+
+
+
         self.draw()
 
     def minimumSizeHint(self):
@@ -309,7 +316,7 @@ class AzEl(AzElCanvas):
         else:
             #self.arrow.xy=(new_x, new_y)
             #self.subaru._xy=(new_x, new_y)
-            self.subaru._xy=(new_y, new_x)
+            self.subaru.xy=(new_y, new_x)
             #self.subaru.orientation = math.radians(rotation+az)
             self.subaru.orientation = math.radians(rotation-az)
             #self.subaru.orientation = math.radians(az)
