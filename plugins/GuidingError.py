@@ -19,6 +19,7 @@ is_simulation = False
 # PFS auto guiding status aliases
 aliases = ['STATL.TELDRIVE', 'GEN2.STATUS.TBLTIME.TSCL',
            'STATL.GUIDE_ERR_DX', 'STATL.GUIDE_ERR_DY',
+           #'TSCL.SV1DX', 'TSCL.SV1DY',
            ]
 
 # starting dimensions of graph window (can change with window size)
@@ -126,6 +127,7 @@ class GuidingError(PlBase.Plugin):
     def get_errpt(self, d):
         err_pt = (d['STATL.GUIDE_ERR_DX'], d['STATL.GUIDE_ERR_DY'])
         #err_pt = (d['TSCL.AG1dX'], d['TSCL.AG1dY'])
+        #err_pt = (d['TSCL.SV1DX'], d['TSCL.SV1DY'])
 
         # NOTE: required because of telescope side encoding?
         err_pt = np.array(err_pt) * self.scale_factor
