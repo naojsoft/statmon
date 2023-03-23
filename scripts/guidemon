@@ -1,0 +1,246 @@
+#!/usr/bin/env python
+#
+# guidemon.py -- Flexible Gen2 guiding statistics monitor.
+#
+# E. Jeschke
+#
+"""
+Usage:
+    guidemon.py --loglevel=20 --stderr
+"""
+# stdlib imports
+import sys, os
+import threading
+import queue as Queue
+from argparse import ArgumentParser
+
+from ginga import toolkit
+toolkit.use('qt5')
+from ginga.gw import Widgets
+
+import statmon.version
+moduleHome = os.path.split(sys.modules['statmon.version'].__file__)[0]
+sys.path.insert(0, moduleHome)
+pluginHome = os.path.join(moduleHome, 'plugins')
+sys.path.insert(0, pluginHome)
+
+from g2base import Task
+from g2base.remoteObjects import remoteObjects as ro
+from g2cam.status.stream import StatusStream
+
+from ginga.misc import ModuleManager, Settings, log
+
+# Local application imports
+from statmon.Model import StatusModel
+from statmon.View import Viewer
+from statmon.Control import Controller
+
+defaultServiceName = 'guidemon'
+version = "20220517.0"
+
+default_layout = ['seq', {},
+                  ['vbox', dict(name='toplvl', width=540, height=1300),
+                   ['hbox', dict(name='menubox', stretch=0)],
+                   ['vpanel', dict(),
+                    ['vbox', dict(stretch=1, spacing=4),
+                     ['ws', dict(name='pointing_info', height=60, stretch=0,
+                                 show_tabs=False), ],
+                     ['ws', dict(name='guideerr2d_info', height=600, stretch=1,
+                                show_tabs=False), ],
+                     ],
+                     ['vbox', dict(stretch=1, spacing=4),
+                      ['ws', dict(name='guidingplot_info', height=600, stretch=1,
+                                  show_tabs=False),],
+                      # ['ws', dict(name='probe1lim_info', height=80, stretch=1,
+                      #             show_tabs=False),],
+                      # ['ws', dict(name='probe2lim_info', height=80, stretch=1,
+                      #             show_tabs=False),],
+                     ],
+                    ],
+                   ['hbox', dict(name='statusbox', stretch=0)],
+                  ]
+                 ]
+
+plugins = [
+    # pluginName, moduleName, className, workspaceName, tabName
+    ('state', 'StatePlugin', 'StatePlugin', 'pointing_info', ''),
+    ('guidingerror', 'GuidingError', 'GuidingError', 'guideerr2d_info', ''),
+    ('guidingimage', 'GuidingImage', 'GuidingImage', 'guidingplot_info','' ),
+    # ('probe1limit', 'LimitPlugin', 'Probe1LimitPlugin', 'probe1lim_info','' ),
+    # ('probe2limit', 'LimitPlugin', 'Probe2LimitPlugin', 'probe2lim_info','' ),
+    #('debug', 'Debug', 'Debug', 'right', "Debug"),
+    ]
+
+class GuideMon(Controller, Viewer):
+
+    def __init__(self, logger, threadPool, module_manager, settings,
+                 ev_quit, model):
+
+        Viewer.__init__(self, logger, ev_quit)
+        Controller.__init__(self, logger, threadPool, module_manager,
+                            settings, ev_quit, model)
+
+    def add_menus(self):
+        menubar = Widgets.Menubar()
+        self.w.menubox.add_widget(menubar, stretch=0)
+
+        # create a File pulldown menu, and add it to the menu bar
+        filemenu = menubar.add_name("File")
+
+        filemenu.add_separator()
+
+        item = filemenu.add_name("Quit")
+        item.add_callback('activated', self.quit)
+
+        # create a Option pulldown menu, and add it to the menu bar
+        ## optionmenu = menubar.add_name("Option")
+
+    def add_statusbar(self):
+        self.w.status = Widgets.StatusBar()
+        self.w.statusbox.add_widget(self.w.status, stretch=1)
+
+
+def main(options, args):
+
+    # Create top level logger.
+    svcname = options.svcname
+    logger = log.get_logger(svcname, options=options)
+
+    # Initialize remote objects subsystem.
+    try:
+        ro.init([options.gen2host])
+
+    except ro.remoteObjectError as e:
+        logger.error("Error initializing remote objects subsystem: %s" % \
+                     str(e))
+        sys.exit(1)
+
+    ev_quit = threading.Event()
+
+    threadPool = Task.ThreadPool(logger=logger, ev_quit=ev_quit,
+                                 numthreads=options.numthreads)
+
+    # Get settings folder
+    if 'CONFHOME' in os.environ:
+        basedir = os.path.join(os.environ['CONFHOME'], svcname)
+    else:
+        basedir = os.path.join(os.environ['HOME'], '.' + svcname)
+    if not os.path.exists(basedir):
+        os.mkdir(basedir)
+    prefs = Settings.Preferences(basefolder=basedir, logger=logger)
+
+    mm = ModuleManager.ModuleManager(logger)
+
+    # Add any custom modules
+    if options.modules:
+        modules = options.modules.split(',')
+        for mdlname in modules:
+            #self.mm.loadModule(name, pfx=pluginconfpfx)
+            self.mm.loadModule(name)
+
+    model = StatusModel(logger)
+
+    # Start up the control/display engine
+    guidemon = GuideMon(logger, threadPool, mm, prefs, ev_quit, model)
+
+    # Build desired layout
+    guidemon.build_toplevel(layout=default_layout)
+    guidemon.w.root.set_title("GuideMon")
+    for w in guidemon.ds.toplevels:
+        w.show()
+
+    for pluginName, moduleName, className, wsName, tabName in plugins:
+        guidemon.load_plugin(pluginName, moduleName, className,
+                             wsName, tabName)
+
+    guidemon.update_pending()
+
+    # Did user specify geometry
+    if options.geometry:
+        guidemon.set_geometry(options.geometry)
+
+    server_started = False
+
+    # Create receiver and start it
+    try:
+        settings = prefs.create_category('status')
+        st_stream = None
+        try:
+            settings.load()
+
+            # set up the status stream interface
+            st_stream = StatusStream(host=settings.get('stream_host'),
+                                     username=settings.get('stream_user'),
+                                     password=settings.get('stream_pass'),
+                                     logger=logger)
+            st_stream.connect()
+
+        except Exception as e:
+            logger.error("Error setting up status stream: {}".format(e),
+                         exc_info=True)
+
+        threadPool.startall(wait=True)
+
+        # intermediary queue
+        status_q = Queue.Queue()
+
+        # stream producer puts updates on the queue
+        task1 = Task.FuncTask2(st_stream.subscribe_loop, ev_quit, status_q)
+        task1.init_and_start(guidemon)
+
+        # stream consumer takes them and updates the status cache
+        task2 = Task.FuncTask2(model.consume_stream, ev_quit, status_q)
+        task2.init_and_start(guidemon)
+
+        try:
+            print('in mainloop')
+            # Main loop to handle GUI events
+            guidemon.mainloop(timeout=0.001)
+
+        except KeyboardInterrupt:
+            logger.error("Received keyboard interrupt!")
+
+    finally:
+        logger.info("Shutting down...")
+
+        guidemon.close_all_plugins()
+        guidemon.stop()
+
+        threadPool.stopall(wait=True)
+
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+
+    # Parse command line options
+    argprs = ArgumentParser(description="Gen2 Status Monitor")
+
+    argprs.add_argument('-f', "--config", dest="configfile", default=None,
+                        help="Specify configuration file")
+    argprs.add_argument("--display", dest="display", metavar="HOST:N",
+                        help="Use X display on HOST:N")
+    argprs.add_argument("-g", "--geometry", dest="geometry",
+                        metavar="GEOM", default="+20+100",
+                    help="X geometry for initial size and placement")
+    argprs.add_argument("--gen2host", dest="gen2host",
+                        metavar="HOST", default="localhost",
+                        help="Connect to Gen2 HOST")
+    argprs.add_argument("--modules", dest="modules", metavar="NAMES",
+                        help="Specify additional modules to load")
+    argprs.add_argument("--numthreads", dest="numthreads", type=int,
+                        default=10,
+                        help="Start NUM threads in thread pool", metavar="NUM")
+    argprs.add_argument("--plugins", dest="plugins", metavar="NAMES",
+                        help="Specify additional plugins to load")
+    argprs.add_argument("--svcname", dest="svcname", metavar="NAME",
+                        default=defaultServiceName,
+                        help="Register using NAME as service name")
+    log.addlogopts(argprs)
+
+    (options, args) = argprs.parse_known_args(sys.argv[1:])
+
+    if options.display:
+        os.environ['DISPLAY'] = options.display
+
+    main(options, args)
