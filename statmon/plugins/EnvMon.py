@@ -22,7 +22,7 @@ al_envmon = dict(windd = ['TSCL.WINDD', 'STATS.AZ_ADJ'],
                  winds = ['TSCL.WINDS_O', 'TSCL.WINDS_I'],
                  temp = ['TSCL.TEMP_O', 'TSCL.TEMP_I'],
                  humid = ['STATL.HUMI_O.MEAN', 'TSCL.HUMI_I'],
-                 m1dew = ['TSCL.M1_TEMP', 'STATL.DEW_POINT_CATWALK.MEAN'],
+                 m1dew = ['TSCL.M1_TEMP', 'STATL.DEW_POINT_M1', 'STATL.DEW_POINT_CATWALK.MEAN'],
                  topring = ['TSCL.TOPRING_WINDS_F', 'TSCL.TOPRING_WINDS_R'],
                  misc = ['GEN2.STATUS.TBLTIME.TSCL'])
 
@@ -89,7 +89,7 @@ class EnvMon(PlBase.Plugin):
         self.root.add_widget(res.widget, stretch=1)
         self.plots.humidity = res
 
-        names = ["M1", "Dew"]
+        names = ["M1", "Dew (I)", "Dew (O)"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['m1dew'], num_pts,
                         y_acc=np.mean, title="M1 & Dew (C)",
@@ -115,19 +115,21 @@ class EnvMon(PlBase.Plugin):
     def check_warning_m1dew(self):
         """custom warning check for m1 dew point."""
         bnch = self.plots.m1_and_dew
-        m1, dew = bnch.sources
+        m1, dew_i, dew_o = bnch.sources
 
         # peek at last point of data sources for M1 and Dew Pt
         m_pt = m1.peek()
-        d_pt = dew.peek()
-        if m_pt is None or d_pt is None:
+        d_i_pt = dew_i.peek()
+        d_o_pt = dew_o.peek()
+        if m_pt is None or d_o_pt is None or d_i_pt is None:
             return
         t, m1_temp_C = m_pt
-        t, dew_pt_temp_C = d_pt
-        self.logger.info(f"m1: {m1_temp_C} dew: {dew_pt_temp_C}")
+        t, dew_i_pt_temp_C = d_i_pt
+        t, dew_o_pt_temp_C = d_o_pt
+        self.logger.info(f"m1: {m1_temp_C} dew_i: {dew_i_pt_temp_C} dew_o: {dew_o_pt_temp_C}")
 
         plot_bg = bnch.aide.get_plot_decor('plot_bg')
-        if m1_temp_C - dew_pt_temp_C <= 2.0:
+        if m1_temp_C - dew_o_pt_temp_C <= 2.0 or m1_temp_C - dew_i_pt_temp_C <= 2.0 :
             plot_bg.warning()
         else:
             plot_bg.normal()
