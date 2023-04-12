@@ -116,8 +116,10 @@ class EnvMon4(PlBase.Plugin):
         for name, _aliases in al_envmon.items():
             aliases.extend(_aliases)
 
-        self.save_file = os.path.join(os.environ['GEN2COMMON'], 'db',
-                                      "envmon_envmon4.npy")
+        home_dir = os.path.join(os.environ['HOME'], '.statmon')
+        if not os.path.isdir(home_dir):
+            os.mkdir(home_dir)
+        self.save_file = os.path.join(home_dir, "statmon_envmon4.npy")
         try:
             d = np.load(self.save_file, allow_pickle=True)
             self.cst = dict(d[()])

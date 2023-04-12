@@ -189,8 +189,10 @@ class GuidingImage(PlBase.Plugin):
     def start(self):
         aliases = al_guiding
 
-        self.save_file = os.path.join(os.environ['GEN2COMMON'], 'db',
-                                      "statmon_guidingimage.npy")
+        home_dir = os.path.join(os.environ['HOME'], '.statmon')
+        if not os.path.isdir(home_dir):
+            os.mkdir(home_dir)
+        self.save_file = os.path.join(home_dir, "statmon_guidingimage.npy")
         try:
             d = np.load(self.save_file, allow_pickle=True)
             self.cst = dict(d[()])

@@ -74,8 +74,10 @@ class EnvMon2(PlBase.Plugin):
         for _aliases in self.alias_sets:
             aliases.extend(_aliases)
 
-        self.save_file = os.path.join(os.environ['GEN2COMMON'], 'db',
-                                      "statmon_envmon2.npy")
+        home_dir = os.path.join(os.environ['HOME'], '.statmon')
+        if not os.path.isdir(home_dir):
+            os.mkdir(home_dir)
+        self.save_file = os.path.join(home_dir, "statmon_envmon2.npy")
         try:
             d = np.load(self.save_file, allow_pickle=True)
             self.cst = dict(d[()])
