@@ -92,8 +92,7 @@ class EnvMon(PlBase.Plugin):
         names = ["M1", "T", "D (I)", "D (O)"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['m1dew'], num_pts,
-                        y_acc=np.mean, title="M T & D (C)",
-                        alert_y=5.0)
+                        y_acc=np.mean, title="M T & D (C)")
         self.root.add_widget(res.widget, stretch=1)
         self.plots.m1_and_dew = res
 
@@ -131,7 +130,10 @@ class EnvMon(PlBase.Plugin):
         self.logger.info(f"m1: {m1_temp_C} trs: {trs_temp_C} dew_i: {dew_i_pt_temp_C} dew_o: {dew_o_pt_temp_C}")
 
         plot_bg = bnch.aide.get_plot_decor('plot_bg')
-        if m1_temp_C - dew_o_pt_temp_C <= 2.0 or m1_temp_C - dew_i_pt_temp_C <= 2.0 or trs_temp_C - dew_o_pt_temp_C <= 2.0  or trs_temp_C - dew_i_pt_temp_C <= 2.0:
+        if m1_temp_C - dew_o_pt_temp_C <= 2.0 or \
+           m1_temp_C - dew_i_pt_temp_C <= 2.0 or \
+           trs_temp_C - dew_o_pt_temp_C <= 2.0 or \
+           trs_temp_C - dew_i_pt_temp_C <= 2.0:
             plot_bg.warning()
         else:
             plot_bg.normal()

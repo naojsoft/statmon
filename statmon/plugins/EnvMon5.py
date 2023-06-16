@@ -20,7 +20,7 @@ from EnvMon3 import cross_connect_plots, make_plot
 # For "envmon" plugin
 al_envmon = dict(temp = ['TSCL.TEMP_O', 'TSCL.TEMP_I'],
                  humid = ['STATL.HUMI_O.MEAN', 'TSCL.HUMI_I'],
-                 m1dew = ['TSCL.M1_TEMP', 'STATL.DEW_POINT_CATWALK.MEAN'],
+                 m1dew = ['STATL.M1_TEMP_MIN', 'STATL.TRUSS_TEMP_MIN', 'STATL.DEW_POINT_TLSCP', 'STATL.DEW_POINT_CATWALK.MEAN'],
                  pressure = ['TSCL.ATOM'],
                  rainfall = ['TSCL.RAIN'],
                  misc = ['GEN2.STATUS.TBLTIME.TSCL'])
@@ -73,11 +73,10 @@ class EnvMon5(PlBase.Plugin):
         self.root.add_widget(res.widget, stretch=1)
         self.plots.humidity = res
 
-        names = ["M1", "Dew"]
+        names = ["M1", "T", "D (I)", "D (O)"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['m1dew'], num_pts,
-                        y_acc=np.mean, title="M1 & Dew (C)",
-                        alert_y=5.0)
+                        y_acc=np.mean, title="M T & D (C)")
         self.root.add_widget(res.widget, stretch=1)
         self.plots.m1_and_dew = res
 
@@ -105,19 +104,26 @@ class EnvMon5(PlBase.Plugin):
     def check_warning_m1dew(self):
         """custom warning check for m1 dew point."""
         bnch = self.plots.m1_and_dew
-        m1, dew = bnch.sources
+        m1, trs, dew_i, dew_o = bnch.sources
 
         # peek at last point of data sources for M1 and Dew Pt
         m_pt = m1.peek()
-        d_pt = dew.peek()
-        if m_pt is None or d_pt is None:
+        trs_pt = trs.peek()
+        d_i_pt = dew_i.peek()
+        d_o_pt = dew_o.peek()
+        if m_pt is None or trs_pt is None or d_o_pt is None or d_i_pt is None:
             return
         t, m1_temp_C = m_pt
-        t, dew_pt_temp_C = d_pt
-        self.logger.info(f"m1: {m1_temp_C} dew: {dew_pt_temp_C}")
+        t, trs_temp_C = trs_pt
+        t, dew_i_pt_temp_C = d_i_pt
+        t, dew_o_pt_temp_C = d_o_pt
+        self.logger.info(f"m1: {m1_temp_C} trs: {trs_temp_C} dew_i: {dew_i_pt_temp_C} dew_o: {dew_o_pt_temp_C}")
 
         plot_bg = bnch.aide.get_plot_decor('plot_bg')
-        if m1_temp_C - dew_pt_temp_C <= 2.0:
+        if m1_temp_C - dew_o_pt_temp_C <= 2.0 or \
+           m1_temp_C - dew_i_pt_temp_C <= 2.0 or \
+           trs_temp_C - dew_o_pt_temp_C <= 2.0 or \
+           trs_temp_C - dew_i_pt_temp_C <= 2.0:
             plot_bg.warning()
         else:
             plot_bg.normal()
