@@ -33,6 +33,11 @@ class XYScatterPlot:
         # store this many points max
         self.num_pts = 1000
 
+        self.plot_bg = None
+        self.norm_bg = (0.95, 0.95, 0.95)
+        self.warn_bg = 'lightyellow'
+        self.alert_bg = 'mistyrose2'
+
     def build_gui(self, container):
 
         from ginga.gw import Widgets, Viewers
@@ -45,8 +50,9 @@ class XYScatterPlot:
         zi.ui_set_active(True)
         zi.show_mode_indicator(True, corner='ur')
 
-        zi.set_bg(0.95, 0.95, 0.95)
+        zi.set_background(self.norm_bg)
         zi.set_fg(0.25, 0.25, 0.75)
+        zi.add_callback('configure', self._reconfigure_dims)
         self.viewer = zi
 
         t_ = zi.get_settings()
@@ -73,6 +79,16 @@ class XYScatterPlot:
     def initialize_plot(self):
         self.canvas.delete_object_by_tag('plotlines')
 
+        # add a backdrop that we can change color for visual warnings
+        wd, ht = self.viewer.get_window_size()
+        self.plot_bg = self.dc.Rectangle(0, 0, wd, ht,
+                                         color=self.norm_bg,
+                                         fill=True, fillcolor=self.norm_bg,
+                                         fillalpha=1.0,
+                                         coord='window')
+        self.canvas.add(self.plot_bg, tag='plotbg')
+
+        # the scatter plot
         self.pts_obj = self.dc.CompoundObject()
         self.canvas.add(self.pts_obj, tag='points')
 
@@ -108,8 +124,15 @@ class XYScatterPlot:
         self.viewer.set_pan(0, 0)
         self.viewer.zoom_to(14)
 
+    def _reconfigure_dims(self, viewer, wd, ht):
+        if self.plot_bg is not None:
+            self.plot_bg.x2 = wd
+            self.plot_bg.y2 = ht
+            self.refresh_plot()
+
     def clear_plot(self):
         self.pts_obj.delete_all_objects()
+        self.plot_bg.color = self.plot_bg.fillcolor = self.norm_bg
         self.viewer.redraw(whence=3)
 
     def add_point(self, pt, color='black', alpha=1.0):
@@ -152,6 +175,18 @@ class XYScatterPlot:
         self.state_lbl.text = text
         self.state_lbl.color = color
         self.viewer.redraw(whence=3)
+
+    def set_normal(self):
+        self.plot_bg.color = self.plot_bg.fillcolor = self.norm_bg
+        self.refresh_plot()
+
+    def set_warning(self):
+        self.plot_bg.color = self.plot_bg.fillcolor = self.warn_bg
+        self.refresh_plot()
+
+    def set_alert(self):
+        self.plot_bg.color = self.plot_bg.fillcolor = self.alert_bg
+        self.refresh_plot()
 
 
 class TimedXYScatterPlot(XYScatterPlot):

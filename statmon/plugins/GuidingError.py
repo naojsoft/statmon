@@ -17,8 +17,10 @@ import PlBase
 is_simulation = False
 
 # PFS auto guiding status aliases
-aliases = ['STATL.TELDRIVE', 'GEN2.STATUS.TBLTIME.TSCL',
+aliases = ['STATL.TELDRIVE', 'STATL.TELDRIVE_INFO',
+           'GEN2.STATUS.TBLTIME.TSCL',
            'STATL.GUIDE_ERR_DX', 'STATL.GUIDE_ERR_DY',
+           #'TSCL.PFS.AG.DX', 'TSCL.PFS.AG.DY',
            #'TSCL.SV1DX', 'TSCL.SV1DY',
            ]
 
@@ -46,6 +48,7 @@ class GuidingError(PlBase.Plugin):
         # scale factor for adjusting PFS error values received
         # from the telescope to convert to arcsec
         self.scale_factor = 0.001
+        #self.scale_factor = 1.0
 
         vbox = Widgets.VBox()
         top = Widgets.VBox()
@@ -125,7 +128,9 @@ class GuidingError(PlBase.Plugin):
                               exc_info=True)
 
     def get_errpt(self, d):
+        # TODO: need to find out why the TSCV.PFS.AG.CCalc is 00 and not 02
         err_pt = (d['STATL.GUIDE_ERR_DX'], d['STATL.GUIDE_ERR_DY'])
+        #err_pt = (d['TSCL.PFS.AG.DX'], d['TSCL.PFS.AG.DY'])
         #err_pt = (d['TSCL.AG1dX'], d['TSCL.AG1dY'])
         #err_pt = (d['TSCL.SV1DX'], d['TSCL.SV1DY'])
 
@@ -140,33 +145,44 @@ class GuidingError(PlBase.Plugin):
         self.logger.debug('updating plot')
         d = self.stat_d.copy()
         self.logger.debug("status: {}".format(str(d)))
-        tel_mode = d['STATL.TELDRIVE']
-        if tel_mode.startswith('Guiding'):
-            if tel_mode != self.tel_mode:
-                self.tel_mode = tel_mode
-                self.plot.set_title_msg(tel_mode, color='green4')
 
-            if not self.guiding:
-                self.guiding = True
-                if self.auto_clear:
-                    self.plot.clear_plot()
+        with self.plot.viewer.suppress_redraw:
+            tel_mode = d['STATL.TELDRIVE']
+            if tel_mode.startswith('Guiding'):
+                if tel_mode != self.tel_mode:
+                    self.tel_mode = tel_mode
+                    #self.plot.set_title_msg(tel_mode, color='green4')
 
-            try:
-                err_pt = self.get_errpt(d)
-                if err_pt != self.err_pt:
-                    self.err_pt = err_pt
-                    if err_pt is not None:
-                        self.plot.plot_point(err_pt, t)
+                if not self.guiding:
+                    self.guiding = True
+                    if self.auto_clear:
+                        self.plot.clear_plot()
 
-            except Exception as e:
-                self.logger.error(f"error getting point: {e}")
+                try:
+                    err_pt = self.get_errpt(d)
+                    if err_pt != self.err_pt:
+                        self.err_pt = err_pt
+                        if err_pt is not None:
+                            self.plot.plot_point(err_pt, t)
 
-        else:
-            if tel_mode != self.tel_mode:
-                self.tel_mode = tel_mode
-                self.plot.set_title_msg(tel_mode)
-            if self.guiding:
-                self.guiding = False
+                    status = d['STATL.TELDRIVE_INFO']
+                    if status == 'NORMAL':
+                        self.plot.set_normal()
+                    elif status == 'WARNING':
+                        self.plot.set_warning()
+                    else:
+                        self.plot.set_alert()
+
+                except Exception as e:
+                    self.logger.error(f"error getting point: {e}")
+
+            else:
+                self.plot.set_normal()
+                if tel_mode != self.tel_mode:
+                    self.tel_mode = tel_mode
+                    #self.plot.set_title_msg(tel_mode)
+                if self.guiding:
+                    self.guiding = False
         t1 = time.time()
         self.logger.debug("time to update plots {0:.4f} sec".format(t1 - t))
 
