@@ -5,10 +5,11 @@
 #
 import time
 import math
-import astro.radec as radec
-import astro.wcs as wcs
 from datetime import datetime
 from dateutil import tz
+
+import g2base.astro.radec as radec
+import g2base.astro.wcs as wcs
 
 from ginga.qtw import Widgets
 from ginga.qtw import QtHelp
