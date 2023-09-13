@@ -7,6 +7,7 @@
 # Russell Kackley (rkackley@naoj.org)
 #
 
+import sys
 import os
 import threading
 from ginga.gw import Widgets
@@ -52,15 +53,17 @@ class Alarm(PlBase.Plugin):
             self.logger.warn('Warning: unable to connect to alarm_handler to save history: %s' % str(e))
 
         # The configuration files tell us which Gen2 aliases we want
-        # to monitor. The configuration files are normally in
-        # $PYHOME/cfg/alarm. If $PYHOME is not defined, use the
-        # current working directory.
+        # to monitor. The configuration files should be have been
+        # installed in the "cfg" module's directory tree.
+        cfg_filename = '*_alarm_cfg.yml'
         try:
-            pyhome = os.environ['PYHOME']
-            cfgDir = os.path.join(pyhome, 'cfg', 'alarm')
-        except:
-            cfgDir = '.'
-        alarm_cfg_file = os.path.join(cfgDir, '*.yml')
+            import cfg
+            cfgDir = os.path.join(os.path.dirname(sys.modules['cfg'].__file__), 'alarm')
+        except Exception as e:
+            self.logger.error(f'Unable to load cfg module so cannot read configuration file {cfg_filename}')
+            raise e
+        alarm_cfg_file = os.path.join(cfgDir, cfg_filename)
+        self.logger.info(f'alarm_cfg_file is {alarm_cfg_file}')
 
         # StatusVarConfig reads in the configuration files
         try:
