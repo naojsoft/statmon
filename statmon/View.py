@@ -56,17 +56,20 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         # dictionary of plugins
         self.plugins = {}
 
+        #self.add_callback('close', self.close_cb)
+        self.add_callback('shutdown', self.shutdown_cb)
 
     def build_toplevel(self, layout):
         # Dynamically create the desktop layout
         self.ds = Desktop.Desktop(self)
         self.ds.make_desktop(layout, widget_dict=self.w)
-        self.ds.add_callback('all-closed', self.quit)
+        #self.ds.add_callback('all-closed', self.quit)
 
         root = self.ds.toplevels[0]
         self.w.root = root
         # TEMP: temporarily needed until "all-closed" callback from Desktop is working
-        root.add_callback('close', self.quit)
+        #root.add_callback('close', self.quit)
+        root.add_callback('close', self.close_cb)
 
         # Add menubar and menus, if desired
         self.add_menus()
@@ -242,68 +245,43 @@ class Viewer(GwMain.GwMain, Widgets.Application):
             coords = map(int, coords)
             self.setPos(*coords)
 
-    ## def update_pending(self, timeout=0.0):
-    ##     """Routine to process pending Qt events."""
-    ##     try:
-    ##         self.app.processEvents()
-    ##     except Exception as e:
-    ##         self.logger.error(str(e))
-    ##         # TODO: traceback!
-
-    ##     done = False
-    ##     while not done:
-    ##         #print "PROCESSING IN-BAND"
-    ##         # Process "in-band" Qt events
-    ##         try:
-    ##             future = self.gui_queue.get(block=True,
-    ##                                         timeout=timeout)
-
-    ##             # Execute the GUI method
-    ##             try:
-    ##                 try:
-    ##                     res = future.thaw(suppress_exception=False)
-
-    ##                 except Exception as e:
-    ##                     future.resolve(e)
-
-    ##                     self.logger.error("gui error: %s" % str(e))
-    ##                     try:
-    ##                         (type, value, tb) = sys.exc_info()
-    ##                         tb_str = "".join(traceback.format_tb(tb))
-    ##                         self.logger.error("Traceback:\n%s" % (tb_str))
-
-    ##                     except Exception as e:
-    ##                         self.logger.error("Traceback information unavailable.")
-
-    ##             finally:
-    ##                 pass
-
-
-    ##         except Queue.Empty:
-    ##             done = True
-
-    ##         except Exception as e:
-    ##             self.logger.error("Main GUI loop error: %s" % str(e))
-    ##             #pass
-
-    ##     # Process "out-of-band" events
-    ##     #print "PROCESSING OUT-BAND"
-    ##     try:
-    ##         self.app.processEvents()
-    ##     except Exception as e:
-    ##         self.logger.error(str(e))
-    ##         # TODO: traceback!
-
 
     ####################################################
     # CALLBACKS
     ####################################################
 
+    def close_cb(self, app):
+        # confirm close with a dialog here
+        q_quit = Widgets.Dialog(title="Confirm Quit", modal=False,
+                                parent=self.w.root,
+                                buttons=[("Cancel", False), ("Confirm", True)])
+        # necessary so it doesn't get garbage collected right away
+        self.w.quit_dialog = q_quit
+        vbox = q_quit.get_content_area()
+        vbox.set_margins(4, 4, 4, 4)
+        vbox.add_widget(Widgets.Label("Do you really want to quit?"))
+        q_quit.add_callback('activated', self._confirm_quit_cb)
+        q_quit.add_callback('close', lambda w: self._confirm_quit_cb(w, False))
+        q_quit.show()
+
+    def _confirm_quit_cb(self, w, tf):
+        self.w.quit_dialog.delete()
+        self.w.quit_dialog = None
+        if not tf:
+            return
+
+        self.quit()
+
+    def shutdown_cb(self, app):
+        """Quit the application.
+        """
+        self.quit()
+
     def quit(self, *args):
         """Quit the application.
         """
+        self.logger.info("closing all plugins...")
+        self.close_all_plugins()
+
+        self.logger.info("Attempting to shut down the application...")
         self.stop()
-        return True
-
-
-# END

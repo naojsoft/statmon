@@ -164,7 +164,7 @@ class StatMon(Controller, Viewer):
         filemenu.add_separator()
 
         item = filemenu.add_name("Quit")
-        item.add_callback('activated', self.quit)
+        item.add_callback('activated', self.close_cb)
 
         # create a Option pulldown menu, and add it to the menu bar
         ## optionmenu = menubar.add_name("Option")
