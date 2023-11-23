@@ -28,9 +28,9 @@ class AzElCanvas(FigureCanvas):
     """ Windscreen """
     def __init__(self, parent=None, width=1, height=1,  dpi=None, logger=None):
 
-        sub=SubplotParams(left=0.0, bottom=0, right=1, \
+        sub=SubplotParams(left=0.0, bottom=0, right=1,
                           top=1, wspace=0, hspace=0)
-        self.fig = Figure(figsize=(width, height), \
+        self.fig = Figure(figsize=(width, height),
                           facecolor='white', subplotpars=sub)
 
         #self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='white')
@@ -105,71 +105,71 @@ class AzElCanvas(FigureCanvas):
         # self.wind = self.axes.annotate('', xy=(self.center, self.center+0.4),
         #                          xytext=(self.center, self.center+0.498),
         #                          size=29.5,
-        #                          arrowprops=dict(arrowstyle="wedge,tail_width=0.7", \
-        #                                          facecolor=self.wind_color, ec="none", \
-        #                                          alpha=0.5, patchA=None, \
+        #                          arrowprops=dict(arrowstyle="wedge,tail_width=0.7",
+        #                                          facecolor=self.wind_color, ec="none",
+        #                                          alpha=0.5, patchA=None,
         #                                          relpos=(0.0, -0.1)),
         #                          horizontalalignment='center')
 
         # center +
-        center_x = Line2D([self.center, self.center], \
+        center_x = Line2D([self.center, self.center],
                           [self.center, self.center],
-                          alpha=0.1, marker='+', ms=165.0, \
+                          alpha=0.1, marker='+', ms=165.0,
                           mew=1.5, mec=self.normal_color, markevery=(0,1))
         self.axes.add_line(center_x)
 
         # inner circle
-        inner_c = Circle((self.center, self.center), radius=0.25, alpha=0.8, \
+        inner_c = Circle((self.center, self.center), radius=0.25, alpha=0.8,
                          fc="white", ec=self.normal_color, lw=0.5, ls='solid')
         self.axes.add_patch(inner_c)
 
         d_offset=0.2
-        directions = {'N':(self.center, self.center+d_offset),\
-                      'S':(self.center, self.center-d_offset),\
-                      'E':(self.center+d_offset, self.center),\
+        directions = {'N':(self.center, self.center+d_offset),
+                      'S':(self.center, self.center-d_offset),
+                      'E':(self.center+d_offset, self.center),
                       'W':(self.center-d_offset, self.center)}
 
         # dirctions
         for key, vals in directions.items():
-            self.axes.text(vals[0], vals[1], key, \
-                           color='g', ha='center', va='center', \
-                           fontsize=18, \
+            self.axes.text(vals[0], vals[1], key,
+                           color='g', ha='center', va='center',
+                           fontsize=18,
                            transform=self.axes.transAxes)
 
         # subaru telescope direction
         self.subaru_radius = 0.125
         # subaru's directions: south 0 , west 90, noroth 180, east 270/-90
-        self.subaru = mpatches.RegularPolygon((self.center, \
-                                               self.center-self.subaru_radius), \
-                                               3, self.subaru_radius, \
-                                               orientation=math.pi, \
+        self.subaru = mpatches.RegularPolygon((self.center,
+                                               self.center-self.subaru_radius),
+                                               3, radius=self.subaru_radius,
+                                               orientation=math.pi,
                                                fc='b', ec='none', alpha=0.5)
         self.axes.add_patch(self.subaru)
 
 
         # subaru text
-        # self.axes.text(self.center, self.center, 'S', \
-        #                color='g', ha='center', va='center', \
-        #                fontsize=30, weight='bold',  \
+        # self.axes.text(self.center, self.center, 'S',
+        #                color='g', ha='center', va='center',
+        #                fontsize=30, weight='bold',
         #                transform=self.axes.transAxes)
         #s_txt.set_rotation(angle)
 
         # subaru telescope
-        subaru = mpatches.Circle((self.center, self.center), \
-                                  radius=self.subaru_radius, \
+        subaru = mpatches.Circle((self.center, self.center),
+                                  radius=self.subaru_radius,
                                   alpha=1, ec="b", fc='white', lw=2.5)
 
 
         # outter circle
-        outer_c = Circle((self.center, self.center), radius=0.492, \
+        outer_c = Circle((self.center, self.center), radius=0.492,
                          fc="None", ec=self.normal_color, lw=1.5, ls='solid',
                          transform=self.axes.transAxes )
         self.axes.add_patch(outer_c)
 
         # telescope elevation
         self.el_kwargs=dict(r=0.5, theta2=180, alpha=0.5, lw=0.5, width=0.25)
-        self.el = mpatches.Wedge((self.center, self.center), theta1=90, \
-                                  fc=self.normal_color, ec=self.normal_color, \
+        self.el = mpatches.Wedge((self.center, self.center), theta1=90,
+                                  fc=self.normal_color, ec=self.normal_color,
                                   **self.el_kwargs)
         self.axes.add_patch(self.el)
 
@@ -177,7 +177,7 @@ class AzElCanvas(FigureCanvas):
         line_kwargs = dict(alpha=0.7, ls=':', lw=5 , color=self.normal_color,
                            ms=7.0, mew=1.0, markevery=(1,2))
 
-        self.light = Line2D([0.5, 0.5], [0.5, 1],  \
+        self.light = Line2D([0.5, 0.5], [0.5, 1],
                             **line_kwargs)
         self.axes.add_line(self.light)
 
@@ -240,9 +240,9 @@ class AzEl(AzElCanvas):
 
     #         self.wind = self.axes.annotate('', xy=(h_x, h_y),
     #                     xytext=(b_x, b_y), size=29.5,
-    #                     arrowprops=dict(arrowstyle="wedge,tail_width=0.7", \
-    #                     facecolor=color, ec="none", \
-    #                     alpha=0.5, patchA=None, \
+    #                     arrowprops=dict(arrowstyle="wedge,tail_width=0.7",
+    #                     facecolor=color, ec="none",
+    #                     alpha=0.5, patchA=None,
     #                     relpos=(0.0, -0.1)),
     #                     horizontalalignment='center')
     #         #print self.wind.arrowprops
@@ -333,8 +333,8 @@ class AzEl(AzElCanvas):
 
         try:
             Artist.remove(self.el)
-            self.el = mpatches.Wedge((self.center, self.center), \
-                                      theta1=180-el, \
+            self.el = mpatches.Wedge((self.center, self.center),
+                                      theta1=180-el,
                                       fc=color, ec=color, **self.el_kwargs)
             self.axes.add_patch(self.el)
         except Exception as e:
