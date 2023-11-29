@@ -277,8 +277,10 @@ def cross_connect_plots(plot_info):
     plot_info = list(plot_info)
     m_settings = plot_info[0].aide.settings
     for res_a in plot_info:
-        for res_b in set(plot_info) - set([res_a]):
-            res_a.aide.add_callback('plot-zoom-x', res_b.aide.plot_zoom_x_cb)
+        for res_b in plot_info:
+            if res_b != res_a:
+                res_a.aide.add_callback('plot-zoom-x',
+                                        res_b.aide.plot_zoom_x_cb)
 
         if res_a.aide.settings is not m_settings:
             m_settings.share_settings(res_a.aide.settings,
