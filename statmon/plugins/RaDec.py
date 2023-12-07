@@ -242,7 +242,7 @@ class Times(PlBase.Plugin):
         try:
             # Display HST even in Mitaka, Japan
             fmt = '%H:%M:%S (%b/%d)'
-            hst_time = datetime.utcfromtimestamp(t_sec).replace(tzinfo=tz.UTC).astimezone(self.hst_tz)
+            hst_time = datetime.fromtimestamp(t_sec, tz=tz.UTC).astimezone(self.hst_tz)
             hst = hst_time.strftime(fmt)
             ut = time.strftime(fmt, time.gmtime(t_sec))
 
