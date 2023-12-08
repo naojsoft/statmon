@@ -1,7 +1,6 @@
 from ginga.gw import Widgets
 
 from qtpy import QtWidgets, QtCore
-import sip
 
 import PlBase
 import State
