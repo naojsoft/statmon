@@ -3,6 +3,9 @@
 import os
 import sys
 
+from datetime import datetime
+import time
+
 from qtpy import QtWidgets, QtCore
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -123,17 +126,22 @@ class Precip(PrecipCanvas):
     def __init__(self,*args, **kwargs):
         super(Precip, self).__init__(*args, **kwargs)
 
+        self.stale_time = 600000  #  10 min in sec
 
-    def update_precip(self, precip):
+    def update_precip(self, precip, precip_time):
         ''' precip  = GEN2.PRECIP.SENSOR1.STATUS
+            precip_time = GEN2.PRECIP.SENSOR1.TIME
         '''
-        self.logger.debug(f'updating precip={precip}')
-        self._precip(precip)
+        self.logger.debug(f'updating precip={precip}, time={precip_time}')
+        self._precip(precip, precip_time)
         self.draw()
 
-    def _precip(self, precip):
+    def _precip(self, precip, precip_time):
 
-        if precip in ERROR:
+        time_diff = datetime.fromtimestamp(time.time()) - datetime.fromtimestamp(precip_time)
+        self.logger.debug(f'precip time diff={time_diff.total_seconds()}')
+
+        if precip in ERROR or (time_diff.total_seconds() > self.stale_time):
             self.logger.debug(f'no precip. {precip}')
             self.set_wet(status=self.warn, alpha=1)
             self.set_dry(status=self.warn, alpha=1)
@@ -175,23 +183,27 @@ class PrecipDisplay(QtWidgets.QWidget):
         hlayout.addWidget(self.precip)
         self.setLayout(hlayout)
 
-    def update_precip(self, precip):
-        self.precip.update_precip(precip)
+    def update_precip(self, precip, precip_time):
+        self.precip.update_precip(precip, precip_time)
 
     def tick(self):
         ''' testing solo mode '''
         import random
 
-        indx = random.randrange(0, 4)
+        idx = random.randrange(0, 4)
+        idx2 = random.randrange(0, 4)
 
         precip = ['WET', 'DRY', STATNONE, STATERROR]
 
+        precip_time = [time.time(), 1707873823.5670083, 1707273823.5670083, 1706673823.5670083]
+
         try:
-            precip = precip[indx]
+            precip = precip[idx]
+            precip_time = precip_time[idx2]
         except Exception:
             pass
         else:
-            self.update_precip(precip)
+            self.update_precip(precip, precip_time)
 
 
 def main(options, args):

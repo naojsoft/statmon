@@ -7,7 +7,7 @@ import Precip
 
 class PrecipPlugin(PlBase.Plugin):
     """ Precip """
-    aliases = ['GEN2.PRECIP.SENSOR1.STATUS']
+    aliases = ['GEN2.PRECIP.SENSOR1.STATUS', 'GEN2.PRECIP.SENSOR1.TIME']
 
     def build_gui(self, container):
         self.root = container
@@ -28,6 +28,7 @@ class PrecipPlugin(PlBase.Plugin):
         self.logger.debug('status=%s' %str(statusDict))
         try:
             precip = statusDict.get(PrecipPlugin.aliases[0])
-            self.precip.update_precip(precip)
+            precip_time = statusDict.get(PrecipPlugin.aliases[1])
+            self.precip.update_precip(precip, precip_time)
         except Exception as e:
             self.logger.error(f'error: updating status. {e}')
