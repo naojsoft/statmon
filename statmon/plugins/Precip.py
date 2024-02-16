@@ -126,7 +126,7 @@ class Precip(PrecipCanvas):
     def __init__(self,*args, **kwargs):
         super(Precip, self).__init__(*args, **kwargs)
 
-        self.stale_time = 600000  #  10 min in sec
+        self.stale_time = 60  #  1 min in sec
 
     def update_precip(self, precip, precip_time):
         ''' precip  = GEN2.PRECIP.SENSOR1.STATUS
@@ -139,7 +139,7 @@ class Precip(PrecipCanvas):
     def _precip(self, precip, precip_time):
 
         time_diff = datetime.fromtimestamp(time.time()) - datetime.fromtimestamp(precip_time)
-        self.logger.debug(f'precip time diff={time_diff.total_seconds()}')
+        self.logger.debug(f'now={time.time()}, precip_time={precip_time}, diff={time_diff.total_seconds()}')
 
         if precip in ERROR or (time_diff.total_seconds() > self.stale_time):
             self.logger.debug(f'no precip. {precip}')
