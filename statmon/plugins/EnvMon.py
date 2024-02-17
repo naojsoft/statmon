@@ -19,10 +19,13 @@ from EnvMon3 import cross_connect_plots, make_plot
 
 # For "envmon" plugin
 al_envmon = dict(windd = ['TSCL.WINDD', 'STATS.AZ_ADJ'],
-                 winds = ['TSCL.WINDS_O', 'TSCL.WINDS_I'],
+                 winds = ['TSCL.WINDS_O', 'TSCL.WINDS_I',
+                          'TSCL.WIND_MAX_SPEED'],
                  temp = ['TSCL.TEMP_O', 'TSCL.TEMP_I'],
                  humid = ['STATL.HUMI_O.MEAN', 'TSCL.HUMI_I'],
-                 m1dew = ['STATL.M1_TEMP_MIN', 'STATL.TRUSS_TEMP_MIN', 'STATL.DEW_POINT_TLSCP', 'STATL.DEW_POINT_CATWALK.MEAN'],
+                 m1dew = ['STATL.M1_TEMP_MIN', 'STATL.TRUSS_TEMP_MIN',
+                          'STATL.DEW_POINT_TLSCP',
+                          'STATL.DEW_POINT_CATWALK.MEAN'],
                  topring = ['TSCL.TOPRING_WINDS_F', 'TSCL.TOPRING_WINDS_R'],
                  misc = ['GEN2.STATUS.TBLTIME.TSCL'])
 
@@ -66,7 +69,7 @@ class EnvMon(PlBase.Plugin):
         self.root.add_widget(res.widget, stretch=1)
         self.plots.wind_direction = res
 
-        names = ["Outside", "Dome"]
+        names = ["Outside", "Dome", "Out(Max)"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['winds'], num_pts,
                         y_acc=np.mean, title="Windspeed (m/s)",

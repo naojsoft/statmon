@@ -14,6 +14,7 @@ Usage:
 import sys, os
 import threading
 import queue as Queue
+from argparse import ArgumentParser
 
 import statmon.version
 moduleHome = os.path.split(sys.modules['statmon.version'].__file__)[0]
@@ -341,7 +342,6 @@ def main(options, args):
 if __name__ == "__main__":
 
     # Parse command line options
-    from argparse import ArgumentParser
     argprs = ArgumentParser(description="Gen2 Status Monitor")
 
     argprs.add_argument('-f', "--config", dest="configfile", default=None,
