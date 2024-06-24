@@ -23,6 +23,7 @@ from TipChop import TipChop
 from Waveplate import Waveplate
 from AoShutter import AoShutter
 from Dummy import Dummy
+from M3 import M3
 
 progname = os.path.basename(sys.argv[0])
 
@@ -41,6 +42,7 @@ class TelescopeGui(QtWidgets.QWidget):
         self.azel = AzEl(logger=logger)
         self.m2 = M2(logger=logger)
         self.m1 = M1Cover(logger=logger)
+        #self.m3 = M3(logger=logger)
         self.cell = CellCover(logger=logger)
 
         w, h = (500, 500)
@@ -81,7 +83,7 @@ class TelescopeGui(QtWidgets.QWidget):
         middlelayout.addLayout(telbodylayout)
 
         # right layout will be combination of following components:
-        # ins/img-rot, adc, tiptilt, wavepalte
+        # ins/img-rot, adc, tiptilt, wavepalte, m3
         rightlayout=QtWidgets.QVBoxLayout()
         self.set_focus_layout(rlayout=rightlayout)
 
@@ -105,12 +107,19 @@ class TelescopeGui(QtWidgets.QWidget):
 
         r2layout=QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
+
         empty_shell=Dummy(height=1, logger=self.logger)
         r2layout.addWidget(empty_shell)
+
         self.insrot=InsRot.InsRotPf(logger=self.logger)
         r2layout.addWidget(self.insrot)
+
         self.adc = Adc.AdcPf(logger=self.logger)
         r2layout.addWidget(self.adc)
+
+        self.m3 = M3(logger=self.logger)
+        r2layout.addWidget(self.m3)
+
         empty_shell=Dummy(height=285, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
@@ -133,6 +142,9 @@ class TelescopeGui(QtWidgets.QWidget):
         self.insrot=InsRot.InsRotPf(logger=self.logger)
         r2layout.addWidget(self.insrot)
 
+        self.m3 = M3(logger=self.logger)
+        r2layout.addWidget(self.m3)
+
         empty_shell=Dummy(height=320, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
@@ -148,12 +160,19 @@ class TelescopeGui(QtWidgets.QWidget):
 
         r2layout=QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
+
         empty_shell=Dummy(height=1, logger=self.logger)
         r2layout.addWidget(empty_shell)
+
         self.imgrot=ImgRot.ImgRotNsOpt(logger=self.logger)
         r2layout.addWidget(self.imgrot)
+
         self.adc = Adc.Adc(logger=self.logger)
         r2layout.addWidget(self.adc)
+
+        self.m3 = M3(logger=self.logger)
+        r2layout.addWidget(self.m3)
+
         empty_shell=Dummy(height=277, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
@@ -182,6 +201,9 @@ class TelescopeGui(QtWidgets.QWidget):
         self.aoshutter = AoShutter(logger=self.logger)
         r2layout.addWidget(self.aoshutter)
 
+        self.m3 = M3(logger=self.logger)
+        r2layout.addWidget(self.m3)
+
         empty_shell = Dummy(height=150, logger=self.logger)
         r2layout.addWidget(empty_shell)
         rlayout.addLayout(r1layout)
@@ -201,6 +223,9 @@ class TelescopeGui(QtWidgets.QWidget):
 
         self.insrot = InsRot.InsRotCs(logger=self.logger)
         r2layout.addWidget(self.insrot)
+
+        self.m3 = M3(logger=self.logger)
+        r2layout.addWidget(self.m3)
 
         empty_shell = Dummy(height=320, logger=self.logger)
         r2layout.addWidget(empty_shell)
@@ -231,6 +256,9 @@ class TelescopeGui(QtWidgets.QWidget):
         self.insrot = InsRot.InsRotCs(logger=self.logger)
         r2layout.addWidget(self.insrot)
 
+        self.m3 = M3(logger=self.logger)
+        r2layout.addWidget(self.m3)
+
         empty_shell = Dummy(height=320, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
@@ -255,6 +283,10 @@ class TelescopeGui(QtWidgets.QWidget):
 
         self.adc = Adc.Adc(logger=self.logger)
         r2layout.addWidget(self.adc)
+
+        self.m3 = M3(logger=self.logger)
+        r2layout.addWidget(self.m3)
+
         empty_shell=Dummy(height=285, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
@@ -357,6 +389,7 @@ class Telescope(TelescopeGui):
                             mode=kargs.get('TSCV.ADCMode'), \
                             in_out=kargs.get('TSCV.ADCInOut'))
 
+
     def update_focus(self, **kargs):
 
         focus = {'HDS': self.update_nsopt, 'SPCAM': self.update_popt, \
@@ -368,6 +401,8 @@ class Telescope(TelescopeGui):
                  'FOCAS': self.update_csopt, 'COMICS': self.update_csir, \
                  'SUKA': self.update_cs, 'PFS': self.update_popt, \
                  'VAMPIRES': self.update_nsir, 'SCEXAO': self.update_nsir}
+
+        self.m3.update_m3(m3=kargs.get('TSCV.M3Drive'))
 
         try:
             focus[self.obcp](**kargs)
@@ -438,6 +473,7 @@ class Telescope(TelescopeGui):
 
         self.m2.tick()
         self.m1.tick()
+        self.m3.tick()
         self.cell.tick()
 
         if self.obcp in ('MOIRCS', 'FOCAS', 'SPCAM', 'HSC', 'COMICS', 'FMOS', 'SWIMS', 'MIMIZUKU', 'SUKA', 'PFS'):

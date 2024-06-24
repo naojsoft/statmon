@@ -22,7 +22,7 @@ class TelescopePlugin(PlBase.Plugin):
                'WAV.STG1_PS', 'WAV.STG2_PS', 'WAV.STG3_PS',
                'TSCV.TT_Mode', 'TSCV.TT_Drive', 'TSCV.TT_DataAvail',
                'TSCV.TT_ChopStat', 'TSCL.WINDS_O',
-               'AON.LWFS.LASH', 'AON.HWFS.LASH']
+               'AON.LWFS.LASH', 'AON.HWFS.LASH', 'TSCV.M3Drive']
 
     def set_layout(self, obcp):
 
