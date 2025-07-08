@@ -13,10 +13,10 @@ different plugins.
 pf_inst = ['SPCAM', 'HSC', 'FMOS', 'PFS']
 cs_inst = ['MOIRCS', 'FOCAS', 'COMICS', 'SWIMS', 'MIMIZUKU', 'SUKA']
 ns_inst = ['IRCS', 'HDS', 'HICIAO', 'K3D', 'CHARIS', 'IRD',
-           'VAMPIRES', 'SCEXAO']
+           'VAMPIRES', 'SCEXAO', 'REACH']
 # These are AO188 instruments
 ao_inst = ['AO188', 'IRCS', 'HICIAO', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES',
-           'SCEXAO']
+           'SCEXAO', 'REACH']
 # These are auto-guiding instruments
 ag_inst = ['MOIRCS', 'FOCAS', 'COMICS', 'HDS', 'SWIMS', 'MIMIZUKU',
            'HSC', 'PFS', 'SUKA']
