@@ -144,6 +144,12 @@ class Controller(Callback.Callbacks):
     def fetch_missing_aliases(self, aliases):
         # Fetch those aliases and update our model
         statusDict = {}.fromkeys(aliases)
+        # TODO: need to figure out which plugins are sending {None}
+        if None in statusDict:
+            del statusDict[None]
+        for key in statusDict:
+            if not isinstance(key, str):
+                print(f"{key} is not a string!")
         try:
             statusInfo = self.proxystatus.fetch(statusDict)
 

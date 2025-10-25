@@ -1,25 +1,47 @@
-from ginga.qtw import Widgets
-from qtpy import QtWidgets
+#
+# DomeffPlugin.py -- dome flats plugin for StatMon
+#
+# T. Inagaki
+# E. Jeschke
+#
+import time
+
+from ginga.gw import Widgets
+from ginga.misc import Bunch
+
+from g2cam.INS import INSdata
 
 import PlBase
-from StatusTable import StatusTable
-from g2cam.INS import INSdata
+
+
+clr_status = dict(off='white', normal='black', warning='orange', alarm='red')
+
+monitor_time = {
+    'obcp': Bunch.Bunch(last_time=0.0, timedelta=120),
+    'tscs': Bunch.Bunch(last_time=0.0, timedelta=10),
+    'tscl': Bunch.Bunch(last_time=0.0, timedelta=10),
+    'tscv': Bunch.Bunch(last_time=0.0, timedelta=120),
+    'mon': Bunch.Bunch(last_time=0.0, timedelta=10),
+}
 
 
 class StatusTablePlugin(PlBase.Plugin):
     """ StatusTable Plugin"""
 
 
-    def set_layout(self):
+    def __set_aliases(self, insname):
 
-        qtwidget = QtWidgets.QWidget()
-        self.statustable = StatusTable(parent=qtwidget, logger=self.logger)
+        self.insname = insname
+        self.w.insname.set_text(insname)
 
-        self.root.remove_all(delete=True)
-        self.root.add_widget(Widgets.wrap(qtwidget), stretch=1)
+        insdata = INSdata()
+        try:
+            inscode = insdata.getCodeByName(insname)
+        except Exception as e:
+            self.logger.error(f'error: fail to fetch inscode: {e}')
+            inscode = 'SUK'
 
-    def set_obcp_alias(self, inscode):
-
+        self.inscode = inscode
         self.aliases = ['FITS.SBR.MAINOBCP',
                         'GEN2.STATUS.TBLTIME.{0}S0001'.format(inscode),
                         'GEN2.STATUS.TBLTIME.{0}S0002'.format(inscode),
@@ -31,82 +53,136 @@ class StatusTablePlugin(PlBase.Plugin):
                         'GEN2.STATUS.TBLTIME.{0}S0008'.format(inscode),
                         'GEN2.STATUS.TBLTIME.{0}S0009'.format(inscode),
                         'GEN2.STATUS.TBLTIME.TSCS',
-                        'GEN2.STATUS.TBLTIME.TSCL', 'GEN2.STATUS.TBLTIME.TSCV']
+                        'GEN2.STATUS.TBLTIME.TSCL',
+                        'GEN2.STATUS.TBLTIME.TSCV']
 
-        self.logger.info('aliases=%s' %self.aliases)
+        self.logger.info(f'aliases={str(self.aliases)}')
 
-    def obcp_alias(self, obcp):
-
-        insdata = INSdata()
-
-        try:
-            inscode = insdata.getCodeByName(obcp)
-        except Exception as e:
-            self.logger.error('error: fail to fetch inscode.  %s' %e)
-            inscode = None
-
-        return inscode
-
+        self.controller.register_select('statustable', self.update,
+                                        self.aliases)
 
     def build_gui(self, container):
+        self.w = Bunch.Bunch()
+        self.insname = 'SUKA'
+        self.inscode = 'SUK'
 
-        self.root = container
-        self.root.set_margins(0, 0, 0, 0)
-        self.root.set_spacing(0)
+        vbox = Widgets.VBox()
+        vbox.set_border_width(4)
+
+        gbox = Widgets.GridBox(rows=5, columns=2)
+        gbox.set_border_width(2)
+        gbox.set_row_spacing(2)
+        self.w.insname = Widgets.Label("")
+        gbox.add_widget(self.w.insname, 0, 0)
+        self.w.insname_time = Widgets.Label("", halign='left')
+        gbox.add_widget(self.w.insname_time, 0, 1)
+
+        self.w.tscs = Widgets.Label("TSCS:")
+        gbox.add_widget(self.w.tscs, 1, 0)
+        self.w.tscs_time = Widgets.Label("", halign='left')
+        gbox.add_widget(self.w.tscs_time, 1, 1)
+
+        self.w.tscl = Widgets.Label("TSCL:")
+        gbox.add_widget(self.w.tscl, 2, 0)
+        self.w.tscl_time = Widgets.Label("", halign='left')
+        gbox.add_widget(self.w.tscl_time, 2, 1)
+
+        self.w.tscv = Widgets.Label("TSCV:")
+        gbox.add_widget(self.w.tscv, 3, 0)
+        self.w.tscv_time = Widgets.Label("", halign='left')
+        gbox.add_widget(self.w.tscv_time, 3, 1)
+
+        self.w.mon = Widgets.Label("MONITOR:")
+        gbox.add_widget(self.w.mon, 4, 0)
+        self.w.mon_time = Widgets.Label("", halign='left')
+        gbox.add_widget(self.w.mon_time, 4, 1)
+
+        vbox.add_widget(gbox, stretch=0)
+        vbox.add_widget(Widgets.Label(""), stretch=1)
+
+        container.add_widget(vbox, stretch=0)
 
         try:
-            self.obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
+            insname = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
+
         except Exception as e:
-            self.logger.error('error: building layout. %s' %e)
+            self.logger.error(f'error: building layout: {e}')
         else:
-            inscode = self.obcp_alias(self.obcp)
-            self.logger.info('inscode=%s' %inscode)
-            self.set_obcp_alias(inscode)
-            self.set_layout()
+            self.__set_aliases(insname)
 
     def start(self):
         self.controller.register_select('statustable', self.update, \
                                          self.aliases)
-        #self.controller.add_callback('change-config', self.change_config)
+        self.controller.add_callback('change-config', self.change_config)
 
-    def update_obcp(self, obcp):
+    def change_config(self, controller, d):
+        insname = d['inst']
+        if insname.startswith('#'):
+            self.logger.debug(f'obcp is not assigned: {insname}')
+            return
 
-        inscode = self.obcp_alias(obcp)
-        self.set_obcp_alias(inscode)
-        self.obcp = obcp
-        self.start()
-        return obcp
+        self.logger.debug(f"target changing config dict={str(d)} ins={insname}")
+        self.__set_aliases(insname)
 
-    def update(self, statusDict):
-        self.logger.info('status=%s' %str(statusDict))
-        obcp = statusDict.get(self.aliases[0])
-        if not self.obcp == obcp:
-            obcp = self.update_obcp(obcp)
+    def update(self, status_dct):
+        self.logger.info(f'status={str(status_dct)}')
+        try:
+            self.update_table(status_dct)
 
-        obcp_time1 = statusDict.get(self.aliases[1])
-        obcp_time2 = statusDict.get(self.aliases[2])
-        obcp_time3 = statusDict.get(self.aliases[3])
-        obcp_time4 = statusDict.get(self.aliases[4])
-        obcp_time5 = statusDict.get(self.aliases[5])
-        obcp_time6 = statusDict.get(self.aliases[6])
-        obcp_time7 = statusDict.get(self.aliases[7])
-        obcp_time8 = statusDict.get(self.aliases[8])
-        obcp_time9 = statusDict.get(self.aliases[9])
+        except Exception as e:
+            self.logger.error(f"error updating status table times: {e}",
+                              exc_info=True)
 
-        self.logger.debug('obcp_time1=%s obcp_time2=%s  obcp_time3=%s obcp_time4=%s obcp_time5=%s obcp_time6=%s obcp_time7=%s obcp_time8=%s obcp_time9=%s' %(obcp_time1, obcp_time2, obcp_time3, obcp_time4, obcp_time5, obcp_time6, obcp_time7, obcp_time8, obcp_time9 ))
+    def update_table(self, status_dct):
+        global monitor_time
 
+        cur_time = time.time()
 
-        tscs_time = statusDict.get(self.aliases[10])
-        tscl_time = statusDict.get(self.aliases[11])
-        tscv_time = statusDict.get(self.aliases[12])
+        for i, name in enumerate(['tscs', 'tscl', 'tscv']):
+            tsc_time = status_dct.get(self.aliases[i + 10])
+            tsc_time_str = time.strftime("%Y-%m-%d %H:%M:%S",
+                                         time.localtime(tsc_time))
+            monitor_time[name].last_time = tsc_time
+            color = clr_status['normal']
+            if cur_time - tsc_time > monitor_time[name].timedelta:
+                color = clr_status['warning']
+            self.w[f'{name}_time'].set_text(tsc_time_str)
+            self.w[f'{name}_time'].set_color(fg=color)
+
         mon_time = self.controller.last_update
+        self.logger.debug('mon last_update=%s' %str(mon_time))
+        mon_time_str = time.strftime("%Y-%m-%d %H:%M:%S",
+                                     time.localtime(mon_time))
+        monitor_time['mon'].last_time = mon_time
+        color = clr_status['normal']
+        if cur_time - mon_time > monitor_time['mon'].timedelta:
+            color = clr_status['warning']
+        self.w.mon_time.set_text(mon_time_str)
+        self.w.mon_time.set_color(fg=color)
 
-        self.logger.info('mon last_update=%s' %str(mon_time))
+        insname = status_dct['FITS.SBR.MAINOBCP']
+        if self.insname != insname:
+            # <-- instrument names don't match
+            self.__set_aliases(insname)
+            # will update instrument table times at next fetch
+            return
 
-        self.statustable.update_statustable(obcp=obcp, obcp_time1=obcp_time1, obcp_time2=obcp_time2, \
-                                            obcp_time3=obcp_time3, obcp_time4=obcp_time4, \
-                                            obcp_time5=obcp_time5, obcp_time6=obcp_time6, \
-                                            obcp_time7=obcp_time7, obcp_time8=obcp_time8, \
-                                            obcp_time9=obcp_time9, \
-                                            tscs_time=tscs_time, tscl_time=tscl_time, \
-                                            tscv_time=tscv_time, mon_time=mon_time)
+        obcp_times = [status_dct.get(self.aliases[i], 0.0)
+                      for i in range(1, 10)]
+        self.logger.debug('obcp_times={}'.format(str(obcp_times)))
+        obcp_times = list(filter(lambda n: isinstance(n, float), obcp_times))
+        if len(obcp_times) == 0:
+            obcp_time_str = "Undefined"
+            obcp_time = monitor_time['obcp'].last_time
+        else:
+            # take the latest table time
+            obcp_time = max(obcp_times)
+            obcp_time_str = time.strftime("%Y-%m-%d %H:%M:%S",
+                                          time.localtime(obcp_time))
+        monitor_time['obcp'].last_time = obcp_time
+        color = clr_status['normal']
+        if cur_time - obcp_time > monitor_time['obcp'].timedelta:
+            color = clr_status['warning']
+        self.w.insname.set_text(f"{self.insname}:")
+        self.w.insname_time.set_text(obcp_time_str)
+        self.w.insname_time.set_color(fg=color)

@@ -5,6 +5,7 @@
 # that can be "plugged in" to statmon.
 #
 # Russell Kackley (rkackley@naoj.org)
+# E. Jeschke
 #
 
 import sys
@@ -83,7 +84,7 @@ class Alarm(PlBase.Plugin):
 
         # Create a list of all the Gen2 aliases we want to monitor
         self.aliases = []
-        self.aliases.append('STS.TIME1')
+        #self.aliases.append('STS.TIME1')
 
         # Default persistent data file
         default_persist_data_filename = AlarmGui.default_persist_data_filename
@@ -109,7 +110,7 @@ class Alarm(PlBase.Plugin):
 
         # Register the update callback function and tell the
         # controller the names of the Gen2 aliases we want to monitor.
-        self.controller.register_select('alarm', self.update, self.aliases)
+        # self.controller.register_select('alarm', self.update, self.aliases)
 
         self.controller.register_channels('alarm', self.update_channel, 'alarm')
 
@@ -136,45 +137,47 @@ class Alarm(PlBase.Plugin):
                 notAllowed = (common.STATERROR, common.STATNONE)
                 if previousAlarmItem not in notAllowed and \
                        currentAlarmItem not in notAllowed:
-                    changed = False
-                    for attribute in currentAlarmItem:
-                        if currentAlarmItem[attribute] != previousAlarmItem[attribute]:
-                            changed = True
-                            break
-                    if changed:
+                    # changed = False
+                    # for attribute in currentAlarmItem:
+                    #     if currentAlarmItem[attribute] != previousAlarmItem[attribute]:
+                    #         changed = True
+                    #         break
+                    # if changed:
+                    #     changedStatusDict[name] = currentAlarmItem
+                    if currentAlarmItem != previousAlarmItem:
                         changedStatusDict[name] = currentAlarmItem
                 elif previousAlarmItem in notAllowed and \
                          currentAlarmItem not in notAllowed:
                     changedStatusDict[name] = currentAlarmItem
-            elif name == 'STS.TIME1':
-                # STS.TIME1 is a scalar quantity, so just check to see
-                # if it has been updated. If so, add it to the list of
-                # changed status values.
-                try:
-                    previousValue = self.previousStatusDict[name]
-                except (TypeError, KeyError)	as e:
-                    previousValue = common.STATNONE
-                if statusDict[name] != previousValue:
-                    changedStatusDict[name] = statusDict[name]
+            # elif name == 'STS.TIME1':
+            #     # STS.TIME1 is a scalar quantity, so just check to see
+            #     # if it has been updated. If so, add it to the list of
+            #     # changed status values.
+            #     try:
+            #         previousValue = self.previousStatusDict[name]
+            #     except (TypeError, KeyError)	as e:
+            #         previousValue = common.STATNONE
+            #     if statusDict[name] != previousValue:
+            #         changedStatusDict[name] = statusDict[name]
 
         # Return the list of changed values
         return changedStatusDict
 
-    def update(self, statusDict):
-        with self.lock:
-            try:
-                changedStatusDict = self.changedStatus(statusDict)
-            except TypeError as e:
-                self.logger.error('Exception %s' % e)
-                self.logger.debug('previousStatusDict %s' % self.previousStatusDict)
-                self.logger.debug('current statusDict %s' % statusDict)
-                changedStatusDict = {}
-            self.logger.debug(changedStatusDict)
-            AlarmGui.updateAlarmWindow(self.mw, self.svConfig, changedStatusDict)
+    # def update(self, statusDict):
+    #     with self.lock:
+    #         try:
+    #             changedStatusDict = self.changedStatus(statusDict)
+    #         except TypeError as e:
+    #             self.logger.error('Exception %s' % e)
+    #             self.logger.debug('previousStatusDict %s' % self.previousStatusDict)
+    #             self.logger.debug('current statusDict %s' % statusDict)
+    #             changedStatusDict = {}
+    #         self.logger.debug(changedStatusDict)
+    #         AlarmGui.updateAlarmWindow(self.mw, self.svConfig, changedStatusDict)
 
-        # Save the current statusDict information so that we can
-        # determine if there are any changes the next time around.
-        self.previousStatusDict = statusDict
+    #     # Save the current statusDict information so that we can
+    #     # determine if there are any changes the next time around.
+    #     self.previousStatusDict = statusDict
 
     def update_channel(self, path, value):
         if not path.startswith('mon.alarm'):

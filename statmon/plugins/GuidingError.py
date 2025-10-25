@@ -42,7 +42,7 @@ class GuidingError(PlBase.Plugin):
         self.guiding = False
         self.tel_mode = ""
         self.err_pt = (None, None)
-        self.auto_clear = False
+        self.auto_clear = True
         self.update_time = time.time()
 
         # scale factor for adjusting PFS error values received
