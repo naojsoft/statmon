@@ -311,7 +311,7 @@ class TelescopeGui(QtWidgets.QWidget):
                  'FOCAS': self.csopt_layout, 'COMICS': self.csir_layout, \
                  'SUKA': self.cs_layout, 'PFS': self.popt_layout, \
                  'VAMPIRES': self.nsir_layout, 'SCEXAO': self.nsir_layout, \
-                 'REACH': self.nsir_layout}
+                 'REACH': self.nsir_layout, 'NINJA': self.nsir_layout}
 
         self.logger.debug(f'telescope focuslayout ins={self.obcp}')
 
@@ -402,7 +402,7 @@ class Telescope(TelescopeGui):
                  'FOCAS': self.update_csopt, 'COMICS': self.update_csir, \
                  'SUKA': self.update_cs, 'PFS': self.update_popt, \
                  'VAMPIRES': self.update_nsir, 'SCEXAO': self.update_nsir, \
-                 'REACH': self.update_nsir}
+                 'REACH': self.update_nsir, 'NINJA': self.update_nsir}
 
         self.m3.update_m3(m3=kargs.get('TSCV.M3Drive'))
 
@@ -480,9 +480,9 @@ class Telescope(TelescopeGui):
 
         if self.obcp in ('MOIRCS', 'FOCAS', 'SPCAM', 'HSC', 'COMICS', 'FMOS', 'SWIMS', 'MIMIZUKU', 'SUKA', 'PFS'):
             self.insrot.tick()
-        if self.obcp in ('HDS', 'HICIAO', 'IRCS', 'K3D', 'CHARIS', 'VAMPIRES', 'SCEXAO', 'REACH'):
+        if self.obcp in ('HDS', 'HICIAO', 'IRCS', 'K3D', 'CHARIS', 'VAMPIRES', 'SCEXAO', 'REACH', 'NINJA'):
             self.imgrot.tick()
-        if self.obcp in ('HICIAO', 'IRCS', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES',  'SCEXAO', 'REACH'):
+        if self.obcp in ('HICIAO', 'IRCS', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES',  'SCEXAO', 'REACH', 'NINJA'):
             self.waveplate.tick()
             self.aoshutter.tick()
         if self.obcp in ('HDS', 'FOCAS', 'SPCAM', 'HSC', 'PFS'):
