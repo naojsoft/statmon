@@ -15,7 +15,7 @@ class DomeShutter(Label):
     ''' state of the DomeShutter  '''
     def __init__(self, parent=None, logger=None):
         super(DomeShutter, self).__init__(parent=parent, fs=10, width=500, \
-                                          height=15, fg='white', bg='black', \
+                                          height=20, fg='white', bg='black', \
                                           weight='bold', logger=logger )
 
     def update_dome(self, dome):

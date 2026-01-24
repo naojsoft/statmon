@@ -75,10 +75,10 @@ class Alarm(PlBase.Plugin):
         statusDict = {}
         try:
             alarmChannelState = self.alhProxy.getMonitorAlarmTree()
-            self.logger.info('initial alarm channel %s' % alarmChannelState)
+            self.logger.debug('initial alarm channel %s' % alarmChannelState)
             for ID, value in alarmChannelState.items():
                 statusDict['ALARM_' + ID] = value
-                self.logger.info('statusDict is {}'.format(statusDict))
+                self.logger.debug('statusDict is {}'.format(statusDict))
         except ro.remoteObjectError as e:
             self.logger.warning('alarm_handler is not running: {}'.format(str(e)))
 
@@ -184,7 +184,7 @@ class Alarm(PlBase.Plugin):
             return
 
         with self.lock:
-            self.logger.info('path is {} value is {}'.format(path, value))
+            self.logger.debug('path is {} value is {}'.format(path, value))
             changedStatusDict = {'ALARM_' + value['ID']: value}
             AlarmGui.updateAlarmWindow(self.mw, self.svConfig, changedStatusDict)
 

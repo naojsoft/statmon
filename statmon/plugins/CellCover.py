@@ -42,12 +42,12 @@ class CellCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        # FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, \
+        # FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding,
         #                            QtWidgets.QSizePolicy.Expanding)
         # FigureCanvas.updateGeometry(self)
 
-        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, \
-                                   QtWidgets.QSizePolicy.Fixed)
+        # self.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
+        #                    QtWidgets.QSizePolicy.Fixed)
 
         # width/hight of widget
         self.w = 250
@@ -69,14 +69,14 @@ class CellCanvas(FigureCanvas):
                                  va='top', ha='center', \
                                  transform=self.axes.transAxes, fontsize=11)
 
-        self.axes.axison=False
+        self.axes.axison = False
         self.draw()
 
     def minimumSizeHint(self):
         return QtCore.QSize(self.w, self.h)
 
-    def sizeHint(self):
-         return QtCore.QSize(self.w, self.h)
+    # def sizeHint(self):
+    #      return QtCore.QSize(self.w, self.h)
 
 
 class CellCover(CellCanvas):

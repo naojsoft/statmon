@@ -28,8 +28,8 @@ class AzElCanvas(FigureCanvas):
     """ Windscreen """
     def __init__(self, parent=None, width=1, height=1,  dpi=None, logger=None):
 
-        sub=SubplotParams(left=0.0, bottom=0, right=1,
-                          top=1, wspace=0, hspace=0)
+        sub = SubplotParams(left=0.0, bottom=0, right=1,
+                            top=1, wspace=0, hspace=0)
         self.fig = Figure(figsize=(width, height),
                           facecolor='white', subplotpars=sub)
 
@@ -70,7 +70,13 @@ class AzElCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        #h_policy = QtWidgets.QSizePolicy.Policy(QtWidgets.QSizePolicy.Expanding)
+        #v_policy = QtWidgets.QSizePolicy.Policy(QtWidgets.QSizePolicy.Expanding)
+        #self.setSizePolicy(QtWidgets.QSizePolicy(h_policy, v_policy))
+        # self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+        #                                          QtWidgets.QSizePolicy.MinimumExpanding))
+
+        # FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         #FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
@@ -123,11 +129,11 @@ class AzElCanvas(FigureCanvas):
                          fc="white", ec=self.normal_color, lw=0.5, ls='solid')
         self.axes.add_patch(inner_c)
 
-        d_offset=0.2
+        d_offset = 0.2
         directions = {'N':(self.center, self.center+d_offset),
                       'S':(self.center, self.center-d_offset),
-                      'E':(self.center+d_offset, self.center),
-                      'W':(self.center-d_offset, self.center)}
+                      'E':(self.center + d_offset, self.center),
+                      'W':(self.center - d_offset, self.center)}
 
         # dirctions
         for key, vals in directions.items():
@@ -181,7 +187,6 @@ class AzElCanvas(FigureCanvas):
                             **line_kwargs)
         self.axes.add_line(self.light)
 
-
         self.axes.add_patch(subaru)
 
         self.axes.set_ylim(min(self.y_scale), max(self.y_scale))
@@ -194,16 +199,22 @@ class AzElCanvas(FigureCanvas):
         #self.axes.set_xscale(10)
         #self.axes.axison=False
 
-
-
-
         self.draw()
 
     def minimumSizeHint(self):
         return QtCore.QSize(self.w, self.h)
 
-    def sizeHint(self):
-         return QtCore.QSize(self.w, self.h)
+    # def sizeHint(self):
+    #      return QtCore.QSize(self.w, self.h)
+
+    def resizeEvent(self, event):
+        rect = self.geometry()
+        x1, y1, x2, y2 = rect.getCoords()
+        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+        width = x2 - x1 + 1
+        height = y2 - y1 + 1
+        #print(f"{width=},{height=}")
+        return super().resizeEvent(event)
 
 
 class AzEl(AzElCanvas):
@@ -213,40 +224,6 @@ class AzEl(AzElCanvas):
 
         #super(AGPlot, self).__init__(*args, **kwargs)
         AzElCanvas.__init__(self, *args, **kwargs)
-
-    # def __update_wind(self, direction, speed):
-
-    #     radius_inner = 0.4
-    #     radius_outer = 0.498
-    #     try:
-    #         direction +=90 # adjust drawing north:up 0 east:left 90, west:right -90, south:bottom 180
-    #         s = speed / 100.0 # for drawing speed arrow
-    #         # find out new position and shpe of both wind-direction and wind-spped
-    #         b_x, b_y = self.__get_xy(degree=direction, radius=radius_outer)
-    #         h_x, h_y = self.__get_xy(degree=direction, radius=radius_inner-s)
-    #     except Exception as e:
-    #         self.logger.error("error: calc wind direction.  %s" %str(e))
-    #     else:
-    #         if speed < 10.0:
-    #             color = self.wind_color
-    #         elif speed > 15.0:
-    #             color = self.alarm_color
-    #         else:
-    #             color = self.warn_color
-    #         #self.wind.xytext = (b_x, b_y)
-    #         #self.wind.xy = (h_x, h_y)
-    #         #print self.wind.properties()['prop_tup']
-    #         self.wind.remove()
-
-    #         self.wind = self.axes.annotate('', xy=(h_x, h_y),
-    #                     xytext=(b_x, b_y), size=29.5,
-    #                     arrowprops=dict(arrowstyle="wedge,tail_width=0.7",
-    #                     facecolor=color, ec="none",
-    #                     alpha=0.5, patchA=None,
-    #                     relpos=(0.0, -0.1)),
-    #                     horizontalalignment='center')
-    #         #print self.wind.arrowprops
-    #         #self.wind.arrowprops['facecolor'] = self.normal_color
 
     def __update_wind(self, direction, speed):
 
@@ -266,7 +243,7 @@ class AzEl(AzElCanvas):
             c_x, c_y = self.__get_xy(degree=direction, radius=radius_inner-update_speed)
 
         except Exception as e:
-            self.logger.error(f"error: calc wind direction.  {e}")
+            self.logger.error(f"error: calc wind direction: {e}")
         else:
             alpha = 0.5
             warn = 7.0
@@ -285,7 +262,8 @@ class AzEl(AzElCanvas):
                 #self.wind.set_xy(update_direction)
                 #self.wind_kwargs = dict(alpha=1, color=color, lw=0)
                 #self.wind.set(**self.wind_kwargs)
-                Artist.remove(self.wind)
+                if self.wind is not None and self.wind.axes is not None:
+                    Artist.remove(self.wind)
                 self.wind_kwargs = dict(alpha=alpha, color=color, lw=0)
                 self.wind = mpatches.Polygon(xy=update_direction,
                                             **self.wind_kwargs)
@@ -293,7 +271,7 @@ class AzEl(AzElCanvas):
                 self.axes.add_patch(self.wind)
 
             except Exception as e:
-                self.logger.error(f'error: updating wind. {e}')
+                self.logger.error(f'error: updating wind: {e}')
 
             #self.wind.set_xy=([[0.4, 0.9], [0.6, 0.9],[0.5, 0.8]])
     def __get_xy(self, degree, sign=1, radius=0):
@@ -332,13 +310,14 @@ class AzEl(AzElCanvas):
             color = self.warn_color
 
         try:
-            Artist.remove(self.el)
+            if self.el is not None and self.el.axes is not None:
+                Artist.remove(self.el)
             self.el = mpatches.Wedge((self.center, self.center),
                                       theta1=180-el,
                                       fc=color, ec=color, **self.el_kwargs)
             self.axes.add_patch(self.el)
         except Exception as e:
-            self.logger.error('error: updating. %s' %str(e))
+            self.logger.error(f'error: updating elevation: {e}')
             pass
 
     def __update_lightpath(self, el):
@@ -391,7 +370,7 @@ class AzEl(AzElCanvas):
         az = winddir = random.random()*random.randrange(-360, 360)
         windspeed = random.random()*random.randrange(0, 50)
         try:
-            state=state[indx]
+            state = state[indx]
         except Exception:
             state='Pointing'
         self.update_azel(az, el, winddir, windspeed, state)

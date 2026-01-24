@@ -4,15 +4,16 @@
 # T. Inagaki
 # E. Jeschke
 #
-from ginga.gw import Widgets
+from ginga.gw import Widgets, GwHelp
 from ginga.misc import Bunch
 from ginga import colors
 
 import PlBase
 
 
-clr_status = dict(off='white', normal='green', warning='orange', alarm='red')
+clr_status = dict(off='white', normal='forestgreen', warning='orange', alarm='red')
 pwr_vals = dict(on=1, off=2)
+font = ("Sans", 11)
 
 aliases = dict(ff_a='TSCV.DomeFF_A',
                ff_1b='TSCV.DomeFF_1B',
@@ -31,33 +32,36 @@ class DomeffPlugin(PlBase.Plugin):
 
     def build_gui(self, container):
 
+        self.font = GwHelp.get_font("Sans Bold", 11)
         self.w = Bunch.Bunch()
 
         gbox = Widgets.GridBox(rows=3, columns=6)
         gbox.set_border_width(2)
         gbox.set_row_spacing(4)
-        gbox.add_widget(Widgets.Label("DomeFF:"), 0, 0)
-        self.w.lamp_600w = Widgets.Label("600W", halign='center')
+        gbox.add_widget(self._get_label("DomeFF:"), 0, 0)
+        self.w.lamp_600w = self._get_label("600W", halign='center')
+        self.w.lamp_600w.set_font(font[0], size=font[1])
         gbox.add_widget(self.w.lamp_600w, 0, 1)
         self.set_lamp(self.w.lamp_600w, clr_status['off'], 1.0)
-        self.w.lamp_10w = Widgets.Label("10W", halign='center')
+        self.w.lamp_10w = self._get_label("10W", halign='center')
+        self.w.lamp_10w.set_font(font[0], size=font[1])
         gbox.add_widget(self.w.lamp_10w, 0, 3)
         self.set_lamp(self.w.lamp_10w, clr_status['off'], 1.0)
 
-        gbox.add_widget(Widgets.Label("A:", halign='center'), 1, 1)
-        gbox.add_widget(Widgets.Label("1B:", halign='center'), 1, 2)
-        gbox.add_widget(Widgets.Label("2B:", halign='center'), 1, 3)
-        gbox.add_widget(Widgets.Label("3B:", halign='center'), 1, 4)
-        gbox.add_widget(Widgets.Label("4B:", halign='center'), 1, 5)
-        self.w.ff_a_v = Widgets.Label("", halign='center')
+        gbox.add_widget(self._get_label("A:", halign='center'), 1, 1)
+        gbox.add_widget(self._get_label("1B:", halign='center'), 1, 2)
+        gbox.add_widget(self._get_label("2B:", halign='center'), 1, 3)
+        gbox.add_widget(self._get_label("3B:", halign='center'), 1, 4)
+        gbox.add_widget(self._get_label("4B:", halign='center'), 1, 5)
+        self.w.ff_a_v = self._get_label("", halign='center')
         gbox.add_widget(self.w.ff_a_v, 2, 1)
-        self.w.ff_1b_v = Widgets.Label("", halign='center')
+        self.w.ff_1b_v = self._get_label("", halign='center')
         gbox.add_widget(self.w.ff_1b_v, 2, 2)
-        self.w.ff_2b_v = Widgets.Label("", halign='center')
+        self.w.ff_2b_v = self._get_label("", halign='center')
         gbox.add_widget(self.w.ff_2b_v, 2, 3)
-        self.w.ff_3b_v = Widgets.Label("", halign='center')
+        self.w.ff_3b_v = self._get_label("", halign='center')
         gbox.add_widget(self.w.ff_3b_v, 2, 4)
-        self.w.ff_4b_v = Widgets.Label("", halign='center')
+        self.w.ff_4b_v = self._get_label("", halign='center')
         gbox.add_widget(self.w.ff_4b_v, 2, 5)
 
         container.add_widget(gbox, stretch=0)
@@ -65,6 +69,12 @@ class DomeffPlugin(PlBase.Plugin):
     def start(self):
         self.controller.register_select('domeff', self.update,
                                         list(aliases.values()))
+
+    def _get_label(self, name, halign=None):
+        lbl = Widgets.Label(name, halign=halign)
+        lbl.set_font(self.font)
+        lbl.set_color(fg=clr_status['normal'])
+        return lbl
 
     def update(self, status_dct):
         self.logger.debug('status=%s' % str(status_dct))
@@ -131,7 +141,7 @@ class DomeffPlugin(PlBase.Plugin):
             self.logger.debug(f'ff_a is on. {ff_a}')
             self.set_lamp(self.w.lamp_10w, clr_status['normal'], 0.3)
             if num_on > pwr_vals['on']:
-                self.logger.debug(f'ff_a is on {ff_a}, but num_on > on {num_on} > {pwr_vals['on']}')
+                self.logger.debug(f"ff_a is on {ff_a}, but num_on > on {num_on} > {pwr_vals['on']}")
                 self.set_lamp(self.w.lamp_10w, clr_status['warning'], 1.0)
         elif ff_a == pwr_vals['off']:
             self.logger.debug(f'ff_a is off. {ff_a}')
@@ -150,7 +160,7 @@ class DomeffPlugin(PlBase.Plugin):
                 self.set_lamp(self.w.lamp_600w, clr_status['normal'], 0.3)
 
                 if num_on > pwr_vals['on']:
-                    self.logger.debug(f'on in six00W {six00W}, but num_on > on {num_on} > {pwr_vals['on']}')
+                    self.logger.debug(f"on in six00W {six00W}, but num_on > on {num_on} > {pwr_vals['on']}")
                     self.set_lamp(self.w.lamp_600w, clr_status['warning'], 1.0)
             else:  #  off
                 self.logger.debug(f'on not in six00W. {six00W}')

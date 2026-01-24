@@ -1,12 +1,12 @@
 #
-# CalPlugin.py -- calibration lamps plugin for StatMon
+# TargetPlugin.py -- miscellaneous table plugin for StatMon
 #
 # T. Inagaki
 # E. Jeschke
 #
 import math
 
-from ginga.gw import Widgets
+from ginga.gw import Widgets, GwHelp
 from ginga.misc import Bunch
 
 from g2cam.INS import INSdata
@@ -15,7 +15,7 @@ ERROR = ["Unknown", None, STATNONE, STATERROR, 'None']
 
 import PlBase
 
-clr_status = dict(off='white', normal='black', warning='orange', alarm='red')
+clr_status = dict(off='white', normal='forestgreen', warning='orange', alarm='red')
 
 
 class TargetPlugin(PlBase.Plugin):
@@ -37,7 +37,7 @@ class TargetPlugin(PlBase.Plugin):
                         ]
         self.logger.debug('setting aliases=%s' % self.aliases)
 
-        controller.register_select('target', self.update, self.aliases)
+        self.controller.register_select('target', self.update, self.aliases)
 
     def set_layout(self, obcp):
         ins = INSdata()
@@ -55,42 +55,44 @@ class TargetPlugin(PlBase.Plugin):
 
     def build_gui(self, container):
 
+        self.font = GwHelp.get_font("Sans Bold", 11)
+
         self.w = Bunch.Bunch()
         self.inscode = 'SUK'
 
         gbox = Widgets.GridBox(rows=8, columns=4)
         gbox.set_border_width(2)
         gbox.set_row_spacing(2)
-        gbox.add_widget(Widgets.Label("Proposal ID:"), 0, 0)
-        self.w.propid = Widgets.Label("", halign='left')
+        gbox.add_widget(self._get_label("Proposal ID:"), 0, 0)
+        self.w.propid = self._get_label("", halign='left')
         gbox.add_widget(self.w.propid, 0, 1)
 
-        gbox.add_widget(Widgets.Label("Instrument:"), 1, 0)
-        self.w.insname = Widgets.Label("", halign='left')
+        gbox.add_widget(self._get_label("Instrument:"), 1, 0)
+        self.w.insname = self._get_label("", halign='left')
         gbox.add_widget(self.w.insname, 1, 1)
 
-        gbox.add_widget(Widgets.Label("Object:"), 2, 0)
-        self.w.object = Widgets.Label("", halign='left')
+        gbox.add_widget(self._get_label("Object:"), 2, 0)
+        self.w.object = self._get_label("", halign='left')
         gbox.add_widget(self.w.object, 2, 1)
 
-        gbox.add_widget(Widgets.Label("Position Angle:"), 3, 0)
-        self.w.pa = Widgets.Label("", halign='left')
+        gbox.add_widget(self._get_label("Position Angle:"), 3, 0)
+        self.w.pa = self._get_label("", halign='left')
         gbox.add_widget(self.w.pa, 3, 1)
 
-        gbox.add_widget(Widgets.Label("Time to AZ Limit:"), 4, 0)
-        self.w.tt_az_limit = Widgets.Label("", halign='left')
+        gbox.add_widget(self._get_label("Time to AZ Limit:"), 4, 0)
+        self.w.tt_az_limit = self._get_label("", halign='left')
         gbox.add_widget(self.w.tt_az_limit, 4, 1)
 
-        gbox.add_widget(Widgets.Label("Time to EL Limit:"), 5, 0)
-        self.w.tt_el_limit = Widgets.Label("", halign='left')
+        gbox.add_widget(self._get_label("Time to EL Limit:"), 5, 0)
+        self.w.tt_el_limit = self._get_label("", halign='left')
         gbox.add_widget(self.w.tt_el_limit, 5, 1)
 
-        gbox.add_widget(Widgets.Label("Time to ROT Limit:"), 6, 0)
-        self.w.tt_rot_limit = Widgets.Label("", halign='left')
+        gbox.add_widget(self._get_label("Time to ROT Limit:"), 6, 0)
+        self.w.tt_rot_limit = self._get_label("", halign='left')
         gbox.add_widget(self.w.tt_rot_limit, 6, 1)
 
-        gbox.add_widget(Widgets.Label("Slew Time:"), 7, 0)
-        self.w.slew_time = Widgets.Label("", halign='left')
+        gbox.add_widget(self._get_label("Slew Time:"), 7, 0)
+        self.w.slew_time = self._get_label("", halign='left')
         gbox.add_widget(self.w.slew_time, 7, 1)
 
         container.add_widget(gbox, stretch=0)
@@ -105,6 +107,12 @@ class TargetPlugin(PlBase.Plugin):
         self.controller.register_select('target', self.update,
                                         self.aliases)
         self.controller.add_callback('change-config', self.change_config)
+
+    def _get_label(self, name, halign=None):
+        lbl = Widgets.Label(name, halign=halign)
+        lbl.set_font(self.font)
+        lbl.set_color(fg=clr_status['normal'])
+        return lbl
 
     def update(self, status_dct):
         self.logger.debug('status=%s' % str(status_dct))
@@ -148,7 +156,7 @@ class TargetPlugin(PlBase.Plugin):
                                  focus2=status_dct.get('TSCV.FOCUSINFO2'))
 
             if status_dct['STATS.SLEWING_STATUS'] == 'NO':
-                self.w.slew_time.set_text("Slew Time: (Not Slewing)")
+                self.w.slew_time.set_text("(Not Slewing)")
                 return
 
             time_sec = status_dct['STATS.SLEWING_TIME']
@@ -156,9 +164,9 @@ class TargetPlugin(PlBase.Plugin):
                 mn, sec = divmod(time_sec, 60)
                 hr, mn = divmod(mn, 60)
                 hr, mn, sec = int(hr), int(mn), int(sec)
-                self.w.slew_time.set_text(f"Slew Time: {hr:02d}:{mn:02d}:{sec:02d}")
+                self.w.slew_time.set_text(f"{hr:02d}:{mn:02d}:{sec:02d}")
             else:
-                self.w.slew_time.set_text(f"Slew Time: ERROR")
+                self.w.slew_time.set_text(f"ERROR")
 
         except Exception as e:
             self.logger.error(f'error: target update: {e}')

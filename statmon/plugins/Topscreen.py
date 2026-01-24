@@ -41,8 +41,8 @@ class TopscreenCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
-        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, \
-                                   QtWidgets.QSizePolicy.Fixed)
+        # FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, \
+        #                            QtWidgets.QSizePolicy.Fixed)
         FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
@@ -56,8 +56,8 @@ class TopscreenCanvas(FigureCanvas):
     def minimumSizeHint(self):
         return QtCore.QSize(self.w, self.h)
 
-    def sizeHint(self):
-         return QtCore.QSize(self.w, self.h)
+    # def sizeHint(self):
+    #      return QtCore.QSize(self.w, self.h)
 
     def init_figure(self):
         ''' initial drawing '''

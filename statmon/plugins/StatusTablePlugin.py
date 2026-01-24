@@ -125,7 +125,7 @@ class StatusTablePlugin(PlBase.Plugin):
         self.__set_aliases(insname)
 
     def update(self, status_dct):
-        self.logger.info(f'status={str(status_dct)}')
+        self.logger.debug(f'status={str(status_dct)}')
         try:
             self.update_table(status_dct)
 
@@ -140,11 +140,15 @@ class StatusTablePlugin(PlBase.Plugin):
 
         for i, name in enumerate(['tscs', 'tscl', 'tscv']):
             tsc_time = status_dct.get(self.aliases[i + 10])
-            tsc_time_str = time.strftime("%Y-%m-%d %H:%M:%S",
-                                         time.localtime(tsc_time))
-            monitor_time[name].last_time = tsc_time
             color = clr_status['normal']
-            if cur_time - tsc_time > monitor_time[name].timedelta:
+            if isinstance(tsc_time, float):
+                tsc_time_str = time.strftime("%Y-%m-%d %H:%M:%S",
+                                             time.localtime(tsc_time))
+                monitor_time[name].last_time = tsc_time
+                if cur_time - tsc_time > monitor_time[name].timedelta:
+                    color = clr_status['warning']
+            else:
+                tsc_time_str = "Undefined"
                 color = clr_status['warning']
             self.w[f'{name}_time'].set_text(tsc_time_str)
             self.w[f'{name}_time'].set_color(fg=color)

@@ -47,7 +47,7 @@ class TelescopeGui(QtWidgets.QWidget):
 
         w, h = (500, 500)
         #self.resize(500, 500)
-        self.setFixedSize(w, h)
+        #self.setFixedSize(w, h)
         self.set_layout()
 
     def set_layout(self):
@@ -66,52 +66,78 @@ class TelescopeGui(QtWidgets.QWidget):
         middlelayout = QtWidgets.QVBoxLayout()
 
         # focusing part of telescope
-        telfocuslayout=QtWidgets.QVBoxLayout()
+        telfocus = QtWidgets.QWidget()
+        telfocuslayout = QtWidgets.QVBoxLayout()
+        telfocuslayout.setContentsMargins(0, 0, 0, 0)
+        telfocuslayout.setSpacing(0)
+        telfocus.setLayout(telfocuslayout)
         telfocuslayout.addWidget(self.z)
         telfocuslayout.addWidget(self.m2)
         telfocuslayout.addWidget(self.focus)
 
         # telescope body
-        telbodylayout=QtWidgets.QVBoxLayout()
+        telbody = QtWidgets.QWidget()
+        telbodylayout = QtWidgets.QVBoxLayout()
+        telbodylayout.setContentsMargins(0, 0, 0, 0)
+        telbody.setLayout(telbodylayout)
         telbodylayout.setSpacing(0)
         #telbodylayout.addWidget(self.el)
-        telbodylayout.addWidget(self.azel)
-        telbodylayout.addWidget(self.m1)
-        telbodylayout.addWidget(self.cell)
+        #telbodylayout.addWidget(self.azel, stretch=5)
+        telbodylayout.addWidget(self.m1, stretch=0)
+        telbodylayout.addWidget(self.cell, stretch=0)
 
-        middlelayout.addLayout(telfocuslayout)
-        middlelayout.addLayout(telbodylayout)
+        # telbodylayout = QtWidgets.QGridLayout()
+        # telbody.setLayout(telbodylayout)
+        # for i in range(3):
+        #     telbodylayout.setRowStretch(i, 1)
+        # telbodylayout.setColumnStretch(0, 5)
+        # for i in range(1, 3):
+        #     telbodylayout.setColumnStretch(i, 0)
+        # telbodylayout.addWidget(self.azel, 0, 0)
+        # telbodylayout.addWidget(self.m1, 1, 0)
+        # telbodylayout.addWidget(self.cell, 2, 0)
+
+        middlelayout.addWidget(telfocus, stretch=0)
+        #middlelayout.addLayout(telbodylayout, stretch=5)
+        middlelayout.addWidget(self.azel, stretch=5)
+        middlelayout.addWidget(telbody, stretch=0)
+        middlelayout.setStretch(1, 1000)
+        middlelayout.setStretch(2, 0)
 
         # right layout will be combination of following components:
-        # ins/img-rot, adc, tiptilt, wavepalte, m3
-        rightlayout=QtWidgets.QVBoxLayout()
+        # ins/img-rot, adc, tiptilt, waveplate, m3
+        rightlayout = QtWidgets.QVBoxLayout()
         self.set_focus_layout(rlayout=rightlayout)
 
         # combine right, middle, left layout
-        telhlayout=QtWidgets.QHBoxLayout()
+        telhlayout = QtWidgets.QHBoxLayout()
         telhlayout.setSpacing(0)
-        telhlayout.addWidget(self.windscreen)
-        telhlayout.addLayout(middlelayout)
-        telhlayout.addLayout(rightlayout)
+        telhlayout.addWidget(self.windscreen, stretch=0)
+        telhlayout.addLayout(middlelayout, stretch=5)
+        telhlayout.addLayout(rightlayout, stretch=0)
 
         mainlayout.addLayout(toplayout)
-        mainlayout.addLayout(telhlayout)
+        mainlayout.addLayout(telhlayout, stretch=5)
         self.setLayout(mainlayout)
+
+        middlelayout.setStretch(1, 1000)
+        middlelayout.setStretch(2, 0)
+
 
     def popt_layout(self, rlayout):
         ''' prime focus optical'''
-        r1layout=QtWidgets.QVBoxLayout()
+        r1layout = QtWidgets.QVBoxLayout()
         #r1layout.addWidget(self.d1)
-        empty_shell=Dummy(height=95, logger=self.logger)
+        empty_shell = Dummy(height=95, logger=self.logger)
         r1layout.addWidget(empty_shell)
 
-        r2layout=QtWidgets.QVBoxLayout()
+        r2layout = QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
 
-        empty_shell=Dummy(height=1, logger=self.logger)
+        empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
-        self.insrot=InsRot.InsRotPf(logger=self.logger)
+        self.insrot = InsRot.InsRotPf(logger=self.logger)
         r2layout.addWidget(self.insrot)
 
         self.adc = Adc.AdcPf(logger=self.logger)
@@ -120,7 +146,7 @@ class TelescopeGui(QtWidgets.QWidget):
         self.m3 = M3(logger=self.logger)
         r2layout.addWidget(self.m3)
 
-        empty_shell=Dummy(height=285, logger=self.logger)
+        empty_shell = Dummy(height=285, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
         rlayout.addLayout(r1layout)
@@ -128,24 +154,24 @@ class TelescopeGui(QtWidgets.QWidget):
 
     def pir_layout(self, rlayout):
         ''' prime focus infrared'''
-        r1layout=QtWidgets.QVBoxLayout()
+        r1layout = QtWidgets.QVBoxLayout()
         #r1layout.addWidget(self.d1)
-        empty_shell=Dummy(height=95, logger=self.logger)
+        empty_shell = Dummy(height=95, logger=self.logger)
         r1layout.addWidget(empty_shell)
 
-        r2layout=QtWidgets.QVBoxLayout()
+        r2layout = QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
 
-        empty_shell=Dummy(height=1, logger=self.logger)
+        empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
-        self.insrot=InsRot.InsRotPf(logger=self.logger)
+        self.insrot = InsRot.InsRotPf(logger=self.logger)
         r2layout.addWidget(self.insrot)
 
         self.m3 = M3(logger=self.logger)
         r2layout.addWidget(self.m3)
 
-        empty_shell=Dummy(height=320, logger=self.logger)
+        empty_shell = Dummy(height=320, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
         rlayout.addLayout(r1layout)
@@ -153,18 +179,18 @@ class TelescopeGui(QtWidgets.QWidget):
 
     def nsopt_layout(self, rlayout):
         ''' nasmyth focus optical'''
-        r1layout=QtWidgets.QVBoxLayout()
+        r1layout = QtWidgets.QVBoxLayout()
         #r1layout.addWidget(self.d1)
-        empty_shell=Dummy(height=95, logger=self.logger)
+        empty_shell = Dummy(height=95, logger=self.logger)
         r1layout.addWidget(empty_shell)
 
-        r2layout=QtWidgets.QVBoxLayout()
+        r2layout = QtWidgets.QVBoxLayout()
         r2layout.setSpacing(1)
 
-        empty_shell=Dummy(height=1, logger=self.logger)
+        empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
-        self.imgrot=ImgRot.ImgRotNsOpt(logger=self.logger)
+        self.imgrot = ImgRot.ImgRotNsOpt(logger=self.logger)
         r2layout.addWidget(self.imgrot)
 
         self.adc = Adc.Adc(logger=self.logger)
@@ -173,7 +199,7 @@ class TelescopeGui(QtWidgets.QWidget):
         self.m3 = M3(logger=self.logger)
         r2layout.addWidget(self.m3)
 
-        empty_shell=Dummy(height=277, logger=self.logger)
+        empty_shell = Dummy(height=277, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
         rlayout.addLayout(r1layout)
@@ -268,7 +294,7 @@ class TelescopeGui(QtWidgets.QWidget):
     def csopt_layout(self, rlayout):
         ''' cassegrain focus optical '''
 
-        r1layout=QtWidgets.QVBoxLayout()
+        r1layout = QtWidgets.QVBoxLayout()
         #r1layout.addWidget(self.d1)
         empty_shell = Dummy(height=95, logger=self.logger)
         r1layout.addWidget(empty_shell)
@@ -287,7 +313,7 @@ class TelescopeGui(QtWidgets.QWidget):
         self.m3 = M3(logger=self.logger)
         r2layout.addWidget(self.m3)
 
-        empty_shell=Dummy(height=285, logger=self.logger)
+        empty_shell = Dummy(height=285, logger=self.logger)
         r2layout.addWidget(empty_shell)
 
         rlayout.addLayout(r1layout)
@@ -302,15 +328,15 @@ class TelescopeGui(QtWidgets.QWidget):
             focas: insrot,adc
             moircs insrot
         '''
-        focus = {'HDS': self.nsopt_layout, 'SPCAM': self.popt_layout, \
-                 'HICIAO': self.nsir_layout, 'IRCS': self.nsir_layout, \
-                 'CHARIS': self.nsir_layout, 'IRD': self.nsir_layout, \
-                 'FMOS': self.pir_layout, 'HSC': self.popt_layout, \
-                 'K3D': self.nsir_layout, 'MOIRCS': self.cs_layout, \
-                 'SWIMS': self.csir_layout, 'MIMIZUKU' : self.csir_layout, \
-                 'FOCAS': self.csopt_layout, 'COMICS': self.csir_layout, \
-                 'SUKA': self.cs_layout, 'PFS': self.popt_layout, \
-                 'VAMPIRES': self.nsir_layout, 'SCEXAO': self.nsir_layout, \
+        focus = {'HDS': self.nsopt_layout, 'SPCAM': self.popt_layout,
+                 'HICIAO': self.nsir_layout, 'IRCS': self.nsir_layout,
+                 'CHARIS': self.nsir_layout, 'IRD': self.nsir_layout,
+                 'FMOS': self.pir_layout, 'HSC': self.popt_layout,
+                 'K3D': self.nsir_layout, 'MOIRCS': self.cs_layout,
+                 'SWIMS': self.csir_layout, 'MIMIZUKU' : self.csir_layout,
+                 'FOCAS': self.csopt_layout, 'COMICS': self.csir_layout,
+                 'SUKA': self.cs_layout, 'PFS': self.popt_layout,
+                 'VAMPIRES': self.nsir_layout, 'SCEXAO': self.nsir_layout,
                  'REACH': self.nsir_layout, 'NINJA': self.nsir_layout}
 
         self.logger.debug(f'telescope focuslayout ins={self.obcp}')
@@ -326,73 +352,74 @@ class Telescope(TelescopeGui):
         super(Telescope, self).__init__(parent=parent, obcp=obcp, logger=logger)
 
     def update_nsir(self, **kargs):
-        self.imgrot.update_imgrot(imgrot=kargs.get('TSCV.ImgRotRotation'), \
-                                  mode=kargs.get('TSCV.ImgRotMode'), \
-                                  focus=kargs.get('TSCV.FOCUSINFO'), \
+        self.imgrot.update_imgrot(imgrot=kargs.get('TSCV.ImgRotRotation'),
+                                  mode=kargs.get('TSCV.ImgRotMode'),
+                                  focus=kargs.get('TSCV.FOCUSINFO'),
                                   itype=kargs.get('TSCV.ImgRotType'))
 
-        self.waveplate.update_waveplate(stage1=kargs.get('WAV.STG1_PS'), \
-                                        stage2=kargs.get('WAV.STG2_PS'), \
-                                        stage3=kargs.get('WAV.STG3_PS'),)
+        self.waveplate.update_waveplate(stage1=kargs.get('WAV.STG1_PS'),
+                                        stage2=kargs.get('WAV.STG2_PS'),
+                                        stage3=kargs.get('WAV.STG3_PS'))
 
-        self.aoshutter.update_aoshutter(lwsh=kargs.get('AON.LWFS.LASH'), \
+        self.aoshutter.update_aoshutter(lwsh=kargs.get('AON.LWFS.LASH'),
                                         hwsh=kargs.get('AON.HWFS.LASH'))
 
 
     def update_csir(self, **kargs):
-        self.tipchop.update_tipchop(mode=kargs.get('TSCV.TT_Mode'), \
-                                    drive=kargs.get('TSCV.TT_Drive'), \
-                                    data=kargs.get('TSCV.TT_DataAvail'), \
+        self.tipchop.update_tipchop(mode=kargs.get('TSCV.TT_Mode'),
+                                    drive=kargs.get('TSCV.TT_Drive'),
+                                    data=kargs.get('TSCV.TT_DataAvail'),
                                     state=kargs.get('TSCV.TT_ChopStat'))
 
-        self.insrot.update_insrot(insrot=kargs.get('TSCV.InsRotRotation'), \
+        self.insrot.update_insrot(insrot=kargs.get('TSCV.InsRotRotation'),
                                   mode=kargs.get('TSCV.InsRotMode'))
 
     def update_csopt(self, **kargs):
 
-        self.insrot.update_insrot(insrot=kargs.get('TSCV.InsRotRotation'), \
+        self.insrot.update_insrot(insrot=kargs.get('TSCV.InsRotRotation'),
                                   mode=kargs.get('TSCV.InsRotMode'))
 
-        self.adc.update_adc(on_off=kargs.get('TSCV.ADCOnOff'), \
-                            mode=kargs.get('TSCV.ADCMode'), \
+        self.adc.update_adc(on_off=kargs.get('TSCV.ADCOnOff'),
+                            mode=kargs.get('TSCV.ADCMode'),
                             in_out=kargs.get('TSCV.ADCInOut'))
 
     def update_cs(self, **kargs):
-        self.insrot.update_insrot(insrot=kargs.get('TSCV.InsRotRotation'), \
+        self.insrot.update_insrot(insrot=kargs.get('TSCV.InsRotRotation'),
                                   mode=kargs.get('TSCV.InsRotMode'))
 
     def update_pir(self, **kargs):
 
-        self.insrot.update_insrot(insrot=kargs.get('TSCV.INSROTROTATION_PF'), \
+        self.insrot.update_insrot(insrot=kargs.get('TSCV.INSROTROTATION_PF'),
                                   mode=kargs.get('TSCV.INSROTMODE_PF'))
 
     def update_popt(self, **kargs):
 
-        self.insrot.update_insrot(insrot=kargs.get('TSCV.INSROTROTATION_PF'), \
+        self.insrot.update_insrot(insrot=kargs.get('TSCV.INSROTROTATION_PF'),
                                   mode=kargs.get('TSCV.INSROTMODE_PF'))
 
-        # self.adc.update_adc(on_off=kargs.get('TSCV.ADCONOFF_PF'), \
-        #                     mode=kargs.get('TSCV.ADCMODE_PF'), \
+        # self.adc.update_adc(on_off=kargs.get('TSCV.ADCONOFF_PF'),
+        #                     mode=kargs.get('TSCV.ADCMODE_PF'),
         #                     in_out=kargs.get('TSCV.ADCInOut'))
 
-        self.adc.update_adc(on_off=kargs.get('TSCV.ADCONOFF_PF'), \
+        self.adc.update_adc(on_off=kargs.get('TSCV.ADCONOFF_PF'),
                             mode=kargs.get('TSCV.ADCMODE_PF'))
 
 
     def update_nsopt(self, **kargs):
 
-        self.imgrot.update_imgrot(imgrot=kargs.get('TSCV.ImgRotRotation'), \
-                                  mode=kargs.get('TSCV.ImgRotMode'), \
-                                  focus=kargs.get('TSCV.FOCUSINFO'), \
+        self.imgrot.update_imgrot(imgrot=kargs.get('TSCV.ImgRotRotation'),
+                                  mode=kargs.get('TSCV.ImgRotMode'),
+                                  focus=kargs.get('TSCV.FOCUSINFO'),
                                   itype=kargs.get('TSCV.ImgRotType'))
 
-        self.adc.update_adc(on_off=kargs.get('TSCV.ADCOnOff'), \
-                            mode=kargs.get('TSCV.ADCMode'), \
+        self.adc.update_adc(on_off=kargs.get('TSCV.ADCOnOff'),
+                            mode=kargs.get('TSCV.ADCMode'),
                             in_out=kargs.get('TSCV.ADCInOut'))
 
 
     def update_focus(self, **kargs):
 
+<<<<<<< HEAD
         focus = {'HDS': self.update_nsopt, 'SPCAM': self.update_popt, \
                  'HICIAO': self.update_nsir, 'IRCS': self.update_nsir, \
                  'CHARIS': self.update_nsir, 'IRD': self.update_nsir, \
@@ -403,6 +430,18 @@ class Telescope(TelescopeGui):
                  'SUKA': self.update_cs, 'PFS': self.update_popt, \
                  'VAMPIRES': self.update_nsir, 'SCEXAO': self.update_nsir, \
                  'REACH': self.update_nsir, 'NINJA': self.update_nsir}
+=======
+        focus = {'HDS': self.update_nsopt, 'SPCAM': self.update_popt,
+                 'HICIAO': self.update_nsir, 'IRCS': self.update_nsir,
+                 'CHARIS': self.update_nsir, 'IRD': self.update_nsir,
+                 'FMOS': self.update_pir, 'HSC': self.update_popt,
+                 'K3D': self.update_nsir, 'MOIRCS': self.update_cs,
+                 'SWIMS':  self.update_cs, 'MIMIZUKU' :  self.update_cs,
+                 'FOCAS': self.update_csopt, 'COMICS': self.update_csir,
+                 'SUKA': self.update_cs, 'PFS': self.update_popt,
+                 'VAMPIRES': self.update_nsir, 'SCEXAO': self.update_nsir,
+                 'REACH': self.update_nsir}
+>>>>>>> eb3bd32 (Update some plugins)
 
         self.m3.update_m3(m3=kargs.get('TSCV.M3Drive'))
 
@@ -417,39 +456,39 @@ class Telescope(TelescopeGui):
 
         self.dome_shutter.update_dome(dome=kargs.get('STATL.DOMESHUTTER_POS'))
         #self.dome_shutter.update_dome(dome=kargs.get('TSCV.DomeShutter'))
-        self.topscreen.update_topscreen(mode=kargs.get('TSCV.TopScreen'), \
-                                        front=kargs.get('TSCL.TSFPOS'), \
+        self.topscreen.update_topscreen(mode=kargs.get('TSCV.TopScreen'),
+                                        front=kargs.get('TSCL.TSFPOS'),
                                         rear=kargs.get('TSCL.TSRPOS'))
 
-        self.windscreen.update_windscreen(drv=kargs.get('TSCV.WINDSDRV'), \
-                                          windscreen=kargs.get('TSCV.WindScreen'), \
-                                          cmd=kargs.get('TSCL.WINDSCMD'), \
-                                          pos=kargs.get('TSCL.WINDSPOS'), \
+        self.windscreen.update_windscreen(drv=kargs.get('TSCV.WINDSDRV'),
+                                          windscreen=kargs.get('TSCV.WindScreen'),
+                                          cmd=kargs.get('TSCL.WINDSCMD'),
+                                          pos=kargs.get('TSCL.WINDSPOS'),
                                           el=kargs.get('TSCS.EL'))
 
         self.z.update_z(z=kargs.get('TSCL.Z'))
 
         self.m2.update_m2(focus=kargs.get('STATL.M2_DESCR'))
 
-        self.focus.update_focus(focus=kargs.get('STATL.FOC_DESCR'), \
+        self.focus.update_focus(focus=kargs.get('STATL.FOC_DESCR'),
                                 alarm=kargs.get('TSCV.FOCUSALARM'))
 
-        #self.el.update_el(el=kargs.get('TSCS.EL'), \
+        #self.el.update_el(el=kargs.get('TSCS.EL'),
         #                  state=kargs.get('STATL.TELDRIVE'))
 
-        # self.azel.update_azel(az=kargs.get('TSCS.AZ'),\
-        #                       el=kargs.get('TSCS.EL'), \
-        #                       wind=kargs.get('TSCL.WINDD'), \
+        # self.azel.update_azel(az=kargs.get('TSCS.AZ'),
+        #                       el=kargs.get('TSCS.EL'),
+        #                       wind=kargs.get('TSCL.WINDD'),
         #                       state=kargs.get('STATL.TELDRIVE'))
 
-        self.azel.update_azel(az=kargs.get('TSCS.AZ'),\
-                              el=kargs.get('TSCS.EL'), \
-                              winddir=kargs.get('TSCL.WINDD'), \
-                              windspeed=kargs.get('TSCL.WINDS_O'), \
+        self.azel.update_azel(az=kargs.get('TSCS.AZ'),
+                              el=kargs.get('TSCS.EL'),
+                              winddir=kargs.get('TSCL.WINDD'),
+                              windspeed=kargs.get('TSCL.WINDS_O'),
                               state=kargs.get('STATL.TELDRIVE'))
 
 
-        self.m1.update_m1cover(m1cover=kargs.get('TSCV.M1Cover'), \
+        self.m1.update_m1cover(m1cover=kargs.get('TSCV.M1Cover'),
                                m1cover_onway=kargs.get('TSCV.M1CoverOnway'))
 
         self.cell.update_cell(cell=kargs.get('TSCV.CellCover'))
@@ -518,13 +557,8 @@ if __name__ == '__main__':
 
     argprs = ArgumentParser(description="Telescope status")
 
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
     argprs.add_argument("--display", dest="display", metavar="HOST:N",
                       help="Use X display on HOST:N")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
     argprs.add_argument("--interval", dest="interval", type=int,
                       default=1000,
                       help="Inverval for plotting(milli sec).")
@@ -547,18 +581,4 @@ if __name__ == '__main__':
     if options.display:
         os.environ['DISPLAY'] = options.display
 
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)
+    main(options, args)

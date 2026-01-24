@@ -33,12 +33,10 @@ class PlotCanvas(FigureCanvas):
         # We want the axes cleared every time plot() is called
         #self.axes.hold(False)
         #self.axes.grid(True)
-
-
-        self.center_x=center_x  # center of canvas
-        self.center_y=center_y
-        self.w=350
-        self.h=350
+        self.center_x = center_x  # center of canvas
+        self.center_y = center_y
+        self.w = 350
+        self.h = 350
         #self.setFixedSize(w, h)
 
         self.plot_color='blue'
@@ -56,12 +54,12 @@ class PlotCanvas(FigureCanvas):
 
     def zoomin(self):
         self.logger.debug('zooming in')
-        self.scale_index-=1
+        self.scale_index -= 1
         self.reconfigure()
 
     def zoomout(self):
         self.logger.debug('zooming out')
-        self.scale_index+=1
+        self.scale_index += 1
         self.reconfigure()
 
     def refresh(self):
@@ -70,18 +68,18 @@ class PlotCanvas(FigureCanvas):
 
     def get_min_max_scale(self):
         ''' get min/max scale values '''
-        scale=self.scale[self.scale_index]
-        #scale=self.circle[self.scale_index]
-        min_val= min(scale)
-        max_val= max(scale)
+        scale = self.scale[self.scale_index]
+        #scale = self.circle[self.scale_index]
+        min_val = min(scale)
+        max_val = max(scale)
         return (min_val, max_val)
 
     def get_scales(self):
         ''' get scales of circle/x,y axis/y label'''
-        circle=self.circle[self.scale_index]
-        y_axis=self.y_axis[self.scale_index]
-        x_axis=self.x_axis[self.scale_index]
-        y_label=self.y_label[self.scale_index]
+        circle = self.circle[self.scale_index]
+        y_axis = self.y_axis[self.scale_index]
+        x_axis = self.x_axis[self.scale_index]
+        y_label = self.y_label[self.scale_index]
 
         return (circle, x_axis, y_axis, y_label)
 
@@ -89,79 +87,76 @@ class PlotCanvas(FigureCanvas):
         ''' initial drawing '''
 
         try:
-            (circle, x_axis, y_axis, y_label)=self.get_scales()
-            (scale_min, scale_max)=self.get_min_max_scale()
+            circle, x_axis, y_axis, y_label = self.get_scales()
+            scale_min, scale_max = self.get_min_max_scale()
         except Exception as e:
             self.logger.error(f'error: getting scales. {e}')
             return
 
         # the arrow from previous plotting to current plotting
-        self.arrow=self.axes.annotate('', xy=(self.center_x, self.center_y),
-                                      xytext=(self.center_x, self.center_y),
-                                      size=5, color='b',
-                                      arrowprops=dict(arrowstyle="wedge,tail_width=2.0", \
-                                                      facecolor='grey', ec="none", \
-                                                      alpha=0.5, patchA=None, \
-                                                      relpos=(0.5, -0.09)),
-                                      horizontalalignment='center')
+        self.arrow = self.axes.annotate('', xy=(self.center_x, self.center_y),
+                                        xytext=(self.center_x, self.center_y),
+                                        size=5, color='b',
+                                        arrowprops=dict(arrowstyle="wedge,tail_width=2.0",
+                                                        facecolor='grey', ec="none",
+                                                        alpha=0.5, patchA=None,
+                                                        relpos=(0.5, -0.09)),
+                                        horizontalalignment='center')
 
         #kwargs=dict(boxstyle='square', alpha=0.1, ec='grey', fc='white' )
-
-
         kwargs=dict(alpha=0.4, ec='grey', fc='white' )
         #self.axes.text(0.057, 1.02, '[                       ]', color='w', ha='left', va='baseline',
         #               bbox=kwargs,
         #               fontsize=27,
         #               transform=self.axes.transAxes)
-        self.title_x=self.axes.text(0.30, 1.03, 'X:%02.2f' %(self.center_x), \
-                                    color='green', ha='left', va='baseline', \
-                                    #bbox=kwargs, \
-                                    fontsize=14, \
+        self.title_x=self.axes.text(0.30, 1.03, 'X:%02.2f' %(self.center_x),
+                                    color='green', ha='left', va='baseline',
+                                    #bbox=kwargs,
+                                    fontsize=14,
                                     transform=self.axes.transAxes)
 
-        self.title_y=self.axes.text(0.54, 1.03, 'Y:%02.2f' %(self.center_y), \
-                                    color='green', ha='left', va='baseline', \
-                                    #bbox=kwargs, \
-                                    fontsize=14, \
+        self.title_y=self.axes.text(0.54, 1.03, 'Y:%02.2f' %(self.center_y),
+                                    color='green', ha='left', va='baseline',
+                                    #bbox=kwargs,
+                                    fontsize=14,
                                     transform=self.axes.transAxes)
 
         #t=Rectangle((0.05, 0.05), 0.9, 0.9, alpha=0.1, color='lightgreen', ec='None',  transform=self.axes.transAxes)
         #self.axes.add_patch(t)
 
         # draw inner/outer circles
-        self.inner_c = Circle((self.center_x, self.center_y), min(circle), \
+        self.inner_c = Circle((self.center_x, self.center_y), min(circle),
                                fc="None", ec="g", lw=0.5, ls='solid')
         self.axes.add_patch(self.inner_c)
-        self.outer_c = Circle((self.center_x, self.center_y), max(circle), \
+        self.outer_c = Circle((self.center_x, self.center_y), max(circle),
                                fc="None", ec="g", lw=1.5, ls='solid')
         self.axes.add_patch(self.outer_c)
 
         # draw x-axis
-        self.h_line=Line2D(x_axis, [self.center_x]*len(x_axis), alpha=0.75, \
-                           ls='None', lw=0.7, color='g', marker='+', ms=35.0, \
-                           mew=1.5, markevery=(2,10))
+        self.h_line = Line2D(x_axis, [self.center_x]*len(x_axis), alpha=0.75,
+                             ls='None', lw=0.7, color='g', marker='+', ms=35.0,
+                             mew=1.5, markevery=(2,10))
 
         self.axes.add_line(self.h_line)
 
         # draw y-axis
-        self.v_line=Line2D([min(x_axis)]*len(y_axis), y_axis, alpha=1, ls=':', \
-                           lw=3, marker=0, color='g', ms=15.0, mew=1, markevery=None)
+        self.v_line = Line2D([min(x_axis)]*len(y_axis), y_axis, alpha=1, ls=':',
+                             lw=3, marker=0, color='g', ms=15.0, mew=1, markevery=None)
         self.axes.add_line(self.v_line)
 
         # draw labels of y-axis
         self.label=[]
         for (y, label) in zip(y_axis, y_label) :
-            self.label.append(self.axes.text(min(x_axis)-0.03-(0.03*self.scale_index), y, '%s' \
-                              %label, verticalalignment='center', horizontalalignment='right'))
+            self.label.append(self.axes.text(min(x_axis) - 0.03 - (0.03 * self.scale_index),
+                                             y, '%s' % label,
+                                             verticalalignment='center',
+                                             horizontalalignment='right'))
 
         # set x,y limit values
         self.axes.set_xlim(scale_min, scale_max)
         self.axes.set_ylim(scale_min, scale_max)
         # disable default x/y axis drawing
-        self.axes.axison=False
-
-        #a = self.fig.axes([-0.5, -.5, 0.1, 0.075])
-        #b = Button(a, 'Next')
+        self.axes.axison = False
 
         self.draw()
 
@@ -170,25 +165,25 @@ class PlotCanvas(FigureCanvas):
         self.logger.debug('reconfiguring...')
 
         def set_scale_index():
-            num_scale=len(self.scale)-1
+            num_scale = len(self.scale) - 1
             if self.scale_index > num_scale:
-                self.scale_index=num_scale
+                self.scale_index = num_scale
             elif self.scale_index < 0:
-                self.scale_index=0
+                self.scale_index = 0
 
         set_scale_index()
 
         try:
-            (circle, x_axis, y_axis, y_label)=self.get_scales()
-            (min_val, max_val)=self.get_min_max_scale()
+            circle, x_axis, y_axis, y_label = self.get_scales()
+            min_val, max_val = self.get_min_max_scale()
         except Exception as e:
             self.logger.error(f'error: getting scales. {e}')
             return
 
         # re-set x/y-axis
         #self.h_line.set_data(x_axis, [0]*len(x_axis))
-        self.h_line.set_data(x_axis, [self.center_x]*len(x_axis))
-        self.v_line.set_data([min(x_axis)]*len(y_axis), y_axis)
+        self.h_line.set_data(x_axis, [self.center_x] * len(x_axis))
+        self.v_line.set_data([min(x_axis)] * len(y_axis), y_axis)
 
         # re-set circles
         #self.inner_c.set_axes([self.center_x, self.center_y])
@@ -197,7 +192,7 @@ class PlotCanvas(FigureCanvas):
 
         # re-draw labels of y-axis
         for (text, label) in zip(self.label, y_label):
-            text.set_text('%s'%label)
+            text.set_text('%s' % label)
 
         # re-set values of y-axis
         for (text, y) in zip(self.label, y_axis):
@@ -206,29 +201,18 @@ class PlotCanvas(FigureCanvas):
         # re-set  values of x-axis
         for text in self.label:
             # 0.03 is a value to adjust lables position of y-axis
-            text.set_x(min(x_axis)-self.label_offset-(0.029*self.scale_index))
+            text.set_x(min(x_axis) - self.label_offset - (0.029 * self.scale_index))
 
         self.axes.set_xlim(min_val, max_val)
         self.axes.set_ylim(min_val, max_val)
 
         self.draw()
 
-    # def mousePressEvent(self, event):
-    #     if event.button() == QtCore.Qt.LeftButton:
-    #         print 'LEFT...'
-    #         self.scale_index+=1
-    #     elif event.button() == QtCore.Qt.RightButton:
-    #         print 'Right...'
-    #         self.scale_index-=1
-    #     else:
-    #         return
-    #     self.reconfigure()
-
     def minimumSizeHint(self):
         return QtCore.QSize(self.w, self.h)
 
-    def sizeHint(self):
-         return QtCore.QSize(self.w, self.h)
+    # def sizeHint(self):
+    #      return QtCore.QSize(self.w, self.h)
 
 
 class Plot(PlotCanvas):
@@ -238,71 +222,68 @@ class Plot(PlotCanvas):
 
         #super(AGPlot, self).__init__(*args, **kwargs)
 
-        self.c=0
-        self.plot_record=[]
+        self.c = 0
+        self.plot_record = []
 
-        self.max_record=500   # max number of record to draw on canvas
+        self.max_record = 500   # max number of record to draw on canvas
 
-        self.label_offset=0.03    # offset potision of label of y-axis
-        self.record_radius=0.005  # the radius of a circle of record
+        self.label_offset = 0.03    # offset potision of label of y-axis
+        self.record_radius = 0.005  # the radius of a circle of record
 
-        self.scale_index=1  # default scale
+        self.scale_index = 1  # default scale
 
         # those values are measured not to waggle redrawn circles when a widget is reconfigured
-        self.scale=([-0.28, 0.28], [-0.56, 0.56], \
-                    [-0.84, 0.84], [-1.12, 1.12], \
-                    [-1.40, 1.40], [-1.68, 1.68], \
-                    [-1.96, 1.96], [-2.24, 2.24])
+        self.scale = ([-0.28, 0.28], [-0.56, 0.56],
+                      [-0.84, 0.84], [-1.12, 1.12],
+                      [-1.40, 1.40], [-1.68, 1.68],
+                      [-1.96, 1.96], [-2.24, 2.24])
 
         # the radius of inner/outer circle
-        self.circle=([0.125, 0.25], [0.25, 0.5], \
-                     [0.375, 0.75], [0.5, 1.0],  \
-                     [0.625, 1.25], [0.75, 1.5], \
-                     [0.875, 1.75], [1.0, 2.0])
+        self.circle = ([0.125, 0.25], [0.25, 0.5],
+                       [0.375, 0.75], [0.5, 1.0],
+                       [0.625, 1.25], [0.75, 1.5],
+                       [0.875, 1.75], [1.0, 2.0])
         # y axis values
-        self.y_axis=([-0.25, -0.125, 0.0, 0.125,  0.25], \
-                     [-0.5, -0.25, 0.0, 0.25, 0.5],  \
-                     [-0.75, -0.375, 0.0, 0.375, 0.75], \
-                     [-1.0, -0.5, 0.0, 0.5, 1.0],  \
-                     [-1.25, -0.625, 0.0, 0.625, 1.25], \
-                     [-1.5, -0.75, 0.0, 0.75, 1.5],  \
-                     [-1.75, -0.875, 0.0, 0.875, 1.75], \
-                     [-2.0, -1.0, 0.0, 1.0, 2.0])
+        self.y_axis = ([-0.25, -0.125, 0.0, 0.125,  0.25],
+                       [-0.5, -0.25, 0.0, 0.25, 0.5],
+                       [-0.75, -0.375, 0.0, 0.375, 0.75],
+                       [-1.0, -0.5, 0.0, 0.5, 1.0],
+                       [-1.25, -0.625, 0.0, 0.625, 1.25],
+                       [-1.5, -0.75, 0.0, 0.75, 1.5],
+                       [-1.75, -0.875, 0.0, 0.875, 1.75],
+                       [-2.0, -1.0, 0.0, 1.0, 2.0])
         # x axis values
-        self.x_axis=([-0.25, -0.125, 0.0, 0.125,  0.25], \
-                     [-0.5, -0.25, 0.0, 0.25, 0.5], \
-                     [-0.75, -0.375, 0.0, 0.375, 0.75], \
-                     [-1.0, -0.5,  0.0, 0.5, 1.0], \
-                     [-1.25, -0.625, 0.0, 0.625, 1.25], \
-                     [-1.5, -0.75, 0.0, 0.75, 1.5], \
-                     [-1.75, -0.875, 0.0, 0.875, 1.75], \
-                     [-2.0, -1.0, 0.0, 1.0, 2.0])
+        self.x_axis = ([-0.25, -0.125, 0.0, 0.125,  0.25],
+                       [-0.5, -0.25, 0.0, 0.25, 0.5],
+                       [-0.75, -0.375, 0.0, 0.375, 0.75],
+                       [-1.0, -0.5,  0.0, 0.5, 1.0],
+                       [-1.25, -0.625, 0.0, 0.625, 1.25],
+                       [-1.5, -0.75, 0.0, 0.75, 1.5],
+                       [-1.75, -0.875, 0.0, 0.875, 1.75],
+                       [-2.0, -1.0, 0.0, 1.0, 2.0])
         # y axis labels
-        self.y_label=([-0.25, -0.125, 'arcsec', 0.125, 0.25], \
-                      [-0.5, -0.25, 'arcsec', 0.25, 0.5], \
-                      [-0.75, -0.375, 'arcsec', 0.375, 0.75], \
-                      [-1.0, -0.5, 'arcsec', 0.5, 1.0], \
-                      [-1.25, -0.625, 'arcsec', 0.625, 1.25], \
-                      [-1.5, -0.75, 'arcsec', 0.75, 1.5], \
-                      [-1.75, -0.875, 'arcsec', 0.875, 1.75], \
-                      [-2.0, -1.0,  'arcsec', 1.0, 2.0])
+        self.y_label = ([-0.25, -0.125, 'arcsec', 0.125, 0.25],
+                        [-0.5, -0.25, 'arcsec', 0.25, 0.5],
+                        [-0.75, -0.375, 'arcsec', 0.375, 0.75],
+                        [-1.0, -0.5, 'arcsec', 0.5, 1.0],
+                        [-1.25, -0.625, 'arcsec', 0.625, 1.25],
+                        [-1.5, -0.75, 'arcsec', 0.75, 1.5],
+                        [-1.75, -0.875, 'arcsec', 0.875, 1.75],
+                        [-2.0, -1.0,  'arcsec', 1.0, 2.0])
 
-        PlotCanvas.__init__(self, parent=parent, center_x=center_x, \
+        PlotCanvas.__init__(self, parent=parent, center_x=center_x,
                             center_y=center_y, logger=logger)
 
         self.rlock = threading.RLock()
-
 
     def tick(self):
         ''' testing solo mode '''
         import random
         random.seed()
 
-        x=random.random()*random.randrange(-800,800)
-        y=random.random()*random.randrange(-800,800)
+        x = random.random()*random.randrange(-800,800)
+        y = random.random()*random.randrange(-800,800)
         self.update_plot(x,y)
-
-
 
     # def in_range(self, x, y, limit):
     #     ''' is ploting in range '''
@@ -316,10 +297,11 @@ class Plot(PlotCanvas):
         ''' draw a path to a current plotting from previous one '''
         with self.rlock:
             try:
-                cur=self.plot_record[-1]
-                pre=self.plot_record[-2]
-                self.arrow.xy=(cur.x, cur.y)
-                self.arrow.xytext=(pre.x, pre.y)
+                cur = self.plot_record[-1]
+                pre = self.plot_record[-2]
+                self.arrow.xy = (cur.x, cur.y)
+                self.arrow.xytext = (pre.x, pre.y)
+
             except Exception as e:
                 self.logger.warn(f'warn: drawing path. {e}')
                 pass
@@ -336,9 +318,8 @@ class Plot(PlotCanvas):
                 pre.point.set_alpha(0.75)
             #  extracting the lastest record fails if a plotting is the first time. but it's ok
             except Exception as e:
-                pre=None
+                pre = None
                 self.logger.warn(f'warn: {e}')
-                pass
         #return pre
 #        plot_path()
 
@@ -347,15 +328,16 @@ class Plot(PlotCanvas):
         with self.rlock:
             for num in list(range(len(self.plot_record))):
                 self.delete_oldest_record()
-            self.arrow.xy=(0, 0)
-            self.arrow.xytext=(0, 0)
+            self.arrow.xy = (0, 0)
+            self.arrow.xytext = (0, 0)
         self.draw()
 
     def delete_oldest_record(self):
         ''' delete the oldest plotting '''
         try:
-            p=self.plot_record.pop(0)
+            p = self.plot_record.pop(0)
             Artist.remove(p.point)
+
         except Exception as e:
             print(e)
             pass
@@ -364,10 +346,10 @@ class Plot(PlotCanvas):
     def update_plot(self, x , y):
         ''' update plotting '''
         self.logger.debug(f'x={x}, y={y}')
-
         try:
             x *= 0.001
             y *= 0.001
+
         except Exception as e:
             self.logger.warn(f'warn: x, y are not digits. {e}')
             return
@@ -386,8 +368,8 @@ class Plot(PlotCanvas):
             if plot_points > self.max_record:
                 self.delete_oldest_record()
 
-        self.title_x.set_text('X:%02.2f' %(x))
-        self.title_y.set_text('Y:%02.2f' %(y))
+        self.title_x.set_text('X:%02.2f' % (x))
+        self.title_y.set_text('Y:%02.2f' % (y))
         #self.axes.set_title('x=%0.2f, y=%0.2f' %(x,y))
 
         self.draw()
@@ -395,11 +377,11 @@ class Plot(PlotCanvas):
     def plot_point(self, x , y, ):
         ''' plotting '''
 
-        self.c+=1
+        self.c += 1
 
         alarm = max(self.circle[self.scale_index])
 
-#        in_range=self.in_range(x,y, limit=alarm)
+#        in_range = self.in_range(x,y, limit=alarm)
 
         circle = Circle(xy=(x,y), radius=0.0125*(self.scale_index+1), \
                       ec="none", fill=True, alpha=1)
@@ -412,7 +394,7 @@ class Plot(PlotCanvas):
 
         self.axes.add_patch(circle)
 
-        print(self.c)
+        # print(self.c)
 
         plot = Bunch(point=circle, x=x, y=y, color=color)
 
@@ -434,27 +416,25 @@ class Ao1Plot(Plot):
 
         self.plot_radius = 0.45
         self.record_radius = 0.1
-        self.max_record=100
-
-        self.alarm=9.0
-        self.warn=6.0
-
+        self.max_record = 100
+        self.alarm = 9.0
+        self.warn = 6.0
         self.record_color = 'grey'
 
         # those values are measured not to waggle redrawn circles when a widget is reconfigured
-        #self.scale=([-11.2, 11.2],)
+        #self.scale = ([-11.2, 11.2],)
         self.scale = ([-10.072, 10.072],)
         # the radius of inner/outer circle
-        #self.circle=([5.0, 10.0],)
+        #self.circle = ([5.0, 10.0],)
         self.circle = ([6.0, 9.0],)
         # y axis values
-        #self.y_axis=([-10.0, -5.0, 0.0, 5.0,  10.0],)
+        #self.y_axis = ([-10.0, -5.0, 0.0, 5.0,  10.0],)
         self.y_axis = ([-9.0, -6.0, 0.0, 6.0,  9.0],)
         # x axis values
-        #self.x_axis=([-10.0, -5.0, 0.0, 5.0,  10.0],)
+        #self.x_axis = ([-10.0, -5.0, 0.0, 5.0,  10.0],)
         self.x_axis = ([-9.0, -6.0, 0.0, 6.0,  9.0],)
         # y axis labels
-        #self.y_label=([-10.0, -5.0, 'voltage', 5.0,  10.0],)
+        #self.y_label = ([-10.0, -5.0, 'voltage', 5.0,  10.0],)
         self.y_label = ([-9.0, -6.0, '0.0(V)', 6.0,  9.0],)
 
         self.reconfigure()
@@ -464,16 +444,16 @@ class Ao1Plot(Plot):
 
         if (x >= self.alarm or x <= -self.alarm) or \
            (y >= self.alarm or y <= -self.alarm):
-            circle = Circle(xy=(x,y), radius=self.plot_radius, \
+            circle = Circle(xy=(x,y), radius=self.plot_radius,
                                 fc=self.alarm_color, ec='none', fill=True, alpha=1)
             color = self.alarm_color
         elif (self.warn <= x or x <= -self.warn) or \
              (self.warn <= y  or y <= -self.warn):
-            circle = Circle(xy=(x,y), radius=self.plot_radius, \
+            circle = Circle(xy=(x,y), radius=self.plot_radius,
                             fc=self.warn_color, ec='none', fill=True, alpha=1)
             color = self.warn_color
         else:
-            circle = Circle(xy=(x,y), radius=self.plot_radius, \
+            circle = Circle(xy=(x,y), radius=self.plot_radius,
                           fc=self.plot_color, ec='none', fill=True, alpha=1)
             color = self.record_color
 
@@ -527,12 +507,14 @@ class Ao2Plot(Plot):
     def plot_point(self, x, y):
         if (x >= self.alarm_high or x <= self.alarm_low) or \
            (y >= self.alarm_high or y <= self.alarm_low):
-            circle = Circle(xy=(x,y), radius=self.plot_radius, \
-            fc = self.alarm_color, ec="none", fill=True, alpha=1)
+            circle = Circle(xy=(x,y), radius=self.plot_radius,
+                            fc = self.alarm_color, ec="none",
+                            fill=True, alpha=1)
             color = self.alarm_color
         else:
-            circle = Circle(xy=(x,y), radius=self.plot_radius, \
-            fc = self.plot_color, ec="none", fill=True, alpha=1)
+            circle = Circle(xy=(x,y), radius=self.plot_radius,
+                            fc = self.plot_color, ec="none",
+                            fill=True, alpha=1)
             color = self.record_color
 
         self.axes.add_patch(circle)
@@ -548,7 +530,7 @@ class Ao2Plot(Plot):
 class Buttons(QtWidgets.QWidget):
     def __init__(self, parent=None, plot=None, logger=None):
         super(Buttons, self).__init__(parent)
-        self.plot=plot
+        self.plot = plot
         self.logger = logger
 
     @property
@@ -597,8 +579,8 @@ class FmosPlot(QtWidgets.QWidget):
 
         self.logger = logger
 
-        w, h = (350, 400)
-        self.setFixedSize(w, h)
+        # w, h = (350, 400)
+        # self.setFixedSize(w, h)
 
         self.set_gui()
 
@@ -624,7 +606,6 @@ class FmosPlot(QtWidgets.QWidget):
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.plot)
-
 
         layout.addLayout(self.buttons.layout)
         self.setLayout(layout)
@@ -658,8 +639,8 @@ class NsIrPlot(QtWidgets.QWidget):
         self.ao2 = Ao2Plot(parent=parent, logger=logger)
         self.buttons2 = Buttons(parent=parent, plot=self.ao2, logger=logger)
         self.logger = logger
-        w, h = (350, 750)
-        self.setFixedSize(w, h)
+        # w, h = (350, 750)
+        # self.setFixedSize(w, h)
         self.set_gui()
 
     def tick(self):
@@ -721,8 +702,8 @@ class PfsAgPlot(QtWidgets.QWidget):
         #self.empty1 = Dummy(width=1, height=25,  logger=logger)
         self.logger = logger
 
-        w, h = (350, 400)
-        self.setFixedSize(w, h)
+        # w, h = (350, 400)
+        # self.setFixedSize(w, h)
 
         self.set_gui()
 
@@ -739,7 +720,6 @@ class PfsAgPlot(QtWidgets.QWidget):
         self.update_plot(state, x, y, exptime)
 
     def set_gui(self):
-
         layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(1)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -770,8 +750,6 @@ class PfsAgPlot(QtWidgets.QWidget):
             #self.threshold.clear()
 
 
-
-
 class AgPlot(QtWidgets.QWidget):
     '''  Ag Guiding  '''
     def __init__(self, parent=None, logger=None):
@@ -785,8 +763,8 @@ class AgPlot(QtWidgets.QWidget):
         #self.empty1 = Dummy(width=1, height=25,  logger=logger)
         self.logger = logger
 
-        w, h = (350, 400)
-        self.setFixedSize(w, h)
+        # w, h = (350, 400)
+        # self.setFixedSize(w, h)
 
         self.set_gui()
 
@@ -847,8 +825,8 @@ class TwoGuidingPlot(QtWidgets.QWidget):
         self.threshold = Threshold(parent=parent, logger=logger)
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
         self.logger = logger
-        w, h = (350, 400)
-        self.setFixedSize(w, h)
+        # w, h = (350, 400)
+        # self.setFixedSize(w, h)
         self.set_gui()
 
     def set_gui(self):

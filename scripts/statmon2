@@ -3,6 +3,8 @@
 # statmon.py -- Flexible Gen2 status monitor.
 #
 # E. Jeschke
+# T. Inagaki
+# R. Kackley
 #
 """
 Usage:
@@ -12,6 +14,7 @@ Usage:
 import sys, os
 import threading
 import queue as Queue
+from argparse import ArgumentParser
 
 import statmon.version
 moduleHome = os.path.split(sys.modules['statmon.version'].__file__)[0]
@@ -59,8 +62,8 @@ default_layout = ['seq', {},
                      #  ['ws', dict(name='left5', height=80, stretch=1,
                      #              show_tabs=False),],
                      #  ],
-                     ['vbox', dict(width=320, spacing=4, stretch=0),
-                      ['ws', dict(name='telconf_info', height=500, stretch=0,
+                     ['vbox', dict(width=320, spacing=4, stretch=5),
+                      ['ws', dict(name='telconf_info', height=500, stretch=5,
                                   show_tabs=False), ],
                       ['ws', dict(name='azlimit_info', height=80, stretch=1,
                                   show_tabs=False), ],
@@ -118,7 +121,6 @@ plugins = [
     ('azlimit', 'LimitPlugin', 'AzLimitPlugin', 'azlimit_info', ''),
     ('ellimit', 'LimitPlugin', 'ElLimitPlugin', 'ellimit_info', ''),
     ('rotlimit', 'LimitPlugin', 'RotLimitPlugin', 'rotlimit_info', '' ),
-    ('slewtime', 'SlewTime', 'SlewTime', 'slewtime_info', ''),
     ('tsccontrol', 'TscControlPlugin', 'TscControlPlugin', 'tsclogin_info', ''),
     ('domeff', 'DomeffPlugin', 'DomeffPlugin', 'domeff_info', ''),
     ('cal', 'CalPlugin', 'CalPlugin', 'callamp_info', ''),
@@ -329,20 +331,18 @@ def main(options, args):
 if __name__ == "__main__":
 
     # Parse command line options
-    from argparse import ArgumentParser
     argprs = ArgumentParser(description="Gen2 Status Monitor")
 
     argprs.add_argument('-f', "--config", dest="configfile", default=None,
                         help="Specify configuration file")
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                        help="Enter the pdb debugger on main()")
     argprs.add_argument("--display", dest="display", metavar="HOST:N",
                         help="Use X display on HOST:N")
     argprs.add_argument("-g", "--geometry", dest="geometry",
                         metavar="GEOM", default="+20+100",
                     help="X geometry for initial size and placement")
     argprs.add_argument("--gen2host", dest="gen2host",
-                        metavar="HOST", default="localhost",
+                        metavar="HOST",
+                        default=os.environ.get('GEN2HOST', "localhost"),
                         help="Connect to Gen2 HOST")
     argprs.add_argument("--modules", dest="modules", metavar="NAMES",
                         help="Specify additional modules to load")
@@ -361,9 +361,6 @@ if __name__ == "__main__":
                         help="Specify additional plugins to load")
     argprs.add_argument("--port", dest="port", type=int, default=None,
                         help="Register using PORT", metavar="PORT")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                        default=False,
-                        help="Run the profiler on main()")
     argprs.add_argument("--svcname", dest="svcname", metavar="NAME",
                         default=defaultServiceName,
                         help="Register using NAME as service name")

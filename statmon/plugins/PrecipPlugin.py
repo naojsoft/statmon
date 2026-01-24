@@ -6,7 +6,7 @@
 #
 import time
 
-from ginga.gw import Widgets
+from ginga.gw import Widgets, GwHelp
 from ginga.misc import Bunch
 from ginga import colors
 
@@ -16,7 +16,7 @@ ERROR = ["Unknown", None, STATNONE, STATERROR, 'None']
 import PlBase
 
 
-clr_status = dict(off='white', normal='green', warning='orange', alarm='red')
+clr_status = dict(off='white', normal='forestgreen', warning='orange', alarm='red')
 
 aliases = dict(precip='GEN2.PRECIP.SENSOR1.STATUS',
                precip_time='GEN2.PRECIP.SENSOR1.TIME')
@@ -30,16 +30,17 @@ class PrecipPlugin(PlBase.Plugin):
     """ Precip """
 
     def build_gui(self, container):
+        self.font = GwHelp.get_font("Sans Bold", 11)
         self.w = Bunch.Bunch()
 
         gbox = Widgets.GridBox(rows=1, columns=5)
         gbox.set_border_width(2)
-        gbox.add_widget(Widgets.Label("Precip:"), 0, 0)
+        gbox.add_widget(self._get_label("Precip:"), 0, 0)
         gbox.add_widget(Widgets.Label(""), 0, 1)  # add spacer
-        self.w.lamp_wet = Widgets.Label("Wet", halign='center')
+        self.w.lamp_wet = self._get_label("Wet", halign='center')
         gbox.add_widget(self.w.lamp_wet, 0, 2)
         self.set_lamp(self.w.lamp_wet, clr_status['off'], 1.0)
-        self.w.lamp_dry = Widgets.Label("Dry", halign='center')
+        self.w.lamp_dry = self._get_label("Dry", halign='center')
         gbox.add_widget(self.w.lamp_dry, 0, 3)
         self.set_lamp(self.w.lamp_dry, clr_status['off'], 1.0)
         gbox.add_widget(Widgets.Label(""), 0, 4)  # add spacer
@@ -57,6 +58,12 @@ class PrecipPlugin(PlBase.Plugin):
 
         except Exception as e:
             self.logger.error(f'error: updating status: {e}')
+
+    def _get_label(self, name, halign=None):
+        lbl = Widgets.Label(name, halign=halign)
+        lbl.set_font(self.font)
+        lbl.set_color(fg=clr_status['normal'])
+        return lbl
 
     def set_lamp(self, w, color, alpha):
         clr_hex = colors.resolve_color(color, alpha=alpha, format='hex')

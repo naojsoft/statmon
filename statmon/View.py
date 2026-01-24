@@ -29,8 +29,8 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         Widgets.Application.__init__(self, logger=logger)
         GwMain.GwMain.__init__(self, logger=logger, ev_quit=ev_quit, app=self)
 
-        QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
-        QtWidgets.QApplication.setPalette(QtWidgets.QApplication.style().standardPalette())
+        # QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
+        # QtWidgets.QApplication.setPalette(QtWidgets.QApplication.style().standardPalette())
 
         # read in any module-level style sheet
         if os.path.exists(rc_file):

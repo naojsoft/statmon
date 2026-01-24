@@ -4,7 +4,7 @@
 # T. Inagaki
 # E. Jeschke
 #
-from ginga.gw import Widgets
+from ginga.gw import Widgets, GwHelp
 from ginga.misc import Bunch
 from ginga import colors
 
@@ -13,7 +13,7 @@ ERROR = ["Unknown", None, STATNONE, STATERROR, 'None']
 
 import PlBase
 
-clr_status = dict(off='white', normal='green', warning='orange', alarm='red')
+clr_status = dict(off='white', normal='forestgreen', warning='orange', alarm='red')
 pwr_vals = dict(on=1, off=2)
 
 aliases = dict(hct1='TSCV.CAL_HCT_LAMP1', hct2='TSCV.CAL_HCT_LAMP2',
@@ -28,34 +28,35 @@ class CalPlugin(PlBase.Plugin):
 
     def build_gui(self, container):
 
+        self.font = GwHelp.get_font("Sans Bold", 11)
         self.w = Bunch.Bunch()
 
         gbox = Widgets.GridBox(rows=2, columns=4)
         gbox.set_row_spacing(4)
         gbox.set_border_width(2)
-        gbox.add_widget(Widgets.Label("Calib:"), 0, 0)
+        gbox.add_widget(self._get_label("Calib:"), 0, 0)
 
-        self.w.lamp_th_ar1 = Widgets.Label("Th-Ar1", halign='center')
+        self.w.lamp_th_ar1 = self._get_label("Th-Ar1", halign='center')
         gbox.add_widget(self.w.lamp_th_ar1, 0, 1)
         self.set_lamp(self.w.lamp_th_ar1, clr_status['off'], 1.0)
-        self.w.lamp_ne = Widgets.Label("Ne", halign='center')
+        self.w.lamp_ne = self._get_label("Ne", halign='center')
         gbox.add_widget(self.w.lamp_ne, 0, 2)
         self.set_lamp(self.w.lamp_ne, clr_status['off'], 1.0)
-        self.w.lamp_hal1 = Widgets.Label("Hal1", halign='center')
+        self.w.lamp_hal1 = self._get_label("Hal1", halign='center')
         gbox.add_widget(self.w.lamp_hal1, 0, 3)
         self.set_lamp(self.w.lamp_hal1, clr_status['off'], 1.0)
 
-        self.w.lamp_th_ar2 = Widgets.Label("Th-Ar2", halign='center')
+        self.w.lamp_th_ar2 = self._get_label("Th-Ar2", halign='center')
         gbox.add_widget(self.w.lamp_th_ar2, 1, 1)
         self.set_lamp(self.w.lamp_th_ar2, clr_status['off'], 1.0)
-        self.w.lamp_ar = Widgets.Label("Ar", halign='center')
+        self.w.lamp_ar = self._get_label("Ar", halign='center')
         gbox.add_widget(self.w.lamp_ar, 1, 2)
         self.set_lamp(self.w.lamp_ar, clr_status['off'], 1.0)
-        self.w.lamp_hal2 = Widgets.Label("Hal2", halign='center')
+        self.w.lamp_hal2 = self._get_label("Hal2", halign='center')
         gbox.add_widget(self.w.lamp_hal2, 1, 3)
         self.set_lamp(self.w.lamp_hal2, clr_status['off'], 1.0)
 
-        self.w.ma = Widgets.Label("", halign='center')
+        self.w.ma = self._get_label("", halign='center')
         gbox.add_widget(self.w.ma, 1, 0)
 
         container.add_widget(gbox, stretch=0)
@@ -63,6 +64,12 @@ class CalPlugin(PlBase.Plugin):
     def start(self):
         self.controller.register_select('cal', self.update,
                                          list(aliases.values()))
+
+    def _get_label(self, name, halign=None):
+        lbl = Widgets.Label(name, halign=halign)
+        lbl.set_font(self.font)
+        lbl.set_color(fg=clr_status['normal'])
+        return lbl
 
     def update(self, status_dct):
         self.logger.debug('status=%s' % str(status_dct))
