@@ -419,18 +419,6 @@ class Telescope(TelescopeGui):
 
     def update_focus(self, **kargs):
 
-<<<<<<< HEAD
-        focus = {'HDS': self.update_nsopt, 'SPCAM': self.update_popt, \
-                 'HICIAO': self.update_nsir, 'IRCS': self.update_nsir, \
-                 'CHARIS': self.update_nsir, 'IRD': self.update_nsir, \
-                 'FMOS': self.update_pir, 'HSC': self.update_popt, \
-                 'K3D': self.update_nsir, 'MOIRCS': self.update_cs, \
-                 'SWIMS':  self.update_cs, 'MIMIZUKU' :  self.update_cs, \
-                 'FOCAS': self.update_csopt, 'COMICS': self.update_csir, \
-                 'SUKA': self.update_cs, 'PFS': self.update_popt, \
-                 'VAMPIRES': self.update_nsir, 'SCEXAO': self.update_nsir, \
-                 'REACH': self.update_nsir, 'NINJA': self.update_nsir}
-=======
         focus = {'HDS': self.update_nsopt, 'SPCAM': self.update_popt,
                  'HICIAO': self.update_nsir, 'IRCS': self.update_nsir,
                  'CHARIS': self.update_nsir, 'IRD': self.update_nsir,
@@ -440,8 +428,7 @@ class Telescope(TelescopeGui):
                  'FOCAS': self.update_csopt, 'COMICS': self.update_csir,
                  'SUKA': self.update_cs, 'PFS': self.update_popt,
                  'VAMPIRES': self.update_nsir, 'SCEXAO': self.update_nsir,
-                 'REACH': self.update_nsir}
->>>>>>> eb3bd32 (Update some plugins)
+                 'REACH': self.update_nsir, 'NINJA': self.update_nsir}
 
         self.m3.update_m3(m3=kargs.get('TSCV.M3Drive'))
 

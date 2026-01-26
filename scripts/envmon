@@ -118,7 +118,8 @@ def main(options, args):
     ev_quit = threading.Event()
 
     threadPool = Task.ThreadPool(logger=logger, ev_quit=ev_quit,
-                                 numthreads=options.numthreads)
+                                 numthreads=options.numthreads,
+                                 minthreads=2)
 
     # Get settings folder
     if 'CONFHOME' in os.environ:
