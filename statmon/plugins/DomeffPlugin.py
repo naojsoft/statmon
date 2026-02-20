@@ -11,7 +11,11 @@ from ginga import colors
 import PlBase
 
 
-clr_status = dict(off='white', normal='forestgreen', warning='orange', alarm='red')
+clr_status = dict(off='white',
+                  normal='forestgreen',
+                  normal_bg='green',
+                  warning='orange',
+                  alarm='red')
 pwr_vals = dict(on=1, off=2)
 font = ("Sans", 11)
 
@@ -102,7 +106,7 @@ class DomeffPlugin(PlBase.Plugin):
             val = f'{voltage:.1f}V'
             color = clr_status['off']
             if voltage > 0.0:
-                color = clr_status['normal']
+                color = clr_status['normal_bg']
             res = (val, color)
         except Exception:
             val = 'Undef'
@@ -139,7 +143,7 @@ class DomeffPlugin(PlBase.Plugin):
 
         if ff_a == pwr_vals['on']:
             self.logger.debug(f'ff_a is on. {ff_a}')
-            self.set_lamp(self.w.lamp_10w, clr_status['normal'], 0.3)
+            self.set_lamp(self.w.lamp_10w, clr_status['normal_bg'], 0.3)
             if num_on > pwr_vals['on']:
                 self.logger.debug(f"ff_a is on {ff_a}, but num_on > on {num_on} > {pwr_vals['on']}")
                 self.set_lamp(self.w.lamp_10w, clr_status['warning'], 1.0)
@@ -157,7 +161,7 @@ class DomeffPlugin(PlBase.Plugin):
         else:  # 600W is either on or off
             if pwr_vals['on'] in six00W:
                 self.logger.debug(f'on in six00W. {six00W}')
-                self.set_lamp(self.w.lamp_600w, clr_status['normal'], 0.3)
+                self.set_lamp(self.w.lamp_600w, clr_status['normal_bg'], 0.3)
 
                 if num_on > pwr_vals['on']:
                     self.logger.debug(f"on in six00W {six00W}, but num_on > on {num_on} > {pwr_vals['on']}")
