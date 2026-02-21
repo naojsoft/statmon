@@ -23,6 +23,8 @@ al_envmon = dict(temp = ['TSCL.TEMP_O', 'TSCL.TEMP_I'],
                  m1dew = ['STATL.M1_TEMP_MIN', 'STATL.TRUSS_TEMP_MIN', 'STATL.DEW_POINT_TLSCP', 'STATL.DEW_POINT_CATWALK.MEAN'],
                  pressure = ['TSCL.ATOM'],
                  rainfall = ['TSCL.RAIN'],
+                 so2 = ['GEN2.SO2.OBSFLOOR.CONC_CORR',
+                        'GEN2.SO2.NOAA.CONC'],
                  misc = ['GEN2.STATUS.TBLTIME.TSCL'])
 
 # starting dimensions of graph window (can change with window size)
@@ -97,6 +99,14 @@ class EnvMon5(PlBase.Plugin):
         self.root.add_widget(res.widget, stretch=1)
         self.plots.rainfall = res
 
+        names = ["ObsFloor", "NOAA"]
+        res = make_plot(self.alias_d, self.logger, dims,
+                        names, al_envmon['so2'], num_pts,
+                        y_acc=np.mean, title="SO2",
+                        warn_y=0.08, alert_y=0.1)
+        self.root.add_widget(res.widget, stretch=1)
+        self.plots.so2 = res
+
         cross_connect_plots(self.plots.values())
 
         self.gui_up = True
@@ -136,7 +146,8 @@ class EnvMon5(PlBase.Plugin):
         home_dir = os.path.join(os.environ['HOME'], '.statmon')
         if not os.path.isdir(home_dir):
             os.mkdir(home_dir)
-        self.save_file = os.path.join(home_dir, "statmon_envmon5.npy")
+        self.save_file = os.path.join(home_dir,
+                                      f"{self.controller.name}_{str(self)}.npy")
         try:
             d = np.load(self.save_file, allow_pickle=True)
             self.cst = dict(d[()])

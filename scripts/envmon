@@ -44,8 +44,6 @@ default_layout = ['seq', {},
                      ['hpanel', dict(stretch=1),
                       ['scrollable', dict(width=350, stretch=1),
                        ['vbox', dict(height=1000, stretch=1),
-                        ['ws', dict(name='left1', height=25, stretch=0,
-                                    show_tabs=False), ],
                         ['ws', dict(name='left', width=350, show_tabs=False), ],
                         ]],
                       ['scrollable', dict(width=350, stretch=1),
@@ -54,7 +52,9 @@ default_layout = ['seq', {},
                         ]],
                       ['scrollable', dict(width=350, stretch=1),
                        ['vbox', dict(height=1000, spacing=4, stretch=1),
-                        ['ws', dict(name='right', show_tabs=False), ],
+                        ['ws', dict(name='precip', height=25, stretch=0,
+                                    show_tabs=False), ],
+                        ['ws', dict(name='right', show_tabs=False, stretch=5), ],
                         ]],
                      ]
                     ],
@@ -65,7 +65,7 @@ default_layout = ['seq', {},
 plugins = [
     # pluginName, moduleName, className, workspaceName, tabName
     ('envmon5', 'EnvMon5', 'EnvMon5', 'left', ''),
-    ('precip', 'PrecipPlugin', 'PrecipPlugin', 'left1', ''),
+    ('precip', 'PrecipPlugin', 'PrecipPlugin', 'precip', ''),
     ('envmon4', 'EnvMon4', 'EnvMon4', 'middle', ''),
     ('envmon3', 'EnvMon3', 'EnvMon3', 'right', ''),
     ('debug', 'Debug', 'Debug', 'right', "Debug"),
@@ -79,6 +79,7 @@ class EnvMon(Controller, Viewer):
         Viewer.__init__(self, logger, ev_quit)
         Controller.__init__(self, logger, threadPool, module_manager,
                             settings, ev_quit, model)
+        self.name = 'envmon'
 
     def add_menus(self):
         menubar = Widgets.Menubar()

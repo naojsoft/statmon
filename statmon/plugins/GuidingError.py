@@ -7,8 +7,6 @@ import os
 import time
 import numpy as np
 
-from qtpy import QtWidgets
-
 from ginga.gw import Widgets
 from statmon.util.xy_scatter import TimedXYScatterPlot
 

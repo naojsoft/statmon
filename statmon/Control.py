@@ -33,6 +33,7 @@ class Controller(Callback.Callbacks):
         self.model = model
         self.last_update = None
         self.last_config = {}
+        self.name = 'generic'  # this gets reassigned in statmon, envmon, etc
 
         # For callbacks
         for name in ['change-config', ]:

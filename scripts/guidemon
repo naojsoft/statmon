@@ -49,7 +49,7 @@ default_layout = ['seq', {},
                                 show_tabs=False), ],
                      ],
                      ['vbox', dict(stretch=1, spacing=4),
-                      ['ws', dict(name='guidingplot_info', height=600, stretch=1,
+                      ['ws', dict(name='guidingplot_info', height=600, stretch=5,
                                   show_tabs=False),],
                       # ['ws', dict(name='probe1lim_info', height=80, stretch=1,
                       #             show_tabs=False),],
@@ -65,9 +65,9 @@ plugins = [
     # pluginName, moduleName, className, workspaceName, tabName
     ('state', 'StatePlugin', 'StatePlugin', 'pointing_info', ''),
     ('guidingerror', 'GuidingError', 'GuidingError', 'guideerr2d_info', ''),
-    ('guidingimage', 'GuidingImage', 'GuidingImage', 'guidingplot_info','' ),
-    # ('probe1limit', 'LimitPlugin', 'Probe1LimitPlugin', 'probe1lim_info','' ),
-    # ('probe2limit', 'LimitPlugin', 'Probe2LimitPlugin', 'probe2lim_info','' ),
+    ('guidingimage', 'GuidingImage', 'GuidingImage', 'guidingplot_info', ''),
+    # ('probe1limit', 'LimitPlugin', 'Probe1LimitPlugin', 'probe1lim_info', ''),
+    # ('probe2limit', 'LimitPlugin', 'Probe2LimitPlugin', 'probe2lim_info', ''),
     #('debug', 'Debug', 'Debug', 'right', "Debug"),
     ]
 
@@ -79,6 +79,7 @@ class GuideMon(Controller, Viewer):
         Viewer.__init__(self, logger, ev_quit)
         Controller.__init__(self, logger, threadPool, module_manager,
                             settings, ev_quit, model)
+        self.name = 'guidemon'
 
     def add_menus(self):
         menubar = Widgets.Menubar()

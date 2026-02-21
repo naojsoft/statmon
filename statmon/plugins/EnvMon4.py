@@ -26,6 +26,8 @@ al_envmon = dict(windd = ['TSCL.WINDD', 'STATS.AZ_ADJ'],
                  wind_gust = ['TSCL.WIND_MAX_SPEED'],
                  topring = ['TSCL.TOPRING_WINDS_F', 'TSCL.TOPRING_WINDS_R'],
                  ctr_winds = ['STATL.CSCT_WINDS_MAX'],
+                 part = ['GEN2.PART.ELVTOWER.NC_ALL',
+                         'GEN2.PART.OBSFLOOR.NC_ALL'],
                  misc = ['GEN2.STATUS.TBLTIME.TSCL'])
 
 # starting dimensions of graph window (can change with window size)
@@ -107,6 +109,14 @@ class EnvMon4(PlBase.Plugin):
         self.root.add_widget(res.widget, stretch=1)
         self.plots.windspeed_center = res
 
+        names = ["Tower", "ObsFloor"]
+        res = make_plot(self.alias_d, self.logger, dims,
+                        names, al_envmon['part'], num_pts,
+                        y_acc=np.mean, title="Particulates",
+                        warn_y=25.0, alert_y=30.0)
+        self.root.add_widget(res.widget, stretch=1)
+        self.plots.windspeed_center = res
+
         cross_connect_plots(self.plots.values())
 
         self.gui_up = True
@@ -119,7 +129,8 @@ class EnvMon4(PlBase.Plugin):
         home_dir = os.path.join(os.environ['HOME'], '.statmon')
         if not os.path.isdir(home_dir):
             os.mkdir(home_dir)
-        self.save_file = os.path.join(home_dir, "statmon_envmon4.npy")
+        self.save_file = os.path.join(home_dir,
+                                      f"{self.controller.name}_{str(self)}.npy")
         try:
             d = np.load(self.save_file, allow_pickle=True)
             self.cst = dict(d[()])

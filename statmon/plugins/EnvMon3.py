@@ -115,7 +115,8 @@ class EnvMon3(PlBase.Plugin):
         home_dir = os.path.join(os.environ['HOME'], '.statmon')
         if not os.path.isdir(home_dir):
             os.mkdir(home_dir)
-        self.save_file = os.path.join(home_dir, "statmon_envmon3.npy")
+        self.save_file = os.path.join(home_dir,
+                                      f"{self.controller.name}_{str(self)}.npy")
         try:
             d = np.load(self.save_file, allow_pickle=True)
             self.cst = dict(d[()])

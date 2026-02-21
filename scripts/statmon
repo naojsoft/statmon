@@ -144,6 +144,7 @@ class StatMon(Controller, Viewer):
         Viewer.__init__(self, logger, ev_quit)
         Controller.__init__(self, logger, threadPool, module_manager,
                             settings, ev_quit, model)
+        self.name = 'statmon'
 
     def play_soundfile(self, filepath, format=None, priority=20):
         self.soundsink.playFile(filepath, format=format,
@@ -259,7 +260,6 @@ def main(options, args):
         #allChannels = set(channels) | model.channels
         # status now handled via different mechanism
         allChannels = (set(channels) | model.channels) - set(['status'])
-        print("channels are", allChannels)
 
         if options.monitor:
             # subscribe our monitor to the central monitor hub.

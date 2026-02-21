@@ -139,6 +139,7 @@ class StatMon(Controller, Viewer):
         Viewer.__init__(self, logger, ev_quit)
         Controller.__init__(self, logger, threadPool, module_manager,
                             settings, ev_quit, model)
+        self.name = 'statmon2'
 
     def play_soundfile(self, filepath, format=None, priority=20):
         self.soundsink.playFile(filepath, format=format,
