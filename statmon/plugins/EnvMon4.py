@@ -7,28 +7,24 @@ import os
 import time
 import numpy as np
 
-from ginga.gw import Viewers, Widgets
-from ginga.plot.plotaide import PlotAide
-from ginga.canvas.types import plots as gplots
-from ginga.plot import time_series as tsp
 from ginga.plot import data_source as dsp
 from ginga.misc import Bunch
 
 import PlBase
 from EnvMon3 import cross_connect_plots, make_plot
 
-# For "envmon2" plugin
-al_envmon = dict(windd = ['TSCL.WINDD', 'STATS.AZ_ADJ'],
-                 winds = ['TSCL.WINDS_O', 'TSCL.WINDS_I'],
-                 winds_roof = ['TSCL.ROOF_WINDS_IR_F',
-                               'TSCL.ROOF_WINDS_OPT_F',
-                               'TSCL.ROOF_WINDS_R'],
-                 wind_gust = ['TSCL.WIND_MAX_SPEED'],
-                 topring = ['TSCL.TOPRING_WINDS_F', 'TSCL.TOPRING_WINDS_R'],
-                 ctr_winds = ['STATL.CSCT_WINDS_MAX'],
-                 part = ['GEN2.PART.ELVTOWER.NC_ALL',
-                         'GEN2.PART.OBSFLOOR.NC_ALL'],
-                 misc = ['GEN2.STATUS.TBLTIME.TSCL'])
+# For "envmon4" plugin
+al_envmon = dict(windd=['TSCL.WINDD', 'STATS.AZ_ADJ'],
+                 winds=['TSCL.WINDS_O', 'TSCL.WINDS_I'],
+                 winds_roof=['TSCL.ROOF_WINDS_IR_F',
+                             'TSCL.ROOF_WINDS_OPT_F',
+                             'TSCL.ROOF_WINDS_R'],
+                 wind_gust=['TSCL.WIND_MAX_SPEED'],
+                 topring=['TSCL.TOPRING_WINDS_F', 'TSCL.TOPRING_WINDS_R'],
+                 ctr_winds=['STATL.CSCT_WINDS_MAX'],
+                 part=['GEN2.PART.ELVTOWER.NC_ALL',
+                       'GEN2.PART.OBSFLOOR.NC_ALL'],
+                 misc=['GEN2.STATUS.TBLTIME.TSCL'])
 
 # starting dimensions of graph window (can change with window size)
 dims = (500, 200)
@@ -78,10 +74,10 @@ class EnvMon4(PlBase.Plugin):
         self.root.add_widget(res.widget, stretch=1)
         self.plots.wind_speed = res
 
-        names = ["Roof IR(F)", "Roof Opt(F)", "Roof (R)"]
+        names = ["IR(F)", "Opt(F)", "Rear"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['winds_roof'], num_pts,
-                        y_acc=np.mean, title="Roof Windspeed (m/s)",
+                        y_acc=np.mean, title="Roof WS(m/s)",
                         warn_y=7.0, alert_y=19.9)
         self.root.add_widget(res.widget, stretch=1)
         self.plots.roof_wind_speed = res
@@ -130,7 +126,7 @@ class EnvMon4(PlBase.Plugin):
         if not os.path.isdir(home_dir):
             os.mkdir(home_dir)
         self.save_file = os.path.join(home_dir,
-                                      f"{self.controller.name}_{str(self)}.npy")
+                                      f"{self.controller.name}_{str(self)}.npy")  # noqa
         try:
             d = np.load(self.save_file, allow_pickle=True)
             self.cst = dict(d[()])
@@ -165,7 +161,6 @@ class EnvMon4(PlBase.Plugin):
 
     def update(self, statusDict):
         t = statusDict.get('GEN2.STATUS.TBLTIME.TSCL', time.time())
-        #t = statusDict.get('FITS.SBR.EPOCH', time.time())
         self.logger.debug("status update t={}".format(t))
 
         try:
@@ -183,12 +178,12 @@ class EnvMon4(PlBase.Plugin):
 
             t = time.time()
             secs_since = t - self.update_time
-            self.logger.debug("{0:.2f} secs since last plot update".format(secs_since))
+            self.logger.debug("{0:.2f} secs since last plot update".format(secs_since))  # noqa
             if secs_since >= update_interval:
                 self.update_plots()
 
             secs_since = t - self.save_time
-            self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))
+            self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))  # noqa
             if t - self.save_time >= save_interval:
                 self.update_persist()
 

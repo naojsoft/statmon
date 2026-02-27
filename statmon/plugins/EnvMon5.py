@@ -7,25 +7,23 @@ import os
 import time
 import numpy as np
 
-from ginga.gw import Viewers, Widgets
-from ginga.plot.plotaide import PlotAide
-from ginga.canvas.types import plots as gplots
-from ginga.plot import time_series as tsp
 from ginga.plot import data_source as dsp
 from ginga.misc import Bunch
 
 import PlBase
 from EnvMon3 import cross_connect_plots, make_plot
 
-# For "envmon" plugin
-al_envmon = dict(temp = ['TSCL.TEMP_O', 'TSCL.TEMP_I'],
-                 humid = ['STATL.HUMI_O.MEAN', 'TSCL.HUMI_I'],
-                 m1dew = ['STATL.M1_TEMP_MIN', 'STATL.TRUSS_TEMP_MIN', 'STATL.DEW_POINT_TLSCP', 'STATL.DEW_POINT_CATWALK.MEAN'],
-                 pressure = ['TSCL.ATOM'],
-                 rainfall = ['TSCL.RAIN'],
-                 so2 = ['GEN2.SO2.OBSFLOOR.CONC_CORR',
-                        'GEN2.SO2.NOAA.CONC'],
-                 misc = ['GEN2.STATUS.TBLTIME.TSCL'])
+# For "envmon5" plugin
+al_envmon = dict(temp=['TSCL.TEMP_O', 'TSCL.TEMP_I'],
+                 humid=['STATL.HUMI_O.MEAN', 'TSCL.HUMI_I'],
+                 m1dew=['STATL.M1_TEMP_MIN', 'STATL.TRUSS_TEMP_MIN',
+                        'STATL.DEW_POINT_TLSCP',
+                        'STATL.DEW_POINT_CATWALK.MEAN'],
+                 pressure=['TSCL.ATOM'],
+                 rainfall=['TSCL.RAIN'],
+                 so2=['GEN2.SO2.OBSFLOOR.CONC_CORR',
+                      'GEN2.SO2.NOAA.CONC'],
+                 misc=['GEN2.STATUS.TBLTIME.TSCL'])
 
 # starting dimensions of graph window (can change with window size)
 dims = (500, 200)
@@ -127,7 +125,7 @@ class EnvMon5(PlBase.Plugin):
         t, trs_temp_C = trs_pt
         t, dew_i_pt_temp_C = d_i_pt
         t, dew_o_pt_temp_C = d_o_pt
-        self.logger.info(f"m1: {m1_temp_C} trs: {trs_temp_C} dew_i: {dew_i_pt_temp_C} dew_o: {dew_o_pt_temp_C}")
+        self.logger.info(f"m1: {m1_temp_C} trs: {trs_temp_C} dew_i: {dew_i_pt_temp_C} dew_o: {dew_o_pt_temp_C}")  # noqa
 
         plot_bg = bnch.aide.get_plot_decor('plot_bg')
         if m1_temp_C - dew_o_pt_temp_C <= 2.0 or \
@@ -147,7 +145,7 @@ class EnvMon5(PlBase.Plugin):
         if not os.path.isdir(home_dir):
             os.mkdir(home_dir)
         self.save_file = os.path.join(home_dir,
-                                      f"{self.controller.name}_{str(self)}.npy")
+                                      f"{self.controller.name}_{str(self)}.npy")  # noqa
         try:
             d = np.load(self.save_file, allow_pickle=True)
             self.cst = dict(d[()])
@@ -182,7 +180,6 @@ class EnvMon5(PlBase.Plugin):
 
     def update(self, statusDict):
         t = statusDict.get('GEN2.STATUS.TBLTIME.TSCL', time.time())
-        #t = statusDict.get('FITS.SBR.EPOCH', time.time())
         self.logger.debug("status update t={}".format(t))
 
         try:
@@ -200,12 +197,12 @@ class EnvMon5(PlBase.Plugin):
 
             t = time.time()
             secs_since = t - self.update_time
-            self.logger.debug("{0:.2f} secs since last plot update".format(secs_since))
+            self.logger.debug("{0:.2f} secs since last plot update".format(secs_since))  # noqa
             if secs_since >= update_interval:
                 self.update_plots()
 
             secs_since = t - self.save_time
-            self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))
+            self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))  # noqa
             if t - self.save_time >= save_interval:
                 self.update_persist()
 
