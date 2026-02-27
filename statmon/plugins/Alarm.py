@@ -4,7 +4,7 @@
 # Uses the MainWindow class from alarm_gui.py to create an Alarm GUI
 # that can be "plugged in" to statmon.
 #
-# Russell Kackley (rkackley@naoj.org)
+# R. Kackley
 # E. Jeschke
 #
 
@@ -20,6 +20,7 @@ import Gen2.alarm.StatusVar as StatusVar
 import Gen2.alarm.StatusValHistory as StatusValHistory
 import SOSS.status.common as common
 import PlBase
+
 
 class Alarm(PlBase.Plugin):
 
@@ -50,8 +51,9 @@ class Alarm(PlBase.Plugin):
         alhProxy = ro.remoteObjectProxy('alarm_handler')
         try:
             alhProxy.saveHistory()
+
         except ro.remoteObjectError as e:
-            self.logger.warn('Warning: unable to connect to alarm_handler to save history: %s' % str(e))
+            self.logger.warn(f"unable to connect to alarm_handler to save history: {e}")
 
         # The configuration files tell us which Gen2 aliases we want
         # to monitor. The configuration files should be have been

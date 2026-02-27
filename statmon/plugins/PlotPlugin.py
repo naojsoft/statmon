@@ -19,9 +19,9 @@ class PlotPlugin(PlBase.Plugin):
                             'TSCV.AG1_I_CEIL']
         elif obcp in self.ao:
             self.update = self.update_ao
-            self.aliases = ['AON.TT.TTX','AON.TT.TTY', 'AON.TT.WTTC1',
+            self.aliases = ['AON.TT.TTX', 'AON.TT.TTY', 'AON.TT.WTTC1',
                             'AON.TT.WTTC2']
-        elif obcp ==  self.agsv:
+        elif obcp == self.agsv:
             self.update = self.update_twoguiding
             self.aliases = ['STATL.TELDRIVE',
                             'TSCL.AG1dX', 'TSCL.AG1dY',
@@ -49,9 +49,8 @@ class PlotPlugin(PlBase.Plugin):
                             'TSCL.PFS.AG.DY',
                             'TSCV.PFS.AG.ExpTime']
 
-
     def update_pfsag(self, statusDict):
-        self.logger.debug('status=%s' %str(statusDict))
+        self.logger.debug('status=%s' % str(statusDict))
         state = statusDict.get(self.aliases[0])
         x = statusDict.get(self.aliases[1])
         y = statusDict.get(self.aliases[2])
@@ -59,7 +58,7 @@ class PlotPlugin(PlBase.Plugin):
         self.plot.update_plot(state, x, y, exp)
 
     def update_ao(self, statusDict):
-        self.logger.debug('status=%s' %str(statusDict))
+        self.logger.debug('status=%s' % str(statusDict))
         ao1x = statusDict.get(self.aliases[0])
         ao1y = statusDict.get(self.aliases[1])
         ao2x = statusDict.get(self.aliases[2])
@@ -67,7 +66,7 @@ class PlotPlugin(PlBase.Plugin):
         self.plot.update_plot(ao1x, ao1y, ao2x, ao2y)
 
     def update_fmosag(self, statusDict):
-        self.logger.debug('status=%s' %str(statusDict))
+        self.logger.debug('status=%s' % str(statusDict))
         state = statusDict.get(self.aliases[0])
         x = statusDict.get(self.aliases[1])
         y = statusDict.get(self.aliases[2])
@@ -75,7 +74,7 @@ class PlotPlugin(PlBase.Plugin):
         self.plot.update_plot(state, x, y, el)
 
     def update_ag(self, statusDict):
-        self.logger.debug('status=%s' %str(statusDict))
+        self.logger.debug('status=%s' % str(statusDict))
         state = statusDict.get(self.aliases[0])
         x = statusDict.get(self.aliases[1])
         y = statusDict.get(self.aliases[2])
@@ -86,7 +85,7 @@ class PlotPlugin(PlBase.Plugin):
                               exptime=exp, bottom=bottom, ceil=ceil)
 
     def update_twoguiding(self, statusDict):
-        self.logger.debug('status=%s' %str(statusDict))
+        self.logger.debug('status=%s' % str(statusDict))
         state = statusDict.get(self.aliases[0])
         guiding1_x = statusDict.get(self.aliases[1])
         guiding1_y = statusDict.get(self.aliases[2])
@@ -108,17 +107,19 @@ class PlotPlugin(PlBase.Plugin):
     def change_config(self, controller, d):
         obcp = d['inst']
         if obcp.startswith('#'):
-            self.logger.debug('obcp is not assigned. %s' %obcp)
+            self.logger.debug('obcp is not assigned. %s' % obcp)
             return
 
-        self.logger.debug('plot changing config dict=%s ins=%s' %(d, d['inst']))
+        self.logger.debug('plot changing config dict=%s ins=%s' % (
+            d, d['inst']))
         self.set_layout(obcp=obcp)
         controller.register_select('plot', self.update, self.aliases)
 
     def set_layout(self, obcp):
-        self.logger.debug('plot setlayout. obcp=%s' %obcp)
+        self.logger.debug('plot setlayout. obcp=%s' % obcp)
         self.__set_aliases(obcp)
-        self.logger.debug('plot update=%s  aliases=%s' %(self.update, self.aliases))
+        self.logger.debug('plot update=%s  aliases=%s' % (self.update,
+                                                          self.aliases))
 
         if obcp in self.ag:
             self.plot = Plot.AgPlot(logger=self.logger)
@@ -151,7 +152,7 @@ class PlotPlugin(PlBase.Plugin):
             obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
             self.set_layout(obcp=obcp)
         except Exception as e:
-            self.logger.error('error: building layout. %s' %e)
+            self.logger.error(f'error: building layout. {e}')
 
     def start(self):
         self.logger.debug('starting plot-updating...')

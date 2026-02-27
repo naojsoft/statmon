@@ -7,10 +7,6 @@ import os
 import time
 import numpy as np
 
-from ginga.gw import Viewers, Widgets
-from ginga.plot.plotaide import PlotAide
-from ginga.canvas.types import plots as gplots
-from ginga.plot import time_series as tsp
 from ginga.plot import data_source as dsp
 from ginga.misc import Bunch
 
@@ -19,10 +15,10 @@ from EnvMon3 import cross_connect_plots, make_plot
 
 # For "envmon2" plugin
 al_ctr_winds = ['STATL.CSCT_WINDS_MAX',
-               ]
+                ]
 al_misc = ['GEN2.STATUS.TBLTIME.TSCL',
-           #'FITS.SBR.EPOCH',
-          ]
+           # 'FITS.SBR.EPOCH',
+           ]
 
 # starting dimensions of graph window (can change with window size)
 dims = (500, 200)
@@ -78,12 +74,12 @@ class EnvMon2(PlBase.Plugin):
         if not os.path.isdir(home_dir):
             os.mkdir(home_dir)
         self.save_file = os.path.join(home_dir,
-                                      f"{self.controller.name}_{str(self)}.npy")
+                                      f"{self.controller.name}_{str(self)}.npy")  # noqa
         try:
             d = np.load(self.save_file, allow_pickle=True)
             self.cst = dict(d[()])
         except Exception as e:
-            self.logger.error("Couldn't open persist file: {}".format(e))
+            self.logger.error(f"Couldn't open persist file: {e}")
             self.cst = dict()
 
         t = time.time()
@@ -113,7 +109,6 @@ class EnvMon2(PlBase.Plugin):
 
     def update(self, statusDict):
         t = statusDict.get('GEN2.STATUS.TBLTIME.TSCL', time.time())
-        #t = statusDict.get('FITS.SBR.EPOCH', time.time())
         self.logger.debug("status update t={}".format(t))
 
         try:
@@ -131,12 +126,12 @@ class EnvMon2(PlBase.Plugin):
 
             t = time.time()
             secs_since = t - self.update_time
-            self.logger.debug("{0:.2f} secs since last plot update".format(secs_since))
+            self.logger.debug("{0:.2f} secs since last plot update".format(secs_since))  # noqa
             if secs_since >= update_interval:
                 self.update_plots()
 
             secs_since = t - self.save_time
-            self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))
+            self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))  # noqa
             if t - self.save_time >= save_interval:
                 self.update_persist()
 

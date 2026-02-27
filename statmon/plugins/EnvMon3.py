@@ -19,22 +19,22 @@ from qtpy import QtCore, QtGui
 import PlBase
 
 # For "envmon3" plugin
-al_envmon3 = dict(cat_rh = ['GEN2.CATWALK.NE.RHUMID',
-                            'GEN2.CATWALK.SE.RHUMID',
-                            'GEN2.CATWALK.SW.RHUMID',
-                            'GEN2.CATWALK.NW.RHUMID'],
-                  cat_temp = ['GEN2.CATWALK.NE.TEMPC',
-                              'GEN2.CATWALK.SE.TEMPC',
-                              'GEN2.CATWALK.SW.TEMPC',
-                              'GEN2.CATWALK.NW.TEMPC'],
-                  cat_dew = ['STATL.DEW_POINT_CATWALK_NE',
-                             'STATL.DEW_POINT_CATWALK_SE',
-                             'STATL.DEW_POINT_CATWALK_SW',
-                             'STATL.DEW_POINT_CATWALK_NW',
-                             'STATL.DEW_POINT_CATWALK.MEAN'],
-                  misc = ['GEN2.CATWALK.TIME',
-                          #'FITS.SBR.EPOCH',
-                          ]
+al_envmon3 = dict(cat_rh=['GEN2.CATWALK.NE.RHUMID',
+                          'GEN2.CATWALK.SE.RHUMID',
+                          'GEN2.CATWALK.SW.RHUMID',
+                          'GEN2.CATWALK.NW.RHUMID'],
+                  cat_temp=['GEN2.CATWALK.NE.TEMPC',
+                            'GEN2.CATWALK.SE.TEMPC',
+                            'GEN2.CATWALK.SW.TEMPC',
+                            'GEN2.CATWALK.NW.TEMPC'],
+                  cat_dew=['STATL.DEW_POINT_CATWALK_NE',
+                           'STATL.DEW_POINT_CATWALK_SE',
+                           'STATL.DEW_POINT_CATWALK_SW',
+                           'STATL.DEW_POINT_CATWALK_NW',
+                           'STATL.DEW_POINT_CATWALK.MEAN'],
+                  misc=['GEN2.CATWALK.TIME',
+                        # 'FITS.SBR.EPOCH',
+                        ]
                   )
 
 
@@ -78,7 +78,7 @@ class EnvMon3(PlBase.Plugin):
         self.update_time = time.time()
         self.save_time = time.time()
 
-        #y_rng = (-30.0, 50.0)
+        # y_rng = (-30.0, 50.0)
         names = ["NE", "SE", "SW", "NW"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon3['cat_temp'], num_pts,
@@ -86,7 +86,7 @@ class EnvMon3(PlBase.Plugin):
         self.root.add_widget(res.widget, stretch=1)
         self.plots.catwalk_temp = res
 
-        #y_rng = (0.0, 100.0)
+        # y_rng = (0.0, 100.0)
         names = ["NE", "SE", "SW", "NW"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon3['cat_rh'], num_pts,
@@ -95,7 +95,7 @@ class EnvMon3(PlBase.Plugin):
         self.root.add_widget(res.widget, stretch=1)
         self.plots.catwalk_rh = res
 
-        #y_rng = (-30.0, 50.0)
+        # y_rng = (-30.0, 50.0)
         names = ["NE", "SE", "SW", "NW", "mean"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon3['cat_dew'], num_pts,
@@ -116,7 +116,7 @@ class EnvMon3(PlBase.Plugin):
         if not os.path.isdir(home_dir):
             os.mkdir(home_dir)
         self.save_file = os.path.join(home_dir,
-                                      f"{self.controller.name}_{str(self)}.npy")
+                                      f"{self.controller.name}_{str(self)}.npy")  # noqa
         try:
             d = np.load(self.save_file, allow_pickle=True)
             self.cst = dict(d[()])
@@ -151,7 +151,6 @@ class EnvMon3(PlBase.Plugin):
 
     def update(self, statusDict):
         t = statusDict.get('GEN2.CATWALK.TIME', time.time())
-        #t = statusDict.get('FITS.SBR.EPOCH', time.time())
         self.logger.debug("status update t={}".format(t))
 
         try:
@@ -169,12 +168,12 @@ class EnvMon3(PlBase.Plugin):
 
             t = time.time()
             secs_since = t - self.update_time
-            self.logger.debug("{0:.2f} secs since last plot update".format(secs_since))
+            self.logger.debug("{0:.2f} secs since last plot update".format(secs_since))  # noqa
             if secs_since >= update_interval:
                 self.update_plots()
 
             secs_since = t - self.save_time
-            self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))
+            self.logger.debug("{0:.2f} secs since last persist update".format(secs_since))  # noqa
             if t - self.save_time >= save_interval:
                 self.update_persist()
 
@@ -271,6 +270,7 @@ def make_plot(alias_d, logger, dims, names, aliases, num_pts,
     res = Bunch.Bunch(viewer=viewer, aide=aide, sources=srcs, aliases=aliases,
                       widget=sw)
     return res
+
 
 def cross_connect_plots(plot_info):
     # cross connect the plots so that zooming or panning in X in one

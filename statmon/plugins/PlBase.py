@@ -21,8 +21,10 @@ ao_inst = ['AO188', 'IRCS', 'HICIAO', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES',
 ag_inst = ['MOIRCS', 'FOCAS', 'COMICS', 'HDS', 'SWIMS', 'MIMIZUKU',
            'HSC', 'PFS', 'SUKA']
 
+
 class PluginError(Exception):
     pass
+
 
 class Plugin(object):
 
@@ -42,5 +44,3 @@ class Plugin(object):
     def stop(self):
         # Subclass can override this method, but doesn't have to
         pass
-
-#END
