@@ -1,20 +1,14 @@
-#!/usr/bin/env python
-
-import sys
-import os
-
-from CustomLabel import Label, QtCore, QtWidgets, ERROR
-from g2base import ssdlog
-from g2cam.status.common import STATNONE, STATERROR
-
-progname = os.path.basename(sys.argv[0])
+#
+# T. Inagaki
+#
+from CustomLabel import Label
 
 
 class InsRot(Label):
     ''' instrument rotator   '''
     def __init__(self, parent=None, logger=None):
-        super(InsRot, self).__init__(parent=parent, fs=11.5, width=125, \
-                                     height=35, logger=logger )
+        super().__init__(parent=parent, fs=11.5, width=125,
+                         height=35, logger=logger )
 
     def update_insrot(self, insrot, mode):
         self.logger.debug(f'insrot={insrot}, mode={mode}')
@@ -29,179 +23,39 @@ class InsRot(Label):
             text = 'InsRot Undefined'
             color = self.alarm
 
-        self.setText(text)
-        self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
-                           %(color, self.bg))
+        self.set_text(text)
+        self.set_color(fg=color, bg=self.bg)
 
 
 class InsRotPf(InsRot):
     ''' prime focus rotator  '''
     def __init__(self, parent=None, logger=None):
+        super().__init__(parent, logger)
 
         self.insrot_free = 0x02
         self.insrot_link = 0x01
         self.mode_free = 0x20
         self.mode_link = 0x10
-        super(InsRotPf, self).__init__(parent, logger)
 
     def update_insrot(self, insrot, mode):
         ''' insrot=TSCV.INSROTROTATION_PF
             mode=TSCV.INSROTMODE_PF
         '''
-        super(InsRotPf, self).update_insrot(insrot, mode)
-
-
-    def tick(self):
-        ''' testing solo mode '''
-        import random
-        random.seed()
-
-        rindx = random.randrange(0, 6)
-        mindx = random.randrange(0, 6)
-
-        insrot = [0x01, 0x02, 0x02, 0x01, STATNONE, STATERROR]
-
-        mode = [0x10, 0x20, None, STATNONE, 0x10, 0x20]
-        try:
-            insrot = insrot[rindx]
-            mode = mode[mindx]
-        except Exception as e:
-            insrot = 0x01
-            mode = 0x10
-            print(e)
-        self.update_insrot(insrot, mode)
+        super().update_insrot(insrot, mode)
 
 
 class InsRotCs(InsRot):
     ''' cassegrain rotator  '''
     def __init__(self, parent=None, logger=None):
+        super().__init__(parent, logger)
 
         self.insrot_free = 0x02
         self.insrot_link = 0x01
         self.mode_free = 0x02
         self.mode_link = 0x01
-        super(InsRotCs, self).__init__(parent, logger)
 
     def update_insrot(self, insrot, mode):
         ''' insrot=TSCV.InsRotRotation
             mode=TSCV.InsRotMode
         '''
-        super(InsRotCs, self).update_insrot(insrot, mode)
-
-    def tick(self):
-        ''' testing solo mode '''
-        import random
-        random.seed()
-
-        rindx = random.randrange(0, 6)
-        mindx = random.randrange(0, 6)
-
-        insrot = [0x01, 0x02, None, 0x02, STATNONE, 0x01]
-
-        mode = [0x01, 0x02, 0x02, STATNONE, 0x01, STATERROR]
-        try:
-            insrot = insrot[rindx]
-            mode = mode[mindx]
-        except Exception as e:
-            insrot = 0x01
-            mode = 0x10
-            print(e)
-        self.update_insrot(insrot, mode)
-
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('insrot', options)
-
-    class AppWindow(QtWidgets.QMainWindow):
-        def __init__(self):
-            super(AppWindow, self).__init__()
-            self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=125; self.h=25;
-            self.init_ui()
-
-        def init_ui(self):
-            self.resize(self.w, self.h)
-
-            self.main_widget = QtWidgets.QWidget()
-            l = QtWidgets.QVBoxLayout(self.main_widget)
-            l.setContentsMargins(0, 0, 0, 0)
-            l.setSpacing(0)
-
-            if options.mode=='pf':
-                ins = InsRotPf(parent=self.main_widget, logger=logger)
-            elif options.mode=='cs':
-                ins = InsRotCs(parent=self.main_widget, logger=logger)
-            l.addWidget(ins)
-
-            timer = QtCore.QTimer(self)
-            timer.timeout.connect(ins.tick)
-            timer.start(options.interval)
-
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget)
-            self.statusBar().showMessage("%s starting..." %options.mode, options.interval)
-
-        def closeEvent(self, ce):
-            self.close()
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        aw = AppWindow()
-        aw.setWindowTitle("%s" % progname)
-        aw.show()
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as e:
-        logger.warn('keyboard interruption....')
-        sys.exit(0)
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-
-    from argparse import ArgumentParser
-
-    argprs = ArgumentParser(description="InsRot status")
-
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    argprs.add_argument("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    argprs.add_argument("--interval", dest="interval", type=int,
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.
-    argprs.add_argument("--mode", dest="mode",
-                      default='pf',
-                      help="Specify a plotting mode [pf|cs]")
-
-    ssdlog.addlogopts(argprs)
-
-    (options, args) = argprs.parse_known_args(sys.argv[1:])
-
-    if len(args) != 0:
-        argprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)
+        super().update_insrot(insrot, mode)

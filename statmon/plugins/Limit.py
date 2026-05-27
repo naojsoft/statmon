@@ -1,41 +1,35 @@
-#!/usr/bin/env python
-
-import os
-import sys
-import math
-import numpy as np
-
-from qtpy import QtWidgets, QtCore
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+#
+# T. Inagaki
+#
+from CustomPlot import PlotWidget
 
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
 from matplotlib.lines import Line2D
 
-from g2base import ssdlog
-import PlBase
 
-progname = os.path.basename(sys.argv[0])
-progversion = "0.1"
-
-
-class LimitCanvas(FigureCanvas):
+class LimitCanvas(PlotWidget):
     """  Canvas to draw a limit """
     def __init__(self, parent=None, title='Limit', width=5, height=5,
-                 alarm=[0,0], warn=[0,0], limit=[0,0], marker=0.0, marker_txt='',logger=None):
+                 alarm=[0,0], warn=[0,0], limit=[0,0], marker=0.0,
+                 marker_txt='', logger=None):
 
         sub = SubplotParams(left=0.05,  right=0.95, wspace=0, hspace=0)
-        self.fig = Figure(figsize=(width, height),  facecolor='white', subplotpars=sub )
-        self.axes = self.fig.add_subplot(111)
-        # We want the axes cleared every time plot() is called
-        #self.axes.hold(False)
-        #self.axes.grid(True)
+        self.fig = Figure(figsize=(width, height),  facecolor='white',
+                          subplotpars=sub)
+        super().__init__(self.fig)
 
-        self.title=title
-        self.limit_low = min(limit); self.limit_high = max(limit);
-        self.alarm_low = min(alarm); self.alarm_high = max(alarm);
-        self.warn_low = min(warn); self.warn_high = max(warn);
-        self.marker = marker; self.marker_txt = marker_txt;
+        self.axes = self.fig.add_subplot(111)
+
+        self.title = title
+        self.limit_low = min(limit)
+        self.limit_high = max(limit)
+        self.alarm_low = min(alarm)
+        self.alarm_high = max(alarm)
+        self.warn_low = min(warn)
+        self.warn_high = max(warn)
+        self.marker = marker
+        self.marker_txt = marker_txt
 
         self.cur_color = 'green'
         self.cmd_color = 'blue'
@@ -47,11 +41,8 @@ class LimitCanvas(FigureCanvas):
         self.center_y = 0.0
         self.init_x = 0.0  # initial value of x
 
-        FigureCanvas.__init__(self, self.fig)
-        self.setParent(parent)
-
-        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
+        self.set_expanding(True, True)
+        #FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
         self.w = 350
@@ -129,18 +120,11 @@ class LimitCanvas(FigureCanvas):
         self.axes.axison = False
         self.draw()
 
-    def minimumSizeHint(self):
-        return QtCore.QSize(self.w, self.h)
-
-    def sizeHint(self):
-         return QtCore.QSize(self.w, self.h)
-
 
 class Limit(LimitCanvas):
     """ AZ/EL/Rotator/Probe Limit  """
     def __init__(self,*args, **kwargs):
 
-        #super(AGPlot, self).__init__(*args, **kwargs)
         LimitCanvas.__init__(self, *args, **kwargs)
 
     def get_val_state(self, val, state=None):
@@ -172,8 +156,8 @@ class Limit(LimitCanvas):
         self.logger.debug('updating current={current}, cmd={cmd} ,state={state}')
 
         # ignore alarm/warning if el in pointing
-        if state and state.strip()=='Pointing':
-            color=self.cur_color
+        if state and state.strip() == 'Pointing':
+            color = self.cur_color
 
         text, val, color = self.get_val_state(current, state)
 
@@ -202,182 +186,8 @@ class Limit(LimitCanvas):
 
         self.draw()
 
-    def tick(self):
-        ''' testing  mode solo '''
-        import random
-        random.seed()
-
-        #  range is limit+-100,
-        current = random.random()*random.randrange(self.limit_low-200, self.limit_high+100)
-        cmd = random.random()*random.randrange(self.limit_low-100, self.limit_high+100)
-        self.update_limit(current, cmd)
-
 
 class ElLimit(Limit):
     ''' EL Limit for testing '''
     def __init__(self,*args, **kwargs):
         super(ElLimit, self).__init__(*args, **kwargs)
-
-    def tick(self):
-        ''' testing solo mode '''
-        import random
-        random.seed()
-        state = ["Guiding(AG1)", "Guiding(AG2)", "Unknown", "##NODATA##",
-               "##ERROR##", "Guiding(SV1)","Guiding(SV2)", "Guiding(AGPIR)",
-               "Guiding(AGFMOS)", "Tracking", "Tracking(Non-Sidereal)",
-               "Slewing", "Pointing"]
-
-        # el limit is between 0 and 90,
-        current = random.random()*random.randrange(0,self.limit_high+50)
-        cmd = random.random()*random.randrange(0, self.limit_high+50)
-        indx = random.randrange(0,13)
-        try:
-            state = state[indx]
-        except Exception:
-            state = 'Pointing'
-        self.update_limit(current, cmd, state)
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('limit', options)
-
-    class AppWindow(QtWidgets.QMainWindow):
-        def __init__(self):
-            QtWidgets.QMainWindow.__init__(self)
-            self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.setup()
-
-        def setup(self):
-
-            self.main_widget = QtWidgets.QWidget(self)
-
-            l = QtWidgets.QVBoxLayout(self.main_widget)
-
-            mode = options.mode.upper()
-
-            titles = {'AZ': 'AZ', 'EL': 'EL', 'POPT': 'Rotator Popt',
-                      'POPT2': 'Rotator Popt2', 'CS': 'Rotator Cs',
-                      'PIR': 'Rotator Pir', 'NSIR': 'Rotator Ns Ir',
-                      'NSOPT': 'Rotator Ns Opt', 'NSIRAG': 'AgProbe Ns Ir',
-                      'NSOPTAG': 'AgProbe Ns Opt', 'CSAG': 'AgProbe Cs'}
-
-            title = titles.get(mode)
-
-            print('mode, title, ', mode, title)
-
-
-            if mode == 'AZ':
-                alarm = [-269.5, 269.5]
-                warn = [-260.0, 260.0 ]
-                az_limit = [-270.0, 270.0]
-                limit =  Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=az_limit, logger=logger)
-            if mode == 'EL':
-                marker = 15.0
-                marker_txt = 15.0
-                warn = [15.0, 89.0]
-                alarm = [10.0,89.5]
-                el_limit = [0.0, 90.0]
-                limit =  ElLimit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=el_limit, marker=marker, marker_txt=marker_txt,logger=logger)
-
-            elif mode == 'POPT':
-                alarm = [-249.5, 249.5]
-                warn = [-240.0, 240.0 ]
-                popt_limit = [-250.0, 250.0]
-                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=popt_limit,logger=logger)
-            elif mode in ['POPT2', 'CS']:
-                warn = [-260.0, 260.0]
-                alarm = [-269.5, 269.5]
-                limit = [-270.0, 270.0]
-                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=limit, logger=logger)
-            elif mode == 'PIR':
-                warn = [-175.0,175.0]
-                alarm = [-179.5,179.5]
-                pir_limit = [-180.0, 180.0]
-                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=pir_limit, logger=logger)
-            elif mode in ['NSIR', 'NSOPT']:
-                warn = [-175.0,175.0]
-                alarm = [-179.5,179.5]
-                ns_limit = [-180.0, 180.0]
-                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=ns_limit, logger=logger)
-
-            elif mode in ['NSIRAG', 'NSOPTAG']:
-                warn = [-270.0, 270.0]
-                alarm = [-270.0, 270.0]
-                ns_limit = [-270.0, 270.0]
-                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=ns_limit, logger=logger)
-
-            elif mode == 'CSAG':
-                warn = [-185.0, 185.0]
-                alarm = [-185.0, 185.0]
-                csag_limit = [-185.0, 185.0]
-                limit = Limit(self.main_widget, title=title, alarm=alarm, warn=warn, limit=csag_limit, logger=logger)
-
-            l.addWidget(limit)
-
-            timer = QtCore.QTimer(self)
-            timer.timeout.connect(limit.tick)
-            timer.start(options.interval)
-
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget)
-
-            self.statusBar().showMessage("%s starting..." %options.mode, 5000)
-            #print options
-
-        def closeEvent(self, ce):
-            self.close()
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        aw = AppWindow()
-        aw.setWindowTitle("%s" % progname)
-        aw.show()
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as e:
-        logger.warn('keyboard interruption....')
-        sys.exit(0)
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-    from argparse import ArgumentParser
-
-    argprs = ArgumentParser(description="Limit status")
-
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    argprs.add_argument("--interval", dest="interval", type=int,
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.
-    argprs.add_argument("--mode", dest="mode",
-                      default='az',
-                      help="Specify a plotting mode [az|el|popt|popt2|pir|cs|nsir|nsopt|nsirag|nsoptag|csag]")
-
-    ssdlog.addlogopts(argprs)
-
-    (options, args) = argprs.parse_known_args(sys.argv[1:])
-
-    if len(args) != 0:
-        argprs.error("incorrect number of arguments")
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)

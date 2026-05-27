@@ -1,17 +1,13 @@
-#!/usr/bin/env python
+#
+# T. Inagaki
+#
+from ginga.gw import Widgets
 
-import os
-import sys
-
-from qtpy import QtCore, QtWidgets
-
-from g2base import ssdlog
 from DomeShutter import DomeShutter
 from Topscreen import Topscreen
 from Windscreen import Windscreen
 from FocusZ import FocusZ
 from Focus import Focus
-#from El import El
 from AzEl import AzEl
 from M2 import M2
 from M1Cover import M1Cover
@@ -25,11 +21,9 @@ from AoShutter import AoShutter
 from Dummy import Dummy
 from M3 import M3
 
-progname = os.path.basename(sys.argv[0])
 
-class TelescopeGui(QtWidgets.QWidget):
+class TelescopeGui:
     def __init__(self, parent=None, obcp=None, logger=None):
-        super(TelescopeGui, self).__init__(parent)
 
         self.obcp = obcp
         self.logger = logger
@@ -38,286 +32,257 @@ class TelescopeGui(QtWidgets.QWidget):
         self.windscreen = Windscreen(logger=logger)
         self.z = FocusZ(logger=logger)
         self.focus = Focus(logger=logger)
-        #self.el=El(logger=logger)
         self.azel = AzEl(logger=logger)
         self.m2 = M2(logger=logger)
         self.m1 = M1Cover(logger=logger)
         #self.m3 = M3(logger=logger)
         self.cell = CellCover(logger=logger)
 
-        w, h = (500, 500)
-        #self.resize(500, 500)
-        #self.setFixedSize(w, h)
-        self.set_layout()
+        self.widget = Widgets.VBox()
+        self.set_spacing(0)
+        self.set_margins(0, 0, 0, 0)
+        self.set_layout(self.widget)
 
     def set_layout(self):
 
-        mainlayout = QtWidgets.QVBoxLayout()
-        mainlayout.setSpacing(0)
-        mainlayout.setContentsMargins(0, 0, 0, 0)
+        self.widget.remove_all(delete=True)
 
         # dome part of telescope
-        toplayout = QtWidgets.QVBoxLayout()
-        toplayout.setSpacing(0)
-        toplayout.addWidget(self.dome_shutter)
-        toplayout.addWidget(self.topscreen)
+        toplayout = Widgets.VBox()
+        toplayout.set_spacing(0)
+        toplayout.add_widget(self.dome_shutter)
+        toplayout.add_widget(self.topscreen)
 
         # middle part of telescope
-        middlelayout = QtWidgets.QVBoxLayout()
+        middlelayout = Widgets.VBox()
 
         # focusing part of telescope
-        telfocus = QtWidgets.QWidget()
-        telfocuslayout = QtWidgets.QVBoxLayout()
-        telfocuslayout.setContentsMargins(0, 0, 0, 0)
-        telfocuslayout.setSpacing(0)
-        telfocus.setLayout(telfocuslayout)
-        telfocuslayout.addWidget(self.z)
-        telfocuslayout.addWidget(self.m2)
-        telfocuslayout.addWidget(self.focus)
+        telfocuslayout = Widgets.VBox()
+        telfocuslayout.set_margins(0, 0, 0, 0)
+        telfocuslayout.set_spacing(0)
+        telfocuslayout.add_widget(self.z)
+        telfocuslayout.add_widget(self.m2)
+        telfocuslayout.add_widget(self.focus)
 
         # telescope body
-        telbody = QtWidgets.QWidget()
-        telbodylayout = QtWidgets.QVBoxLayout()
-        telbodylayout.setContentsMargins(0, 0, 0, 0)
-        telbody.setLayout(telbodylayout)
-        telbodylayout.setSpacing(0)
-        #telbodylayout.addWidget(self.el)
-        #telbodylayout.addWidget(self.azel, stretch=5)
-        telbodylayout.addWidget(self.m1, stretch=0)
-        telbodylayout.addWidget(self.cell, stretch=0)
+        telbodylayout = Widgets.VBox()
+        telbodylayout.set_margins(0, 0, 0, 0)
+        telbodylayout.set_spacing(0)
+        telbodylayout.add_widget(self.m1, stretch=0)
+        telbodylayout.add_widget(self.cell, stretch=0)
 
-        # telbodylayout = QtWidgets.QGridLayout()
-        # telbody.setLayout(telbodylayout)
-        # for i in range(3):
-        #     telbodylayout.setRowStretch(i, 1)
-        # telbodylayout.setColumnStretch(0, 5)
-        # for i in range(1, 3):
-        #     telbodylayout.setColumnStretch(i, 0)
-        # telbodylayout.addWidget(self.azel, 0, 0)
-        # telbodylayout.addWidget(self.m1, 1, 0)
-        # telbodylayout.addWidget(self.cell, 2, 0)
-
-        middlelayout.addWidget(telfocus, stretch=0)
-        #middlelayout.addLayout(telbodylayout, stretch=5)
-        middlelayout.addWidget(self.azel, stretch=5)
-        middlelayout.addWidget(telbody, stretch=0)
-        middlelayout.setStretch(1, 1000)
-        middlelayout.setStretch(2, 0)
+        middlelayout.add_widget(telfocus, stretch=0)
+        middlelayout.add_widget(self.azel, stretch=5)
+        middlelayout.add_widget(telbody, stretch=0)
+        # middlelayout.setStretch(1, 1000)
+        # middlelayout.setStretch(2, 0)
 
         # right layout will be combination of following components:
         # ins/img-rot, adc, tiptilt, waveplate, m3
-        rightlayout = QtWidgets.QVBoxLayout()
+        rightlayout = Widgets.VBox()
         self.set_focus_layout(rlayout=rightlayout)
 
         # combine right, middle, left layout
-        telhlayout = QtWidgets.QHBoxLayout()
-        telhlayout.setSpacing(0)
-        telhlayout.addWidget(self.windscreen, stretch=0)
-        telhlayout.addLayout(middlelayout, stretch=5)
-        telhlayout.addLayout(rightlayout, stretch=0)
+        telhlayout = Widgets.HBox()
+        telhlayout.set_spacing(0)
+        telhlayout.add_widget(self.windscreen, stretch=0)
+        telhlayout.add_widget(middlelayout, stretch=5)
+        telhlayout.add_widget(rightlayout, stretch=0)
 
-        mainlayout.addLayout(toplayout)
-        mainlayout.addLayout(telhlayout, stretch=5)
-        self.setLayout(mainlayout)
+        self.widget.add_widget(toplayout)
+        self.widget.add_widget(telhlayout, stretch=5)
 
-        middlelayout.setStretch(1, 1000)
-        middlelayout.setStretch(2, 0)
+        # middlelayout.setStretch(1, 1000)
+        # middlelayout.setStretch(2, 0)
 
 
     def popt_layout(self, rlayout):
         ''' prime focus optical'''
-        r1layout = QtWidgets.QVBoxLayout()
-        #r1layout.addWidget(self.d1)
+        r1layout = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.addWidget(empty_shell)
+        r1layout.add_widget(empty_shell)
 
-        r2layout = QtWidgets.QVBoxLayout()
-        r2layout.setSpacing(1)
+        r2layout = Widgets.VBox()
+        r2layout.set_spacing(1)
 
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
         self.insrot = InsRot.InsRotPf(logger=self.logger)
-        r2layout.addWidget(self.insrot)
+        r2layout.add_widget(self.insrot)
 
         self.adc = Adc.AdcPf(logger=self.logger)
-        r2layout.addWidget(self.adc)
+        r2layout.add_widget(self.adc)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.addWidget(self.m3)
+        r2layout.add_widget(self.m3)
 
         empty_shell = Dummy(height=285, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
-        rlayout.addLayout(r1layout)
-        rlayout.addLayout(r2layout)
+        rlayout.add_widget(r1layout)
+        rlayout.add_widget(r2layout)
 
     def pir_layout(self, rlayout):
         ''' prime focus infrared'''
-        r1layout = QtWidgets.QVBoxLayout()
-        #r1layout.addWidget(self.d1)
+        r1layout = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.addWidget(empty_shell)
+        r1layout.add_widget(empty_shell)
 
-        r2layout = QtWidgets.QVBoxLayout()
-        r2layout.setSpacing(1)
+        r2layout = Widgets.VBox()
+        r2layout.set_spacing(1)
 
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
         self.insrot = InsRot.InsRotPf(logger=self.logger)
-        r2layout.addWidget(self.insrot)
+        r2layout.add_widget(self.insrot)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.addWidget(self.m3)
+        r2layout.add_widget(self.m3)
 
         empty_shell = Dummy(height=320, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
-        rlayout.addLayout(r1layout)
-        rlayout.addLayout(r2layout)
+        rlayout.add_widget(r1layout)
+        rlayout.add_widget(r2layout)
 
     def nsopt_layout(self, rlayout):
         ''' nasmyth focus optical'''
-        r1layout = QtWidgets.QVBoxLayout()
-        #r1layout.addWidget(self.d1)
+        r1layout = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.addWidget(empty_shell)
+        r1layout.add_widget(empty_shell)
 
-        r2layout = QtWidgets.QVBoxLayout()
-        r2layout.setSpacing(1)
+        r2layout = Widgets.VBox()
+        r2layout.set_spacing(1)
 
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
         self.imgrot = ImgRot.ImgRotNsOpt(logger=self.logger)
-        r2layout.addWidget(self.imgrot)
+        r2layout.add_widget(self.imgrot)
 
         self.adc = Adc.Adc(logger=self.logger)
-        r2layout.addWidget(self.adc)
+        r2layout.add_widget(self.adc)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.addWidget(self.m3)
+        r2layout.add_widget(self.m3)
 
         empty_shell = Dummy(height=277, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
-        rlayout.addLayout(r1layout)
-        rlayout.addLayout(r2layout)
+        rlayout.add_widget(r1layout)
+        rlayout.add_widget(r2layout)
 
     def nsir_layout(self, rlayout):
         ''' nasmyth focus infrared'''
 
-        r1layout = QtWidgets.QVBoxLayout()
-        #r1layout.addWidget(self.d1)
+        r1layout = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.addWidget(empty_shell)
+        r1layout.add_widget(empty_shell)
 
-        r2layout = QtWidgets.QVBoxLayout()
-        r2layout.setSpacing(1)
+        r2layout = Widgets.VBox()
+        r2layout.set_spacing(1)
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
         self.imgrot = ImgRot.ImgRotNsIr(logger=self.logger)
-        r2layout.addWidget(self.imgrot)
+        r2layout.add_widget(self.imgrot)
         self.waveplate = Waveplate(logger=self.logger)
-        r2layout.addWidget(self.waveplate)
+        r2layout.add_widget(self.waveplate)
         empty_shell = Dummy(height=30, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
         self.aoshutter = AoShutter(logger=self.logger)
-        r2layout.addWidget(self.aoshutter)
+        r2layout.add_widget(self.aoshutter)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.addWidget(self.m3)
+        r2layout.add_widget(self.m3)
 
         empty_shell = Dummy(height=150, logger=self.logger)
-        r2layout.addWidget(empty_shell)
-        rlayout.addLayout(r1layout)
-        rlayout.addLayout(r2layout)
+        r2layout.add_widget(empty_shell)
+        rlayout.add_widget(r1layout)
+        rlayout.add_widget(r2layout)
 
     def cs_layout(self, rlayout):
         ''' cassegrain focus '''
-        r1layout = QtWidgets.QVBoxLayout()
-        #r1layout.addWidget(self.d1)
+        r1layout = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.addWidget(empty_shell)
+        r1layout.add_widget(empty_shell)
 
-        r2layout = QtWidgets.QVBoxLayout()
-        r2layout.setSpacing(1)
+        r2layout = Widgets.VBox()
+        r2layout.set_spacing(1)
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
         self.insrot = InsRot.InsRotCs(logger=self.logger)
-        r2layout.addWidget(self.insrot)
+        r2layout.add_widget(self.insrot)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.addWidget(self.m3)
+        r2layout.add_widget(self.m3)
 
         empty_shell = Dummy(height=320, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
-        rlayout.addLayout(r1layout)
-        rlayout.addLayout(r2layout)
+        rlayout.add_widget(r1layout)
+        rlayout.add_widget(r2layout)
 
     def csir_layout(self, rlayout):
         ''' cassegrain focus infrared '''
 
-        r1layout = QtWidgets.QVBoxLayout()
-        #r1layout.addWidget(self.d1)
+        r1layout = Widgets.VBox()
         empty_shell = Dummy(height=25, logger=self.logger)
-        r1layout.addWidget(empty_shell)
+        r1layout.add_widget(empty_shell)
 
         self.tipchop = TipChop(logger=self.logger)
-        r1layout.addWidget(self.tipchop)
+        r1layout.add_widget(self.tipchop)
 
         empty_shell = Dummy(height=35, logger=self.logger)
-        r1layout.addWidget(empty_shell)
+        r1layout.add_widget(empty_shell)
 
         r2layout = QtWidgets.QVBoxLayout()
-        r2layout.setSpacing(1)
+        r2layout.set_spacing(1)
 
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
         self.insrot = InsRot.InsRotCs(logger=self.logger)
-        r2layout.addWidget(self.insrot)
+        r2layout.add_widget(self.insrot)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.addWidget(self.m3)
+        r2layout.add_widget(self.m3)
 
         empty_shell = Dummy(height=320, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
-        rlayout.addLayout(r1layout)
-        rlayout.addLayout(r2layout)
+        rlayout.add_widget(r1layout)
+        rlayout.add_widget(r2layout)
 
     def csopt_layout(self, rlayout):
         ''' cassegrain focus optical '''
 
-        r1layout = QtWidgets.QVBoxLayout()
-        #r1layout.addWidget(self.d1)
+        r1layout = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.addWidget(empty_shell)
+        r1layout.add_widget(empty_shell)
 
         r2layout = QtWidgets.QVBoxLayout()
-        r2layout.setSpacing(1)
+        r2layout.set_spacing(1)
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
         self.insrot = InsRot.InsRotCs(logger=self.logger)
-        r2layout.addWidget(self.insrot)
+        r2layout.add_widget(self.insrot)
 
         self.adc = Adc.Adc(logger=self.logger)
-        r2layout.addWidget(self.adc)
+        r2layout.add_widget(self.adc)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.addWidget(self.m3)
+        r2layout.add_widget(self.m3)
 
         empty_shell = Dummy(height=285, logger=self.logger)
-        r2layout.addWidget(empty_shell)
+        r2layout.add_widget(empty_shell)
 
-        rlayout.addLayout(r1layout)
-        rlayout.addLayout(r2layout)
+        rlayout.add_widget(r1layout)
+        rlayout.add_widget(r2layout)
 
     def set_focus_layout(self, rlayout):
         ''' spcam/hsc: insrot,adc
@@ -397,10 +362,6 @@ class Telescope(TelescopeGui):
         self.insrot.update_insrot(insrot=kargs.get('TSCV.INSROTROTATION_PF'),
                                   mode=kargs.get('TSCV.INSROTMODE_PF'))
 
-        # self.adc.update_adc(on_off=kargs.get('TSCV.ADCONOFF_PF'),
-        #                     mode=kargs.get('TSCV.ADCMODE_PF'),
-        #                     in_out=kargs.get('TSCV.ADCInOut'))
-
         self.adc.update_adc(on_off=kargs.get('TSCV.ADCONOFF_PF'),
                             mode=kargs.get('TSCV.ADCMODE_PF'))
 
@@ -460,14 +421,6 @@ class Telescope(TelescopeGui):
         self.focus.update_focus(focus=kargs.get('STATL.FOC_DESCR'),
                                 alarm=kargs.get('TSCV.FOCUSALARM'))
 
-        #self.el.update_el(el=kargs.get('TSCS.EL'),
-        #                  state=kargs.get('STATL.TELDRIVE'))
-
-        # self.azel.update_azel(az=kargs.get('TSCS.AZ'),
-        #                       el=kargs.get('TSCS.EL'),
-        #                       wind=kargs.get('TSCL.WINDD'),
-        #                       state=kargs.get('STATL.TELDRIVE'))
-
         self.azel.update_azel(az=kargs.get('TSCS.AZ'),
                               el=kargs.get('TSCS.EL'),
                               winddir=kargs.get('TSCL.WINDD'),
@@ -481,91 +434,3 @@ class Telescope(TelescopeGui):
         self.cell.update_cell(cell=kargs.get('TSCV.CellCover'))
 
         self.update_focus(**kargs)
-
-    def tick(self):
-
-        import random
-        self.dome_shutter.tick()
-        self.topscreen.tick()
-        self.z.tick()
-        self.focus.tick()
-        #self.el.tick()
-
-        el = random.random()*random.randrange(0,100)
-        #el=27.1
-        self.azel.tick(el=el)
-        self.windscreen.tick(el=el)
-
-        #self.azel.tick()
-        #self.windscreen.tick()
-
-        self.m2.tick()
-        self.m1.tick()
-        self.m3.tick()
-        self.cell.tick()
-
-        if self.obcp in ('MOIRCS', 'FOCAS', 'SPCAM', 'HSC', 'COMICS', 'FMOS', 'SWIMS', 'MIMIZUKU', 'SUKA', 'PFS'):
-            self.insrot.tick()
-        if self.obcp in ('HDS', 'HICIAO', 'IRCS', 'K3D', 'CHARIS', 'VAMPIRES', 'SCEXAO', 'REACH', 'NINJA'):
-            self.imgrot.tick()
-        if self.obcp in ('HICIAO', 'IRCS', 'K3D', 'CHARIS', 'IRD', 'VAMPIRES',  'SCEXAO', 'REACH', 'NINJA'):
-            self.waveplate.tick()
-            self.aoshutter.tick()
-        if self.obcp in ('HDS', 'FOCAS', 'SPCAM', 'HSC', 'PFS'):
-            self.adc.tick()
-        if self.obcp == 'COMICS':
-            self.tipchop.tick()
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('telescope', options)
-
-
-    try:
-
-        qApp = QtWidgets.QApplication(sys.argv)
-        tel = Telescope(obcp=options.ins, logger=logger)
-        timer = QtCore.QTimer()
-        timer.timeout.connect(tel.tick)
-        timer.start(options.interval)
-        tel.setWindowTitle("%s" % progname)
-        tel.show()
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as e:
-        logger.warn('keyboard interruption....')
-        sys.exit(0)
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-    from argparse import ArgumentParser
-
-    argprs = ArgumentParser(description="Telescope status")
-
-    argprs.add_argument("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    argprs.add_argument("--interval", dest="interval", type=int,
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.
-    argprs.add_argument("--mode", dest="mode",
-                      default='ag',
-                      help="Specify a plotting mode [ag | sv | pir | fmos]")
-
-    argprs.add_argument("--ins", dest="ins",
-                      default='HDS',
-                      help="Specify an instrument name. e.g., HDS")
-
-    ssdlog.addlogopts(argprs)
-
-    (options, args) = argprs.parse_known_args(sys.argv[1:])
-
-    if len(args) != 0:
-        argprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    main(options, args)

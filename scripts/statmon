@@ -136,14 +136,14 @@ plugins = [
 
 class StatMon(Controller, Viewer):
 
-    def __init__(self, logger, threadPool, module_manager, settings,
+    def __init__(self, logger, threadPool, module_manager, prefs,
                  soundsink, ev_quit, model):
 
         self.soundsink = soundsink
-
-        Viewer.__init__(self, logger, ev_quit)
+        settings = prefs.create_category('general')
+        Viewer.__init__(self, logger, settings, ev_quit)
         Controller.__init__(self, logger, threadPool, module_manager,
-                            settings, ev_quit, model)
+                            prefs, ev_quit, model)
         self.name = 'statmon'
 
     def play_soundfile(self, filepath, format=None, priority=20):
@@ -315,6 +315,16 @@ def main(options, args):
         ctrlsvc.ro_start()
 
         try:
+            # if there is a network component, start it
+            if hasattr(statmon, 'start'):
+                statmon.start()
+
+                if hasattr(statmon, 'get_url'):
+                    base_url = statmon.get_url()
+                    if base_url is not None:
+                        print(f"visit {base_url} to view the application")
+                        logger.info(f"visit {base_url} to view the application")
+
             # Main loop to handle GUI events
             statmon.mainloop(timeout=0.001)
 

@@ -1,11 +1,8 @@
-#!/usr/bin/env python
+#
+# T. Inagaki
+#
+from ginga.gw import Widgets
 
-import os
-import sys
-
-from qtpy import QtCore, QtWidgets
-
-from g2base import ssdlog
 from Propid import PropIdDisplay
 from InsName import InsNameDisplay
 from Object import ObjectDisplay
@@ -15,11 +12,12 @@ from TimeAz import TimeAzLimitDisplay
 from TimeEl import TimeElLimitDisplay
 from TimeRot import TimeRotLimitDisplay
 
-progname = os.path.basename(sys.argv[0])
 
-class TargetGui(QtWidgets.QWidget):
+class TargetGui(Widgets.VBox):
     def __init__(self, parent=None, obcp=None, logger=None):
-        super(TargetGui, self).__init__(parent)
+        super().__init__()
+        self.set_spacing(1)
+        self.set_margins(0, 0, 0, 0)
 
         self.obcp = obcp  # instrument 3 letter code
         self.logger = logger
@@ -34,19 +32,14 @@ class TargetGui(QtWidgets.QWidget):
         self.set_layout()
 
     def set_layout(self):
-        mainlayout = QtWidgets.QVBoxLayout()
-        mainlayout.setSpacing(1)
-        mainlayout.setContentsMargins(0, 0, 0, 0)
-
-        mainlayout.addWidget(self.propid)
-        mainlayout.addWidget(self.insname)
-        mainlayout.addWidget(self.object)
-        #mainlayout.addWidget(self.airmass)
-        mainlayout.addWidget(self.pa)
-        mainlayout.addWidget(self.time_az)
-        mainlayout.addWidget(self.time_el)
-        mainlayout.addWidget(self.time_rot)
-        self.setLayout(mainlayout)
+        self.add_widget(self.propid)
+        self.add_widget(self.insname)
+        self.add_widget(self.object)
+        #self.add_widget(self.airmass)
+        self.add_widget(self.pa)
+        self.add_widget(self.time_az)
+        self.add_widget(self.time_el)
+        self.add_widget(self.time_rot)
 
 
 class Target(TargetGui):
@@ -85,101 +78,20 @@ class Target(TargetGui):
             # pa = TSCL.INSROTPA_PF | TSCL.InsRotPA | TSCL.ImgRotPA
             # cmd_diff = STATS.ROTDIF_PF | STATS.ROTDIF
             pa, cmd_diff = self.get_pa_status()
-            self.pa.update_pa(pa=kargs.get(pa), \
+            self.pa.update_pa(pa=kargs.get(pa),
                               cmd_diff=kargs.get(cmd_diff))
 
-            self.time_az.update_azlimit(flag=kargs.get('TSCL.LIMIT_FLAG'), \
+            self.time_az.update_azlimit(flag=kargs.get('TSCL.LIMIT_FLAG'),
                                         az=kargs.get('TSCL.LIMIT_AZ'),)
 
-            self.time_el.update_ellimit(flag=kargs.get('TSCL.LIMIT_FLAG'), \
-                                        low=kargs.get('TSCL.LIMIT_EL_LOW'), \
+            self.time_el.update_ellimit(flag=kargs.get('TSCL.LIMIT_FLAG'),
+                                        low=kargs.get('TSCL.LIMIT_EL_LOW'),
                                         high=kargs.get('TSCL.LIMIT_EL_HIGH'))
 
-            self.time_rot.update_rotlimit(flag=kargs.get('TSCL.LIMIT_FLAG'), \
-                                          rot=kargs.get('TSCL.LIMIT_ROT'), \
-                                          link=kargs.get('TSCV.PROBE_LINK'), \
-                                          focus=kargs.get('TSCV.FOCUSINFO'), \
+            self.time_rot.update_rotlimit(flag=kargs.get('TSCL.LIMIT_FLAG'),
+                                          rot=kargs.get('TSCL.LIMIT_ROT'),
+                                          link=kargs.get('TSCV.PROBE_LINK'),
+                                          focus=kargs.get('TSCV.FOCUSINFO'),
                                           focus2=kargs.get('TSCV.FOCUSINFO2'))
         except Exception as e:
             self.logger.error(f'error: target update. {e}')
-
-    def tick(self):
-
-        self.propid.tick()
-        self.insname.tick()
-        self.object.tick()
-        #self.airmass.tick()
-        self.pa.tick()
-        self.time_az.tick()
-        self.time_el.tick()
-        self.time_rot.tick()
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('target', options)
-
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        tel = Target(obcp=options.ins, logger=logger)
-        timer = QtCore.QTimer()
-        timer.timeout.connect(tel.tick)
-        timer.start(options.interval)
-        tel.setWindowTitle("%s" % progname)
-        tel.show()
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as e:
-        logger.warn('keyboard interruption....')
-        sys.exit(0)
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-    from argparse import ArgumentParser
-
-    argprs = ArgumentParser(description="Target status")
-
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    argprs.add_argument("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    argprs.add_argument("--interval", dest="interval", type=int,
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.
-    argprs.add_argument("--mode", dest="mode",
-                      default='ag',
-                      help="Specify a plotting mode [ag | sv | pir | fmos]")
-    argprs.add_argument("--ins", dest="ins",
-                      default='HDS',
-                      help="Specify 3 character code of an instrument. e.g., HDS")
-    ssdlog.addlogopts(argprs)
-
-    (options, args) = argprs.parse_known_args(sys.argv[1:])
-
-    if len(args) != 0:
-        argprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)

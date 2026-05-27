@@ -1,5 +1,6 @@
-from ginga.gw import Widgets
-
+#
+# T. Inagaki
+#
 import PlBase
 import Telescope
 
@@ -31,7 +32,7 @@ class TelescopePlugin(PlBase.Plugin):
                                              logger=self.logger)
 
         self.root.remove_all(delete=True)
-        self.root.add_widget(Widgets.wrap(self.telescope), stretch=1)
+        self.root.add_widget(self.telescope, stretch=1)
 
     def change_config(self, controller, d):
 

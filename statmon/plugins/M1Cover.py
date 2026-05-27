@@ -1,51 +1,34 @@
-#!/usr/bin/env python
-
-import os
-import sys
-import math
-import numpy as np
-
-from qtpy import QtWidgets, QtCore
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+#
+# T. Inagaki
+#
+from CustomPlot import PlotWidget
 
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
-from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
 
 from error import ERROR
-from g2base import ssdlog
-import PlBase
-
-progname = os.path.basename(sys.argv[0])
 
 
-class M1Canvas(FigureCanvas):
+class M1Canvas(PlotWidget):
     """ M1 Mirror """
-    def __init__(self, parent=None, width=3, height=3,  logger=None):
+    def __init__(self, parent=None, width=3, height=3, logger=None):
 
-        sub=SubplotParams(left=0.0, right=1, bottom=0, top=1, wspace=0, hspace=0)
-        self.fig = Figure(figsize=(width, height), facecolor='white', subplotpars=sub)
+        sub = SubplotParams(left=0.0, right=1, bottom=0, top=1, wspace=0,
+                            hspace=0)
+        self.fig = Figure(figsize=(width, height), facecolor='white',
+                          subplotpars=sub)
+        super().__init__(self.fig)
+
         self.axes = self.fig.add_subplot(111)
-        # We want the axes cleared every time plot() is called
-        #self.axes.hold(False)
-        #self.axes.grid(True)
 
-        self.closed_color='black'
-        self.open_color='white'
-        self.onway_color='orange'
-        self.alarm_color='red'
+        self.closed_color = 'black'
+        self.open_color = 'white'
+        self.onway_color = 'orange'
+        self.alarm_color = 'red'
 
-        FigureCanvas.__init__(self, self.fig)
-        self.setParent(parent)
-
-        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, \
-                                   QtWidgets.QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-
-        #FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, \
-        #                           QtWidgets.QSizePolicy.Fixed)
-        #FigureCanvas.updateGeometry(self)
+        self.set_expanding(True, True)
+        # FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
         self.w = 250
@@ -70,19 +53,12 @@ class M1Canvas(FigureCanvas):
         self.axes.axison=False
         self.draw()
 
-    def minimumSizeHint(self):
-        return QtCore.QSize(self.w, self.h)
-
-    def sizeHint(self):
-         return QtCore.QSize(self.w, self.h)
-
 
 class M1Cover(M1Canvas):
 
     """A canvas that updates itself every second with a new plot."""
     def __init__(self,*args, **kwargs):
 
-        #super(AGPlot, self).__init__(*args, **kwargs)
         M1Canvas.__init__(self, *args, **kwargs)
 
     def update_m1cover(self, m1cover, m1cover_onway):
@@ -117,112 +93,3 @@ class M1Cover(M1Canvas):
             self.logger.error(f'Error: M1 cover. {e}')
 
         self.draw()
-
-    def tick(self):
-        ''' testing  mode solo '''
-        import random
-        random.seed()
-
-        indx=random.randrange(0, 4)
-        m1cover = [0x1111111111111111111111, 'Unknown',  None, 0x4444444444444444444444]
-
-        indx2=random.randrange(0, 4)
-        m1onway = [0x01, 0x03, 0x02, None]
-        try:
-            m1cover = m1cover[indx]
-            m1onway = m1onway[indx2]
-        except Exception:
-            m1cover=None
-            m1onway=None
-        finally:
-            self.update_m1cover(m1cover, m1onway)
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('m1cover', options)
-
-    class AppWindow(QtWidgets.QMainWindow):
-        def __init__(self):
-            QtWidgets.QMainWindow.__init__(self)
-            self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w = 250
-            self.h = 20
-            self.setup()
-
-        def setup(self):
-            self.resize(self.w, self.h)
-            self.main_widget = QtWidgets.QWidget(self)
-
-            l = QtWidgets.QVBoxLayout(self.main_widget)
-            m1 =  M1Cover(self.main_widget, logger=logger)
-
-            l.addWidget(m1)
-
-            timer = QtCore.QTimer(self)
-            timer.timeout.connect(m1.tick)
-            timer.start(options.interval)
-
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget)
-
-            self.statusBar().showMessage("M1 starting..." , 5000)
-            #print options
-
-        def closeEvent(self, ce):
-            self.close()
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        aw = AppWindow()
-        aw.setWindowTitle("%s" % progname)
-        aw.show()
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as e:
-        logger.warn('keyboard interruption....')
-        sys.exit(0)
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-    from argparse import ArgumentParser
-
-    argprs = ArgumentParser(description="M1cover status")
-
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    argprs.add_argument("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    argprs.add_argument("--interval", dest="interval", type=int,
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-
-    ssdlog.addlogopts(argprs)
-
-    (options, args) = argprs.parse_known_args(sys.argv[1:])
-
-    if len(args) != 0:
-        argprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)

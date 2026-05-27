@@ -1,12 +1,10 @@
-#!/usr/bin/env python
-
-import os
-import sys
+#
+# T. Inagaki
+#
 import math
 import numpy as np
 
-from qtpy import QtWidgets, QtCore
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from ginga.gw.Plot import PlotWidget
 
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
@@ -14,36 +12,30 @@ from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
 
 from error import ERROR
-from g2base import ssdlog
 from g2cam.status.common import STATNONE, STATERROR
 import PlBase
 
-progname = os.path.basename(sys.argv[0])
 
-
-class TopscreenCanvas(FigureCanvas):
+class TopscreenCanvas(PlotWidget):
     """ Topscreen """
     def __init__(self, parent=None, width=1, height=1,  logger=None):
+        super().__init__(None, width=width, height=height)
 
-        sub=SubplotParams(left=0, bottom=0, right=1, \
-                          top=1, wspace=0, hspace=0)
-        self.fig = Figure(figsize=(width, height), facecolor='white', \
+        sub = SubplotParams(left=0, bottom=0, right=1,
+                            top=1, wspace=0, hspace=0)
+        self.fig = Figure(figsize=(width, height), facecolor='white',
                           subplotpars=sub)
         self.axes = self.fig.add_subplot(111)
-        # We want the axes cleared every time plot() is called
-        #self.axes.hold(False)
-        #self.axes.grid(True)
 
         # y axis values. these are fixed values.
         self.y_axis = [-1.0, 0, 1]
         self.center_y = 0.0
 
-        FigureCanvas.__init__(self, self.fig)
-        self.setParent(parent)
+        self.fig.set_canvas(self)
 
         # FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, \
         #                            QtWidgets.QSizePolicy.Fixed)
-        FigureCanvas.updateGeometry(self)
+        # FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
         self.w = 500
@@ -52,12 +44,6 @@ class TopscreenCanvas(FigureCanvas):
         self.logger = logger
 
         self.init_figure()
-
-    def minimumSizeHint(self):
-        return QtCore.QSize(self.w, self.h)
-
-    # def sizeHint(self):
-    #      return QtCore.QSize(self.w, self.h)
 
     def init_figure(self):
         ''' initial drawing '''
@@ -76,17 +62,17 @@ class TopscreenCanvas(FigureCanvas):
         self.alarm_color = 'red'
 
         # front/rear top screen
-        ts_kwargs = dict(alpha=0.8, fc=self.screen_color, \
-                       ec=self.screen_color, lw=1, )
-        self.front = mpatches.Rectangle((front_init, screen_width - screen_width), \
-                                      self.screen_len, screen_width, **ts_kwargs)
+        ts_kwargs = dict(alpha=0.8, fc=self.screen_color,
+                         ec=self.screen_color, lw=1, )
+        self.front = mpatches.Rectangle((front_init, screen_width - screen_width),
+                                        self.screen_len, screen_width, **ts_kwargs)
 
-        self.rear1 = mpatches.Rectangle((rear1_init, screen_width*2), \
-                                      self.screen_len, screen_width, \
-                                      **ts_kwargs)
-        self.rear2 = mpatches.Rectangle((rear2_init, screen_width), \
-                                      self.screen_len, screen_width, \
-                                      **ts_kwargs)
+        self.rear1 = mpatches.Rectangle((rear1_init, screen_width * 2),
+                                        self.screen_len, screen_width,
+                                        **ts_kwargs)
+        self.rear2 = mpatches.Rectangle((rear2_init, screen_width),
+                                        self.screen_len, screen_width,
+                                        **ts_kwargs)
 
         self.axes.add_patch(self.front)
         self.axes.add_patch(self.rear1)
@@ -94,30 +80,30 @@ class TopscreenCanvas(FigureCanvas):
 
         # draw x-axis line
         line_kwargs = dict(alpha=0.7, ls='-', lw=0.7 , color=self.screen_color,
-                         marker='|', ms=10.0, mew=2, markevery=(0,1))
+                           marker='|', ms=10.0, mew=2, markevery=(0,1))
 
         offset_drawing = 0.04
-        middle = [max(limit)-offset_drawing, min(limit)+offset_drawing]
-        line = Line2D(middle, [self.center_y]*len(middle), **line_kwargs)
+        middle = [max(limit) - offset_drawing, min(limit) + offset_drawing]
+        line = Line2D(middle, [self.center_y] * len(middle), **line_kwargs)
         self.axes.add_line(line)
 
         # draw text
-        self.text = self.axes.text(0.5, 0.2, 'Initializing', \
-                                 va='baseline', ha='center', \
-                                 transform = self.axes.transAxes, \
-                                             color=self.normal_color, \
-                                             fontsize=13)
+        self.text = self.axes.text(0.5, 0.2, 'Initializing',
+                                   va='baseline', ha='center',
+                                   transform = self.axes.transAxes,
+                                   color=self.normal_color,
+                                   fontsize=13)
 
         # set x,y limit values
         self.axes.set_xlim(max(limit), min(limit))
         self.axes.set_ylim(min(self.y_axis), max(self.y_axis))
-        # # disable default x/y axis drawing
+        # disable default x/y axis drawing
         #self.axes.set_xlabel(False)
         #self.axes.apply_aspect()
         self.axes.set_axis_off()
 
         #self.axes.set_xscale(10)
-        self.axes.axison=False
+        self.axes.axison = False
         self.draw()
 
 
@@ -127,7 +113,7 @@ class Topscreen(TopscreenCanvas):
     def __init__(self,*args, **kwargs):
 
         TopscreenCanvas.__init__(self, *args, **kwargs)
-        #super(TopscreenCanvas, self).__init__(*args, **kwargs)
+        #super().__init__(*args, **kwargs)
 
     def update_topscreen(self, mode, front , rear):
         ''' mode = TSCV.TopScreen
@@ -171,110 +157,3 @@ class Topscreen(TopscreenCanvas):
             self.logger.error(f'error: front={front}, rear={rear}. {e}')
 
         self.draw()
-
-    def tick(self):
-        ''' testing  mode solo '''
-        import random
-        random.seed()
-
-        mode = [32, "Unknown", 31,  None, 11, STATNONE, 12, 30, STATERROR]
-        #  range is limit+-100,
-        indx = random.randrange(0, 10)
-        try:
-            mode = mode[indx]
-        except Exception:
-            mode = 30
-        front = random.randrange(0, 24)
-        rear = random.randrange(0, 14)
-
-        self.update_topscreen(mode, front, rear)
-
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('topscreen', options)
-
-    class AppWindow(QtWidgets.QMainWindow):
-        def __init__(self):
-            QtWidgets.QMainWindow.__init__(self)
-            self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w = 500; self.h = 40;
-            self.setup()
-
-        def setup(self):
-            self.resize(self.w, self.h)
-            self.main_widget = QtWidgets.QWidget(self)
-
-            l = QtWidgets.QVBoxLayout(self.main_widget)
-            topscreen = Topscreen(self.main_widget, logger=logger)
-            l.addWidget(topscreen)
-
-            timer = QtCore.QTimer(self)
-            timer.timeout.connect(topscreen.tick)
-            timer.start(options.interval)
-
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget)
-
-            self.statusBar().showMessage("topscreen starting..."  ,5000)
-            #print options
-
-        def closeEvent(self, ce):
-            self.close()
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        aw = AppWindow()
-        aw.setWindowTitle("%s" % progname)
-        aw.show()
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as  e:
-        print('key...board')
-        logger.info('keyboard interruption....')
-        sys.exit(0)
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-    from argparse import ArgumentParser
-
-    argprs = ArgumentParser(description="Topscreen status")
-
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    argprs.add_argument("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    argprs.add_argument("--interval", dest="interval", type=int,
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-
-    ssdlog.addlogopts(argprs)
-
-    (options, args) = argprs.parse_known_args(sys.argv[1:])
-
-    if len(args) != 0:
-        argprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)

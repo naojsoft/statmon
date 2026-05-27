@@ -1,21 +1,16 @@
-#!/usr/bin/env python
-
-import sys
-import os
-
-from CustomLabel import Label, QtCore, QtWidgets, ERROR
-from g2base import ssdlog
-
-progname = os.path.basename(sys.argv[0])
+#
+# T. Inagaki
+#
+from CustomLabel import Label, ERROR
 
 
 class FocusZ(Label):
     ''' telescope focus z '''
     def __init__(self, parent=None, logger=None):
 
-        super(FocusZ, self).__init__(parent=parent, fs=14, width=250, \
-                                     height=25, frame=True, linewidth=0.1, \
-                                     logger=logger )
+        super().__init__(parent=parent, fs=14, width=250,
+                         height=25, frame=True, linewidth=0.1,
+                         logger=logger )
 
     def update_z(self, z):
         ''' z=TSCL.Z '''
@@ -29,105 +24,5 @@ class FocusZ(Label):
             text = "Focus: Undefined"
             color = self.alarm
             self.logger.error(f'error: focus z undef. z={z}')
-        self.setStyleSheet("QLabel {color :%s; background-color:%s}" \
-                           %(color, self.bg) )
-        self.setText(text)
-
-    def tick(self):
-        ''' testing solo mode '''
-        import random
-        random.seed()
-
-        z = random.random()*random.randrange(-20, 20)
-        self.update_z(z)
-
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('focus_z', options)
-
-    class AppWindow(QtWidgets.QMainWindow):
-        def __init__(self):
-            super(AppWindow, self).__init__()
-            self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w = 250; self.h = 25;
-            self.init_ui()
-
-        def init_ui(self):
-            self.resize(self.w, self.h)
-
-            self.main_widget = QtWidgets.QWidget()
-            l = QtWidgets.QVBoxLayout(self.main_widget)
-            l.setContentsMargins(0, 0, 0, 0)
-            l.setSpacing(0)
-            z = FocusZ(parent=self.main_widget, logger=logger)
-            l.addWidget(z)
-
-            timer = QtCore.QTimer(self)
-            timer.timeout.connect(z.tick)
-            timer.start(options.interval)
-
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget)
-            self.statusBar().showMessage("FocusZ starting...", options.interval)
-
-        def closeEvent(self, ce):
-            self.close()
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        aw = AppWindow()
-        aw.setWindowTitle("%s" % progname)
-        aw.show()
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as e:
-        logger.warn('keyboard interruption....')
-        sys.exit(0)
-
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-
-    from argparse import ArgumentParser
-
-    argprs = ArgumentParser(description="Focus Z status")
-
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    argprs.add_argument("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    argprs.add_argument("--interval", dest="interval", type=int,
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-
-    ssdlog.addlogopts(argprs)
-
-    (options, args) = argprs.parse_known_args(sys.argv[1:])
-
-    if len(args) != 0:
-        argprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)
+        self.set_color(fg=color, bg=self.bg)
+        self.set_text(text)

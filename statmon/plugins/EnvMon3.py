@@ -14,8 +14,6 @@ from ginga.canvas.types import plots as gplots
 from ginga.plot import time_series as tsp
 from ginga.plot import data_source as dsp
 
-from qtpy import QtCore, QtGui
-
 import PlBase
 
 # For "envmon3" plugin
@@ -69,9 +67,8 @@ class EnvMon3(PlBase.Plugin):
         self.alias_d = {}
 
         lbl = Widgets.Label("Catwalk Sensors")
-        w = lbl.get_widget()
-        w.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        w.setFont(QtGui.QFont('DejaVu Sans', 12, QtGui.QFont.Bold))
+        lbl.set_halign('center')
+        lbl.set_font('DejaVu Sans Bold', 12)
         self.root.add_widget(lbl, stretch=0)
 
         self.plots = Bunch.Bunch()

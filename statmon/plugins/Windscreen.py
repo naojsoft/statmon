@@ -1,45 +1,30 @@
-#!/usr/bin/env python
-
-import os
-import sys
+#
+# T. Inagaki
+#
 import math
-import numpy as np
 
-from qtpy import QtWidgets, QtCore
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from CustomPlot import PlotWidget
 
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 import matplotlib.patches as mpatches
 from matplotlib.figure import SubplotParams
 
-from g2base import ssdlog
-from g2cam.status.common import STATNONE, STATERROR
-import PlBase
-from error import *
-
-progname = os.path.basename(sys.argv[0])
+from error import ERROR
 
 
-class WindscreenCanvas(FigureCanvas):
+class WindscreenCanvas(PlotWidget):
     """ Windscreen """
     def __init__(self, parent=None, width=1, height=1,  dpi=None, logger=None):
 
-#        sub  =SubplotParams(left=0, bottom=0.234, right=1, \
-#                            top=0.998, wspace=0, hspace=0)
-
-        sub = SubplotParams(left=0, bottom=0.03, right=1, \
+        self.logger = logger
+        sub = SubplotParams(left=0, bottom=0.03, right=1,
                             top=1, wspace=0, hspace=0)
-
-        self.fig = Figure(figsize=(width, height), facecolor='white', \
+        self.fig = Figure(figsize=(width, height), facecolor='white',
                           subplotpars=sub)
+        super().__init__(self.fig)
 
-        #self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='white')
-        #self.fig = Figure(facecolor='white')
         self.axes = self.fig.add_subplot(111)
-        # We want the axes cleared every time plot() is called
-        #self.axes.hold(False)
-        #self.axes.grid(True)
 
         self.limit = [-14.5, 14.5]
 
@@ -54,24 +39,17 @@ class WindscreenCanvas(FigureCanvas):
         self.center_x = 0.5
         self.init_x = 0.0  # initial value of x
 
-        FigureCanvas.__init__(self, self.fig)
-        self.setParent(parent)
-
-        FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-
-        #FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.set_expanding(True, True)
+        #FigureCanvas.updateGeometry(self)
 
         # width/hight of widget
         self.w = 125
         self.h = 450
-        #FigureCanvas.resize(self, self.w, self.h)
+        #self.resize(self, self.w, self.h)
 
         # top screen lenght/width
         self.ts_len = 6
         self.ts_width = 0.1
-
-        self.logger = logger
 
         self.init_figure()
 
@@ -87,44 +65,34 @@ class WindscreenCanvas(FigureCanvas):
         # draw x-axis
         line_kwargs = dict(alpha=0.7, ls='-', lw=1 , color=self.normal,
                          marker='_', ms=15.0, mew=1.0, markevery=(0,1))
-#        line_kwargs=dict(alpha=0.7, ls='-', lw=1 , color=self.normal,
-#
-#                         marker='v', ms=17.0, mew=0.5, markevery=(1,2))
 
 
         middle = [min(self.limit),  max(self.limit)]
-        line = Line2D([0.87]*len(middle), [0, 14.5],  \
-                      #transform=self.axes.transAxes, \
+        line = Line2D([0.87]*len(middle), [0, 14.5],
+                      #transform=self.axes.transAxes,
                       **line_kwargs)
         self.axes.add_line(line)
-
-
 
         line_kwargs = dict(alpha=0.7, ls=':', lw=5, color=self.normal,
                          marker='', ms=7.0, mew=1.0, markevery=(1,2))
 
-
-
         y = math.tan(math.radians(90)) * 14.5
-        self.light = Line2D([2.0, 0], [0, y],  \
-                      #transform=self.axes.transAxes, \
-                      **line_kwargs)
+        self.light = Line2D([2.0, 0], [0, y],
+                            #transform=self.axes.transAxes,
+                            **line_kwargs)
         self.axes.add_line(self.light)
-
-
-
 
         ts_kwargs = dict(alpha=0.7, fc=self.wind, ec=self.wind, lw=1.5)
 
-        self.windscreen = mpatches.Rectangle((self.center_x-(self.ts_width/2.0)+0.425, 0.0), \
-                                           self.ts_width, 0, \
-                                           **ts_kwargs)
+        self.windscreen = mpatches.Rectangle((self.center_x - (self.ts_width / 2.0) + 0.425, 0.0),
+                                             self.ts_width, 0,
+                                             **ts_kwargs)
 
         self.axes.add_patch(self.windscreen)
 
         # draw text
-        self.msg = self.axes.text(0.9, 0.48, 'Init', \
-                                  color=self.normal,  va='top', ha='right', \
+        self.msg = self.axes.text(0.9, 0.48, 'Init',
+                                  color=self.normal,  va='top', ha='right',
                                   transform=self.axes.transAxes, fontsize=13)
 
         # set x,y limit values
@@ -138,12 +106,6 @@ class WindscreenCanvas(FigureCanvas):
         #self.axes.set_xscale(10)
         #self.axes.axison=False
         self.draw()
-
-    def minimumSizeHint(self):
-        return QtCore.QSize(self.w, self.h)
-
-    def sizeHint(self):
-         return QtCore.QSize(self.w, self.h)
 
 
 class Windscreen(WindscreenCanvas):
@@ -240,115 +202,3 @@ class Windscreen(WindscreenCanvas):
         self.__update_lightpath(el)
 
         self.draw()
-
-    def tick(self, el=None):
-        ''' testing  mode solo '''
-        import random
-        random.seed()
-
-        drv = [0x08, "Unknown",  None, 0x04, STATNONE, STATERROR]
-        windscreen = ["Unknown", 0x01,  None, STATNONE, 0x02,
-                      STATERROR]
-
-        indx = random.randrange(0, 6)
-        #  0 ~ 14.9m
-        pos = random.random()*random.randrange(0, 16)
-        cmd = random.random()*random.randrange(0, 16)
-
-        if el is None:
-            el = random.random()*random.randrange(0,100)
-
-        drv = drv[indx]
-        windscreen = windscreen[indx]
-
-        self.update_windscreen(drv, windscreen, cmd, pos, el)
-
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('windscreen', options)
-
-    class AppWindow(QtWidgets.QMainWindow):
-        def __init__(self):
-            QtWidgets.QMainWindow.__init__(self)
-            self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w = 125; self.h = 500;
-            self.setup()
-
-        def setup(self):
-            self.resize(self.w, self.h)
-            self.main_widget = QtWidgets.QWidget(self)
-
-            l = QtWidgets.QVBoxLayout(self.main_widget)
-            windscreen = Windscreen(self.main_widget, logger=logger)
-
-            l.addWidget(windscreen)
-
-            timer = QtCore.QTimer(self)
-            timer.timeout.connect(windscreen.tick)
-            timer.start(options.interval)
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget)
-
-            self.statusBar().showMessage("windscreen starting..."  ,5000)
-            #print options
-
-        def closeEvent(self, ce):
-            self.close()
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        aw = AppWindow()
-        aw.setWindowTitle("%s" % progname)
-        aw.show()
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as  e:
-        print('keyboard interruption...')
-        logger.info('keyboard interruption....')
-        sys.exit(0)
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-    from argparse import ArgumentParser
-
-    argprs = ArgumentParser(description="Windsc status")
-
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    argprs.add_argument("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    argprs.add_argument("--interval", dest="interval", type=int,
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-
-    ssdlog.addlogopts(argprs)
-
-    (options, args) = argprs.parse_known_args(sys.argv[1:])
-
-    if len(args) != 0:
-        argprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)

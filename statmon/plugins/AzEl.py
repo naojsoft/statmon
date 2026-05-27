@@ -1,13 +1,7 @@
-#!/usr/bin/env python
-
-import os
-import sys
+#
+# T. Inagaki
+#
 import math
-import numpy as np
-
-from qtpy import QtWidgets, QtCore
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
@@ -16,15 +10,11 @@ import matplotlib.patches as mpatches
 from matplotlib.figure import SubplotParams
 from matplotlib.artist import Artist
 
-from g2base import ssdlog
-import PlBase
+from CustomPlot import PlotWidget
 from error import *
 
-progname = os.path.basename(sys.argv[0])
-progversion = "0.1"
 
-
-class AzElCanvas(FigureCanvas):
+class AzElCanvas(PlotWidget):
     """ Windscreen """
     def __init__(self, parent=None, width=1, height=1,  dpi=None, logger=None):
 
@@ -32,13 +22,9 @@ class AzElCanvas(FigureCanvas):
                             top=1, wspace=0, hspace=0)
         self.fig = Figure(figsize=(width, height),
                           facecolor='white', subplotpars=sub)
+        super().__init__(self.fig)
 
-        #self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='white')
-        #self.fig = Figure(facecolor='white')
         self.axes = self.fig.add_subplot(111)
-        # We want the axes cleared every time plot() is called
-        #self.axes.hold(False)
-        #self.axes.grid(True)
 
         self.limit_low = 0.0
         self.limit_high = 90.0;
@@ -67,34 +53,21 @@ class AzElCanvas(FigureCanvas):
         self.new_x = 0.5
         self.new_y = 0.375
 
-        FigureCanvas.__init__(self, self.fig)
-        self.setParent(parent)
-
-        #h_policy = QtWidgets.QSizePolicy.Policy(QtWidgets.QSizePolicy.Expanding)
-        #v_policy = QtWidgets.QSizePolicy.Policy(QtWidgets.QSizePolicy.Expanding)
-        #self.setSizePolicy(QtWidgets.QSizePolicy(h_policy, v_policy))
-        # self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-        #                                          QtWidgets.QSizePolicy.MinimumExpanding))
-
-        # FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        #FigureCanvas.updateGeometry(self)
-
         # width/hight of widget
         self.w = 250
         self.h = 250
-        #FigureCanvas.resize(self, self.w, self.h)
+        #self.resize(self.w, self.h)
 
         self.logger = logger
 
         self.init_figure()
 
-    def test(self, degree, radius):
+    # def test(self, degree, radius):
 
-        rad = math.radians(degree)
-        new_y = self.center + radius * math.sin(rad)
-        new_x = self.center + radius * math.cos(rad)
-        return (new_x, new_y)
-
+    #     rad = math.radians(degree)
+    #     new_y = self.center + radius * math.sin(rad)
+    #     new_x = self.center + radius * math.cos(rad)
+    #     return (new_x, new_y)
 
     def init_figure(self):
         ''' initial drawing '''
@@ -144,7 +117,7 @@ class AzElCanvas(FigureCanvas):
 
         # subaru telescope direction
         self.subaru_radius = 0.125
-        # subaru's directions: south 0 , west 90, noroth 180, east 270/-90
+        # subaru's directions: south 0 , west 90, north 180, east 270/-90
         self.subaru = mpatches.RegularPolygon((self.center,
                                                self.center-self.subaru_radius),
                                                3, radius=self.subaru_radius,
@@ -200,21 +173,6 @@ class AzElCanvas(FigureCanvas):
         #self.axes.axison=False
 
         self.draw()
-
-    def minimumSizeHint(self):
-        return QtCore.QSize(self.w, self.h)
-
-    # def sizeHint(self):
-    #      return QtCore.QSize(self.w, self.h)
-
-    def resizeEvent(self, event):
-        rect = self.geometry()
-        x1, y1, x2, y2 = rect.getCoords()
-        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-        width = x2 - x1 + 1
-        height = y2 - y1 + 1
-        #print(f"{width=},{height=}")
-        return super().resizeEvent(event)
 
 
 class AzEl(AzElCanvas):
@@ -353,115 +311,3 @@ class AzEl(AzElCanvas):
         self.__update_wind(direction=winddir, speed=windspeed)
 
         self.draw()
-
-    def tick(self, el=None):
-        ''' testing solo mode '''
-        import random
-        random.seed()
-        state=["Guiding(AG1)", "Guiding(AG2)", "Unknown", "##NODATA##",
-               "##ERROR##", "Guiding(SV1)","Guiding(SV2)", "Guiding(AGPIR)",
-               "Guiding(AGFMOS)", "Tracking", "Tracking(Non-Sidereal)",
-               "Slewing", "Pointing", "Guiding(HSCSCAG)", "Guiding(HSCSHAG)"]
-
-        # el limit is between 0 and 90,
-        if el is None:
-            el = random.random()*random.randrange(-10,150)
-        indx = random.randrange(0,15)
-        az = winddir = random.random()*random.randrange(-360, 360)
-        windspeed = random.random()*random.randrange(0, 50)
-        try:
-            state = state[indx]
-        except Exception:
-            state='Pointing'
-        self.update_azel(az, el, winddir, windspeed, state)
-
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('el', options)
-
-    class AppWindow(QtWidgets.QMainWindow):
-        def __init__(self):
-            QtWidgets.QMainWindow.__init__(self)
-            self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w=250; self.h=250;
-            self.setup()
-
-        def setup(self):
-            self.resize(self.w, self.h)
-            self.main_widget = QtWidgets.QWidget(self)
-
-            l = QtWidgets.QVBoxLayout(self.main_widget)
-            azel = AzEl(self.main_widget, logger=logger)
-            l.addWidget(azel)
-
-            timer = QtCore.QTimer(self)
-            timer.timeout.connect(azel.tick)
-            timer.start(options.interval)
-
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget)
-
-            self.statusBar().showMessage("windscreen starting..."  ,5000)
-            #print options
-
-        def closeEvent(self, ce):
-            self.close()
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        aw = AppWindow()
-        aw.setWindowTitle("%s" % progname)
-        aw.show()
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as  e:
-        print('keyboard...')
-        logger.info('keyboard interruption....')
-        sys.exit(0)
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-
-    from argparse import ArgumentParser
-
-    argprs = ArgumentParser(description="AZ/EL status")
-
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    argprs.add_argument("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    argprs.add_argument("--interval", dest="interval", type=int,
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-
-    ssdlog.addlogopts(argprs)
-
-    (options, args) = argprs.parse_known_args(sys.argv[1:])
-
-    if len(args) != 0:
-        argprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)

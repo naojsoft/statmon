@@ -1,53 +1,45 @@
-#!/usr/bin/env python
-
-import sys, os
+#
+# T. Inagaki
+#
 import math
 import threading
 
-from qtpy import QtWidgets, QtCore, QtGui
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.patches import Circle
 from matplotlib.artist import Artist
 from matplotlib.lines import Line2D
-from matplotlib.widgets import Button
-from matplotlib.figure import SubplotParams
 
-from g2base.Bunch import Bunch
-from g2base import ssdlog
+from ginga.misc.Bunch import Bunch
+from ginga.gw import Widgets
+
+from CustomPlot import PlotWidget
 from Exptime import Exptime
 from Threshold import Threshold
 from Dummy import Dummy
-progname = os.path.basename(sys.argv[0])
-progversion = "0.1"
 
 
-class PlotCanvas(FigureCanvas):
+class PlotCanvas(PlotWidget):
     """ AG/SV/FMOS/AO188 Plotting """
     def __init__(self, parent=None, center_x=0, center_y=0, logger=None):
-        #sub=SubplotParams(bottom=0)
+
         self.fig = Figure(figsize=(5, 5), dpi=None, facecolor='white')
-        #plt.subplots_adjust(bottom=0.3)
+        super().__init__(self.fig)
+
         self.axes = self.fig.add_subplot(111)
-        # We want the axes cleared every time plot() is called
-        #self.axes.hold(False)
-        #self.axes.grid(True)
+
         self.center_x = center_x  # center of canvas
         self.center_y = center_y
         self.w = 350
         self.h = 350
         #self.setFixedSize(w, h)
 
-        self.plot_color='blue'
-        self.record_color='black'
-        self.alarm_color='red'
-        self.warn_color='orange'
+        self.plot_color = 'blue'
+        self.record_color = 'black'
+        self.alarm_color = 'red'
+        self.warn_color = 'orange'
 
-        FigureCanvas.__init__(self, self.fig)
-        self.setParent(parent)
-
-        FigureCanvas.updateGeometry(self)
+        #FigureCanvas.updateGeometry(self)
 
         self.logger = logger
         self.init_figure()
@@ -103,33 +95,25 @@ class PlotCanvas(FigureCanvas):
                                                         relpos=(0.5, -0.09)),
                                         horizontalalignment='center')
 
-        #kwargs=dict(boxstyle='square', alpha=0.1, ec='grey', fc='white' )
-        kwargs=dict(alpha=0.4, ec='grey', fc='white' )
-        #self.axes.text(0.057, 1.02, '[                       ]', color='w', ha='left', va='baseline',
-        #               bbox=kwargs,
-        #               fontsize=27,
-        #               transform=self.axes.transAxes)
-        self.title_x=self.axes.text(0.30, 1.03, 'X:%02.2f' %(self.center_x),
-                                    color='green', ha='left', va='baseline',
-                                    #bbox=kwargs,
-                                    fontsize=14,
-                                    transform=self.axes.transAxes)
+        kwargs = dict(alpha=0.4, ec='grey', fc='white' )
+        self.title_x = self.axes.text(0.30, 1.03, 'X:%02.2f' %(self.center_x),
+                                      color='green', ha='left', va='baseline',
+                                      #bbox=kwargs,
+                                      fontsize=14,
+                                      transform=self.axes.transAxes)
 
-        self.title_y=self.axes.text(0.54, 1.03, 'Y:%02.2f' %(self.center_y),
-                                    color='green', ha='left', va='baseline',
-                                    #bbox=kwargs,
-                                    fontsize=14,
-                                    transform=self.axes.transAxes)
-
-        #t=Rectangle((0.05, 0.05), 0.9, 0.9, alpha=0.1, color='lightgreen', ec='None',  transform=self.axes.transAxes)
-        #self.axes.add_patch(t)
+        self.title_y = self.axes.text(0.54, 1.03, 'Y:%02.2f' %(self.center_y),
+                                      color='green', ha='left', va='baseline',
+                                      #bbox=kwargs,
+                                      fontsize=14,
+                                      transform=self.axes.transAxes)
 
         # draw inner/outer circles
         self.inner_c = Circle((self.center_x, self.center_y), min(circle),
-                               fc="None", ec="g", lw=0.5, ls='solid')
+                              fc="None", ec="g", lw=0.5, ls='solid')
         self.axes.add_patch(self.inner_c)
         self.outer_c = Circle((self.center_x, self.center_y), max(circle),
-                               fc="None", ec="g", lw=1.5, ls='solid')
+                              fc="None", ec="g", lw=1.5, ls='solid')
         self.axes.add_patch(self.outer_c)
 
         # draw x-axis
@@ -208,19 +192,13 @@ class PlotCanvas(FigureCanvas):
 
         self.draw()
 
-    def minimumSizeHint(self):
-        return QtCore.QSize(self.w, self.h)
-
-    # def sizeHint(self):
-    #      return QtCore.QSize(self.w, self.h)
-
 
 class Plot(PlotCanvas):
 
     """A canvas that updates itself every second with a new plot."""
     def __init__(self, parent=None, center_x=0, center_y=0, logger=None):
-
-        #super(AGPlot, self).__init__(*args, **kwargs)
+        super().__init__(parent=parent, center_x=center_x, center_y=center_y,
+                         logger=logger)
 
         self.c = 0
         self.plot_record = []
@@ -276,23 +254,6 @@ class Plot(PlotCanvas):
 
         self.rlock = threading.RLock()
 
-    def tick(self):
-        ''' testing solo mode '''
-        import random
-        random.seed()
-
-        x = random.random()*random.randrange(-800,800)
-        y = random.random()*random.randrange(-800,800)
-        self.update_plot(x,y)
-
-    # def in_range(self, x, y, limit):
-    #     ''' is ploting in range '''
-    #     res=True
-    #     if (x > limit or x < -limit) or (y > limit or y < -limit):
-    #         res=False
-    #     return res
-
-    #def draw_path(self, cur, pre):
     def draw_path(self):
         ''' draw a path to a current plotting from previous one '''
         with self.rlock:
@@ -342,7 +303,6 @@ class Plot(PlotCanvas):
             print(e)
             pass
 
-
     def update_plot(self, x , y):
         ''' update plotting '''
         self.logger.debug(f'x={x}, y={y}')
@@ -354,14 +314,11 @@ class Plot(PlotCanvas):
             self.logger.warn(f'warn: x, y are not digits. {e}')
             return
 
-        #pre=self.redraw_point()
         self.redraw_point()
 
-        #plot=self.plot_point(x,y)
         self.plot_point(x,y)
 
         self.draw_path()
-        #self.draw_path(plot, pre)
 
         with self.rlock:
             plot_points = len(self.plot_record)
@@ -381,8 +338,6 @@ class Plot(PlotCanvas):
 
         alarm = max(self.circle[self.scale_index])
 
-#        in_range = self.in_range(x,y, limit=alarm)
-
         circle = Circle(xy=(x,y), radius=0.0125*(self.scale_index+1), \
                       ec="none", fill=True, alpha=1)
         if (x > alarm or x < -alarm) or (y > alarm or y < -alarm):
@@ -394,24 +349,17 @@ class Plot(PlotCanvas):
 
         self.axes.add_patch(circle)
 
-        # print(self.c)
-
         plot = Bunch(point=circle, x=x, y=y, color=color)
 
-        #print 'PLOT=%s' %plot
         with self.rlock:
             self.plot_record.append(plot)
-
-        #print self.plot_record
-        #return plot
 
 
 class Ao1Plot(Plot):
     def __init__(self, parent=None, logger=None):
-        #super(AOPlot1, self).__init__(parent, logger)
         Plot.__init__(self, parent=parent, logger=logger)
 
-        self.scale_index=0
+        self.scale_index = 0
         self.label_offset = 1.033
 
         self.plot_radius = 0.45
@@ -472,20 +420,20 @@ class Ao2Plot(Plot):
 
         Plot.__init__(self, parent=parent, center_x=5, center_y=5, logger=logger)
 
-        self.scale_index=0
-        self.label_offset=0.553
+        self.scale_index = 0
+        self.label_offset = 0.553
 
-        self.plot_radius=0.25
-        self.record_radius=0.06
+        self.plot_radius = 0.25
+        self.record_radius = 0.06
 
-        self.alarm_low=2.0
-        self.alarm_high=8.0
+        self.alarm_low = 2.0
+        self.alarm_high = 8.0
 
-        self.max_record=100
-        self.record_color='grey'
-        #self.alarm=self.warn=3.0 # no warning. so set warn as alarm
+        self.max_record = 100
+        self.record_color = 'grey'
+        #self.alarm = self.warn = 3.0  # no warning. so set warn as alarm
 
-        #self.warn_color='red'
+        #self.warn_color = 'red'
 
         # those values are measured not to waggle redrawn circles when a widget is reconfigured
         #self.scale=([-5.6, 5.6],)
@@ -527,56 +475,56 @@ class Ao2Plot(Plot):
         return plot
 
 
-class Buttons(QtWidgets.QWidget):
+class Buttons(Widgets.HBox):
     def __init__(self, parent=None, plot=None, logger=None):
-        super(Buttons, self).__init__(parent)
+        super().__init__()
+        self.set_spacing(0)
+        self.set_margins(0, 0, 0, 0)
+
         self.plot = plot
         self.logger = logger
 
     @property
     def ao_layout(self):
-        buttonlayout = QtWidgets.QHBoxLayout()
-        buttonlayout.setSpacing(0)
-        buttonlayout.setContentsMargins(0, 0, 0, 0)
-        spacer = QtWidgets.QWidget()
-        spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        refresh = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('view-refresh'), 'Clear')
-        refresh.clicked.connect(self.plot.refresh)
-        buttonlayout.addWidget(spacer)
-        buttonlayout.addWidget(refresh)
+        spacer = Widgets.Label('')
+        spacer.set_expanding(True, True)
+        #refresh = Widgets.Button(QtGui.QIcon.fromTheme('view-refresh'), 'Clear')
+        refresh = Widgets.Button('Clear')
+        refresh.add_callback('activated', self.plot.refresh)
+        self.add_widget(spacer)
+        self.add_widget(refresh)
 
-        return buttonlayout
+        return self
 
     @property
     def layout(self):
-        buttonlayout = QtWidgets.QHBoxLayout()
-        buttonlayout.setSpacing(0)
-        buttonlayout.setContentsMargins(0, 0, 0, 0)
-
-        zoomin = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('zoom-in'), 'Zoom In')
-        zoomin.clicked.connect(self.plot.zoomin)
-        #zoomin.setStyleSheet('QPushButton {color: white;  background-color: lightgrey }')
-        zoomout = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('zoom-out'), 'Zoom Out')
-        zoomout.clicked.connect(self.plot.zoomout)
-        spacer = QtWidgets.QWidget()
-        spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        refresh = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('view-refresh'), 'Clear')
-        refresh.clicked.connect(self.plot.refresh)
-        buttonlayout.addWidget(zoomin)
-        buttonlayout.addWidget(zoomout)
-        buttonlayout.addWidget(spacer)
-        buttonlayout.addWidget(refresh)
-        return buttonlayout
+        #zoomin = Widgets.Button(QtGui.QIcon.fromTheme('zoom-in'), 'Zoom In')
+        zoomin = Widgets.Button('Zoom In')
+        zoomin.add_callback('activated', self.plot.zoomin)
+        #zoomout = Widgets.Button(QtGui.QIcon.fromTheme('zoom-out'), 'Zoom Out')
+        zoomout = Widgets.Button('Zoom Out')
+        zoomout.add_callback('activated', self.plot.zoomout)
+        spacer = Widgets.Label('')
+        spacer.set_expanding(True, False)
+        #refresh = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('view-refresh'), 'Clear')
+        refresh = Widgets.Button('Clear')
+        refresh.add_callback('activated', self.plot.refresh)
+        self.add_widget(zoomin)
+        self.add_widget(zoomout)
+        self.add_widget(spacer)
+        self.add_widget(refresh)
+        return self
 
 
-class FmosPlot(QtWidgets.QWidget):
+class FmosPlot(Widgets.VBox):
     ''' Fmos Guiding '''
     def __init__(self, parent=None, logger=None):
-        super(FmosPlot, self).__init__(parent)
+        super().__init__()
+        self.set_spacing(0)
+        self.set_margins(0, 0, 0, 0)
 
         self.plot = Plot(parent=parent, logger=logger)
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
-
         self.logger = logger
 
         # w, h = (350, 400)
@@ -584,31 +532,9 @@ class FmosPlot(QtWidgets.QWidget):
 
         self.set_gui()
 
-    def tick(self):
-
-        import random
-        random.seed()
-
-        x = random.random()*random.randrange(-2, 2)
-        y = random.random()*random.randrange(-2,2)
-        el = random.randrange(15,90)
-
-        state = ["Guiding(AGFMOS)", "Guiding(AGFMOS)", "Slewing", "Guiding(AGFMOS)",]
-
-        sindx = random.randrange(0,4)
-        state = state[sindx]
-
-        self.update_plot(state, x, y, el)
-
     def set_gui(self):
-
-        layout = QtWidgets.QVBoxLayout()
-        layout.setSpacing(0)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.plot)
-
-        layout.addLayout(self.buttons.layout)
-        self.setLayout(layout)
+        self.add_widget(self.plot)
+        self.add_widget(self.buttons)
 
     def update_plot(self, state, x, y, el):
         self.logger.debug(f'state={state}, x={x}, y={y}, el={el}')
@@ -628,10 +554,12 @@ class FmosPlot(QtWidgets.QWidget):
                 self.plot.clear()
 
 
-class NsIrPlot(QtWidgets.QWidget):
+class NsIrPlot(Widgets.VBox):
     '''  NsIr AO188 Plotting  '''
     def __init__(self, parent=None, logger=None):
-        super(NsIrPlot, self).__init__(parent)
+        super().__init__()
+        self.set_spacing(0)
+        self.set_margins(0, 0, 0, 0)
 
         self.ao1 = Ao1Plot(parent=parent, logger=logger)
         self.buttons1 = Buttons(parent=parent, plot=self.ao1, logger=logger)
@@ -643,29 +571,11 @@ class NsIrPlot(QtWidgets.QWidget):
         # self.setFixedSize(w, h)
         self.set_gui()
 
-    def tick(self):
-
-        import random
-        random.seed()
-
-        x1 = random.random()*random.randrange(-11,11)
-        y1 = random.random()*random.randrange(-11,11)
-
-        x2 = random.random()*random.randrange(0, 15)
-        y2 = random.random()*random.randrange(0,15)
-
-        self.update_plot(x1, y1, x2, y2)
-
     def set_gui(self):
-
-        layout = QtWidgets.QVBoxLayout()
-        layout.setSpacing(0)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.ao1)
-        layout.addLayout(self.buttons1.ao_layout)
-        layout.addWidget(self.ao2)
-        layout.addLayout(self.buttons2.ao_layout)
-        self.setLayout(layout)
+        self.add_widget(self.ao1)
+        self.add_widget(self.buttons1)
+        self.add_widget(self.ao2)
+        self.add_widget(self.buttons2)
 
     def update_plot(self, ao1x, ao1y, ao2x, ao2y):
 
@@ -689,10 +599,12 @@ class NsIrPlot(QtWidgets.QWidget):
             self.ao2.update_plot(ao2x , ao2y)
 
 
-class PfsAgPlot(QtWidgets.QWidget):
+class PfsAgPlot(Widgets.VBox):
     '''  PfsAg Guiding  '''
     def __init__(self, parent=None, logger=None):
-        super(PfsAgPlot, self).__init__(parent)
+        super().__init__()
+        self.set_spacing(1)
+        self.set_margins(0, 0, 0, 0)
 
         self.plot = Plot(parent=parent, logger=logger)
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
@@ -707,32 +619,16 @@ class PfsAgPlot(QtWidgets.QWidget):
 
         self.set_gui()
 
-    def tick(self):
-
-        import random
-
-        state = ["Guiding(PFSAG)", "Guiding(PFSAG)", "Guiding(PFSAG)", "##ERROR##", ]
-        sindx = random.randrange(0,4)
-        state = state[sindx]
-        x = random.random()*random.randrange(-800,800)
-        y = random.random()*random.randrange(-800,800)
-        exptime = random.random()*random.randrange(0, 40000)
-        self.update_plot(state, x, y, exptime)
-
     def set_gui(self):
-        layout = QtWidgets.QVBoxLayout()
-        layout.setSpacing(1)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.plot)
+        self.add_widget(self.plot)
 
-        hlayout = QtWidgets.QHBoxLayout()
-        hlayout.setSpacing(2)
-        hlayout.addWidget(self.exptime)
-        hlayout.addWidget(self.empty)
-        layout.addLayout(hlayout)
+        hlayout = Widgets.HBox()
+        hlayout.set_spacing(2)
+        hlayout.add_widget(self.exptime)
+        hlayout.add_widget(self.empty)
+        self.add_widget(hlayout)
 
-        layout.addLayout(self.buttons.layout)
-        self.setLayout(layout)
+        self.add_widget(self.buttons)
 
     def update_plot(self, state, x, y, exptime):
         self.logger.debug(f'state={state}, x={x}, y={y}')
@@ -750,10 +646,12 @@ class PfsAgPlot(QtWidgets.QWidget):
             #self.threshold.clear()
 
 
-class AgPlot(QtWidgets.QWidget):
+class AgPlot(Widgets.VBox):
     '''  Ag Guiding  '''
     def __init__(self, parent=None, logger=None):
-        super(AgPlot, self).__init__(parent)
+        super().__init__()
+        self.set_spacing(1)
+        self.set_margins(0, 0, 0, 0)
 
         self.plot = Plot(parent=parent, logger=logger)
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
@@ -768,35 +666,17 @@ class AgPlot(QtWidgets.QWidget):
 
         self.set_gui()
 
-    def tick(self):
-
-        import random
-
-        state = ["Guiding(AG)", "Guiding(AG1)", "Guiding(AG2)",  "Slewing"]
-        sindx = random.randrange(0,4)
-        state = state[sindx]
-        x = random.random()*random.randrange(-800,800)
-        y = random.random()*random.randrange(-800,800)
-        exptime = random.random()*random.randrange(0, 40000)
-        bottom = random.randrange(0, 30000)
-        ceil = random.randrange(30000, 70000)
-        self.update_plot(state, x, y, exptime, bottom, ceil)
-
     def set_gui(self):
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.setSpacing(1)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.plot)
+        self.add_widget(self.plot)
 
-        hlayout = QtWidgets.QHBoxLayout()
-        hlayout.setSpacing(2)
-        hlayout.addWidget(self.exptime)
-        hlayout.addWidget(self.threshold)
-        layout.addLayout(hlayout)
+        hlayout = Widgets.HBox()
+        hlayout.set_spacing(2)
+        hlayout.add_widget(self.exptime)
+        hlayout.add_widget(self.threshold)
+        self.add_widget(hlayout)
 
-        layout.addLayout(self.buttons.layout)
-        self.setLayout(layout)
+        self.add_widget(self.buttons)
 
     def update_plot(self, state, x, y, exptime, bottom, ceil):
         self.logger.debug(f'state={state}, x={x}, y={y}')
@@ -815,10 +695,12 @@ class AgPlot(QtWidgets.QWidget):
             self.threshold.clear()
 
 
-class TwoGuidingPlot(QtWidgets.QWidget):
+class TwoGuidingPlot(Widgets.VBox):
     ''' Ns-Opt AG/SV, HSCSC/SHAG Guiding  '''
     def __init__(self, parent=None, logger=None):
-        super(TwoGuidingPlot, self).__init__(parent)
+        super().__init__()
+        self.set_spacing(1)
+        self.set_margins(0, 0, 0, 0)
 
         self.plot = Plot(parent=parent, logger=logger)
         self.exptime = Exptime(parent=parent, logger=logger)
@@ -831,28 +713,24 @@ class TwoGuidingPlot(QtWidgets.QWidget):
 
     def set_gui(self):
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.setSpacing(1)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.plot)
+        self.add_widget(self.plot)
 
-        hlayout = QtWidgets.QHBoxLayout()
-        hlayout.setSpacing(2)
-        hlayout.addWidget(self.exptime)
-        hlayout.addWidget(self.threshold)
-        layout.addLayout(hlayout)
+        hlayout = Widgets.HBox()
+        hlayout.set_spacing(2)
+        hlayout.add_widget(self.exptime)
+        hlayout.add_widget(self.threshold)
+        self.add_widget(hlayout)
 
-        layout.addLayout(self.buttons.layout)
-        self.setLayout(layout)
+        self.add_widget(self.buttons)
 
-    def update_plot(self, state, \
-                    guiding1_x, guiding1_y, \
-                    guiding2_x, guiding2_y, \
-                    guiding1_exp, guiding2_exp, \
-                    guiding1_bottom, guiding1_ceil, \
+    def update_plot(self, state,
+                    guiding1_x, guiding1_y,
+                    guiding2_x, guiding2_y,
+                    guiding1_exp, guiding2_exp,
+                    guiding1_bottom, guiding1_ceil,
                     guiding2_bottom, guiding2_ceil):
 
-        self.logger.debug("state=%s g1x=%s g1y=%s g2x=%s g2y=%s g1exp=%s g2exp=%s g1bottom=%s  g1ceil=%s g2bottom=%s g2ceil=%s" %(state, guiding1_x, guiding1_y, guiding2_x, guiding2_y, guiding1_exp, guiding2_exp, guiding1_bottom, guiding1_ceil, guiding2_bottom, guiding2_ceil))
+        self.logger.debug("state=%s g1x=%s g1y=%s g2x=%s g2y=%s g1exp=%s g2exp=%s g1bottom=%s  g1ceil=%s g2bottom=%s g2ceil=%s" % (state, guiding1_x, guiding1_y, guiding2_x, guiding2_y, guiding1_exp, guiding2_exp, guiding1_bottom, guiding1_ceil, guiding2_bottom, guiding2_ceil))
 
         guiding1 = ("Guiding(AG1)", "Guiding(AG2)", "Guiding(HSCSCAG)")
         guiding2 = ("Guiding(SV1)", "Guiding(SV2)", "Guiding(HSCSHAG)")
@@ -872,139 +750,3 @@ class TwoGuidingPlot(QtWidgets.QWidget):
             self.plot.clear()
             self.exptime.clear()
             self.threshold.clear()
-
-    def tick(self):
-
-        import random
-        random.seed()
-
-        state = ["Guiding(AG1)", "Guiding(AG2)", \
-                 "Guiding(SV1)","Guiding(SV2)",  \
-                 "Guiding(HSCSCAG)", "Guiding(HSCSHAG)", \
-                 "Slewing"]
-
-        sindx = random.randrange(0,7)
-        state = state[sindx]
-        guiding1_x = guiding2_x = random.random()*random.randrange(-800,800)
-        guiding1_y = guiding2_y = random.random()*random.randrange(-800,800)
-        guiding1_exp = guiding2_exp = random.random()*random.randrange(0, 40000)
-        guiding1_bottom = guiding2_bottom = random.randrange(0, 30000)
-        guiding1_ceil = guiding2_ceil = random.randrange(30000, 70000)
-
-        self.update_plot(state, \
-                    guiding1_x, guiding1_y, \
-                    guiding2_x, guiding2_y, \
-                    guiding1_exp, guiding2_exp, \
-                    guiding1_bottom, guiding1_ceil, \
-                    guiding2_bottom, guiding2_ceil)
-
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('plot', options)
-
-    class AppWindow(QtWidgets.QMainWindow):
-        def __init__(self):
-            QtWidgets.QMainWindow.__init__(self)
-            self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-
-            self.resize(350, 350)
-
-            self.main_widget = QtWidgets.QWidget()
-            l = QtWidgets.QVBoxLayout(self.main_widget)
-            l.setContentsMargins(0, 0, 0, 0)
-            l.setSpacing(0)
-
-            #sc = MyStaticMplCanvas(self.main_widget, width=5, height=5, dpi=None)
-
-            if options.mode == 'ag':
-                plot = AgPlot(self.main_widget, logger=logger)
-                #aplot=AOPlot1(self.main_widget, logger=logger)
-            elif options.mode == 'fmos':
-                plot=FmosPlot(self.main_widget, logger=logger)
-            elif options.mode == 'nsopt' or options.mode == 'hsc':
-                plot = TwoGuidingPlot(self.main_widget, logger=logger)
-            elif options.mode == 'nsir':
-                plot = NsIrPlot(self.main_widget, logger=logger)
-            elif options.mode == 'pfs':
-                plot = PfsAgPlot(self.main_widget, logger=logger)
-            else:
-                logger.error('error: mode=%s' %options.mode)
-                sys.exit(1)
-            #l.addWidget(sc)
-            #zoomin = QtWidgets.QPushButton(QtGui.QIcon.fromTheme('zoom-in'), 'Zoom In')
-            l.addWidget(plot)
-            ##l.addWidget(aplot)
-            ##l.addWidget(zoomin)
-            timer = QtCore.QTimer(self)
-            timer.timeout.connect(plot.tick)
-            timer.start(options.interval)
-
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget)
-
-            self.statusBar().showMessage("%s starting..." %options.mode, 5000)
-            #print options
-
-        def closeEvent(self, ce):
-            self.close()
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        aw = AppWindow()
-        aw.setWindowTitle("%s" % progname)
-        aw.show()
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as e:
-        logger.warn('keyboard interruption....')
-        sys.exit(0)
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-    from argparse import ArgumentParser
-
-    argprs = ArgumentParser(description="Plot status")
-
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    argprs.add_argument("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    argprs.add_argument("--interval", dest="interval", type=int,
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.
-    argprs.add_argument("--mode", dest="mode",
-                      default='ag',
-                      help="Specify a plotting mode [ag | nsopt | nsir | fmos | pfs]")
-
-    ssdlog.addlogopts(argprs)
-
-    (options, args) = argprs.parse_known_args(sys.argv[1:])
-
-    if len(args) != 0:
-        argprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)

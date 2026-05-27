@@ -1,20 +1,15 @@
-#!/usr/bin/env python
-
-import sys
-import os
-
-from CustomLabel import Label, QtCore, QtWidgets, ERROR
-from g2base import ssdlog
+#
+# T. Inagaki
+#
+from CustomLabel import Label, ERROR
 from g2cam.status.common import STATNONE, STATERROR
-
-progname = os.path.basename(sys.argv[0])
 
 
 class TipChop(Label):
     ''' telescope 2nd mirror   '''
     def __init__(self, parent=None, logger=None):
-        super(TipChop, self).__init__(parent=parent, fs=16, width=125, \
-                                      height=35, logger=logger )
+        super().__init__(parent=parent, fs=16, width=125,
+                         height=35, logger=logger)
 
     def update_tipchop(self, mode, drive, data, state, focus=None, focus2=None):
         '''
@@ -31,8 +26,8 @@ class TipChop(Label):
 
         color = self.normal
 
-        if mode in ERROR or drive in ERROR or \
-             data in ERROR or state in ERROR:
+        if (mode in ERROR or drive in ERROR or
+            data in ERROR or state in ERROR):
             text = ''
         elif not drive&0x01 and drive&0x02: # not drive on
             text = ''
@@ -51,139 +46,5 @@ class TipChop(Label):
             text = 'Tip/Chop Undefined'
             color = self.alarm
 
-        self.setText(text)
-        self.setStyleSheet("QLabel {color :%s ; background-color:%s }" \
-                           %(color, self.bg))
-
-    def tick(self):
-        ''' testing solo mode '''
-        import random
-        random.seed()
-
-        findx = random.randrange(0, 11)
-        f2indx = random.randrange(0, 6)
-
-        mindx = random.randrange(0, 4)
-        dindx = random.randrange(0, 2)
-        daindx = random.randrange(0, 2)
-        sindx = random.randrange(0,3)
-
-        print(findx, f2indx, mindx, dindx, daindx, sindx)
-
-        mode = [0x04, 0x02, 0x01, None]
-        drive = [0x02, 0x01]
-        data = [0x02, 0x01]
-        state = [0x02, 0x05, 0x00]
-
-        foci = [0x00001000, 0x00002000, 0x00004000, STATNONE,
-                0x00008000, 0x00000001, 0x00000002, 0x00000004,
-                0x00000008, 0x00000010, 0x00000000]
-
-        foci2 = [0x01, 0x02, 0x04, "Unknown", 0x01, 0x01]
-        try:
-            mode=mode[mindx]
-            drive=drive[dindx]
-            data=data[daindx]
-            state=state[sindx]
-            focus=foci[findx]
-            focus2=foci2[f2indx]
-        except Exception as e:
-            focus= 0x00000000
-            focus2=0x01
-            mode=0x01
-            drive=0x01
-            data=0x02
-            state=0x02
-            print(e)
-        self.update_tipchop(mode, drive, data, state, focus, focus2)
-
-
-def main(options, args):
-
-    # Create top level logger.
-    logger = ssdlog.make_logger('tipchop', options)
-
-    class AppWindow(QtWidgets.QMainWindow):
-        def __init__(self):
-            super(AppWindow, self).__init__()
-            self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            self.w = 125; self.h = 35;
-            self.init_ui()
-
-        def init_ui(self):
-            self.resize(self.w, self.h)
-
-            self.main_widget = QtWidgets.QWidget()
-            l = QtWidgets.QVBoxLayout(self.main_widget)
-            l.setContentsMargins(0, 0, 0, 0)
-            l.setSpacing(0)
-            tc = TipChop(parent=self.main_widget, logger=logger)
-            l.addWidget(tc)
-
-            timer = QtCore.QTimer(self)
-            timer.timeout.connect(tc.tick)
-            timer.start(options.interval)
-
-            self.main_widget.setFocus()
-            self.setCentralWidget(self.main_widget)
-            self.statusBar().showMessage("TipChop starting...", options.interval)
-
-        def closeEvent(self, ce):
-            self.close()
-
-    try:
-        qApp = QtWidgets.QApplication(sys.argv)
-        aw = AppWindow()
-        aw.setWindowTitle("%s" % progname)
-        aw.show()
-        sys.exit(qApp.exec_())
-
-    except KeyboardInterrupt as e:
-        logger.warn('keyboard interruption....')
-        sys.exit(0)
-
-
-
-if __name__ == '__main__':
-    # Create the base frame for the widgets
-    from argparse import ArgumentParser
-
-    argprs = ArgumentParser(description="EL status")
-
-    argprs.add_argument("--debug", dest="debug", default=False, action="store_true",
-                      help="Enter the pdb debugger on main()")
-    argprs.add_argument("--display", dest="display", metavar="HOST:N",
-                      help="Use X display on HOST:N")
-    argprs.add_argument("--profile", dest="profile", action="store_true",
-                      default=False,
-                      help="Run the profiler on main()")
-    argprs.add_argument("--interval", dest="interval", type=int,
-                      default=1000,
-                      help="Inverval for plotting(milli sec).")
-    # note: there are sv/pir plotting, but mode ag uses the same code.
-
-    ssdlog.addlogopts(argprs)
-
-    (options, args) = argprs.parse_known_args(sys.argv[1:])
-
-    if len(args) != 0:
-        argprs.error("incorrect number of arguments")
-
-    if options.display:
-        os.environ['DISPLAY'] = options.display
-
-    # Are we debugging this?
-    if options.debug:
-        import pdb
-
-        pdb.run('main(options, args)')
-
-    # Are we profiling this?
-    elif options.profile:
-        import profile
-
-        print("%s profile:" % sys.argv[0])
-        profile.run('main(options, args)')
-
-    else:
-        main(options, args)
+        self.set_text(text)
+        self.set_color(fg=color, bg=self.bg)

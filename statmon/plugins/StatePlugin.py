@@ -1,7 +1,6 @@
-from ginga.gw import Widgets
-
-from qtpy import QtWidgets, QtCore
-
+#
+# T. Inagaki
+#
 import PlBase
 import State
 
@@ -57,7 +56,7 @@ class StatePlugin(PlBase.Plugin):
                                  logger=self.logger)
 
         self.root.remove_all(delete=True)
-        self.root.add_widget(Widgets.wrap(self.state), stretch=1)
+        self.root.add_widget(self.state, stretch=1)
 
     def build_gui(self, container):
         self.root = container

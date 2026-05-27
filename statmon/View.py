@@ -1,5 +1,5 @@
 #
-# Viewer.py -- Qt display handler for StatMon.
+# Viewer.py -- display handler for StatMon.
 #
 # E. Jeschke
 #
@@ -10,7 +10,6 @@ import traceback
 
 # GUI imports
 from ginga.gw import Widgets, Desktop, GwMain
-from qtpy import QtWidgets, QtCore, QtGui
 from ginga.misc import Bunch
 
 moduleHome = os.path.split(sys.modules[__name__].__file__)[0]
@@ -24,17 +23,15 @@ class ViewError(Exception):
 
 class Viewer(GwMain.GwMain, Widgets.Application):
 
-    def __init__(self, logger, ev_quit):
-        # Create the top level Qt app
-        Widgets.Application.__init__(self, logger=logger)
+    def __init__(self, logger, settings, ev_quit, ws_sock=None):
+        # Create the top level app
+        Widgets.Application.__init__(self, logger=logger, settings=settings,
+                                     ws_sock=ws_sock)
         GwMain.GwMain.__init__(self, logger=logger, ev_quit=ev_quit, app=self)
 
-        # QtWidgets.QApplication.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
-        # QtWidgets.QApplication.setPalette(QtWidgets.QApplication.style().standardPalette())
-
         # read in any module-level style sheet
-        if os.path.exists(rc_file):
-            self.app.setStyleSheet(rc_file)
+        # if os.path.exists(rc_file):
+        #     self.app.setStyleSheet(rc_file)
 
         # defaults for height and width
         self.default_height = min(900, self.screen_ht - 100)
@@ -45,10 +42,8 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         self.iconpath = icon_path
 
         # Default fonts for our all
-        self.font = Bunch.Bunch(mono12=QtGui.QFont('Monospace', 12),
-                                mono11=QtGui.QFont('Monospace', 11))
-
-        QtWidgets.QToolTip.setFont(self.font.mono11)
+        self.font = Bunch.Bunch(mono12='Monospace 12',
+                                mono11='Monospace 11')
 
         # For now...
         self.controller = self
@@ -67,7 +62,8 @@ class Viewer(GwMain.GwMain, Widgets.Application):
 
         root = self.ds.toplevels[0]
         self.w.root = root
-        # TEMP: temporarily needed until "all-closed" callback from Desktop is working
+        # TEMP: temporarily needed until "all-closed" callback from
+        # Desktop is working
         #root.add_callback('close', self.quit)
         root.add_callback('close', self.close_cb)
 
@@ -223,7 +219,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         be an X-style geometry string; e.g. 1000x900+100+200
         """
         # Painful translation of X window geometry specification
-        # into correct calls to Qt
+        # into correct calls
         coords = geometry.replace('+', ' +')
         coords = coords.replace('-', ' -')
         coords = coords.split()

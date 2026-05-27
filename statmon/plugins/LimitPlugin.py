@@ -1,5 +1,6 @@
-from ginga.gw import Widgets
-
+#
+# T. Inagaki
+#
 import PlBase
 import Limit
 
@@ -19,7 +20,7 @@ class AzLimitPlugin(PlBase.Plugin):
         limit = [-270.0, 270.0]
         self.limit = Limit.Limit(title=title, alarm=alarm, warn=warn,
                                  limit=limit, logger=self.logger)
-        self.root.add_widget(Widgets.wrap(self.limit), stretch=1)
+        self.root.add_widget(self.limit, stretch=1)
 
     def start(self):
         self.controller.register_select('azlimit', self.update, AzLimitPlugin.aliases)
@@ -48,7 +49,7 @@ class ElLimitPlugin(PlBase.Plugin):
         limit = [10.0, 90.0]
 
         self.limit = Limit.Limit(title=title, alarm=alarm, warn=warn, limit=limit, marker=marker, marker_txt=marker_txt, logger=self.logger)
-        self.root.add_widget(Widgets.wrap(self.limit), stretch=1)
+        self.root.add_widget(self.limit, stretch=1)
 
     def start(self):
         self.controller.register_select('ellimit', self.update, ElLimitPlugin.aliases)
@@ -118,7 +119,7 @@ class RotLimitPlugin(PlBase.Plugin):
                                      logger=self.logger)
 
         self.root.remove_all(delete=True)
-        self.root.add_widget(Widgets.wrap(self.limit_rot), stretch=1)
+        self.root.add_widget(self.limit_rot, stretch=1)
 
     def change_config(self, controller, d):
 
@@ -173,7 +174,7 @@ class ProbeLimitPlugin(PlBase.Plugin):
                                        limit=self.limit, width=width,
                                        logger=self.logger)
         self.root.remove_all(delete=True)
-        self.root.add_widget(Widgets.wrap(self.limit_probe), stretch=1)
+        self.root.add_widget(self.limit_probe, stretch=1)
 
     def change_config(self, controller, d):
 

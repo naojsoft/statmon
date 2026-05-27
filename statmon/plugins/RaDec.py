@@ -11,11 +11,8 @@ from dateutil import tz
 import g2base.astro.radec as radec
 import g2base.astro.wcs as wcs
 
-from ginga.qtw import Widgets
-from ginga.qtw import QtHelp
+from ginga.gw import Widgets, GwHelp
 from ginga.misc import Bunch
-
-from qtpy import QtWidgets, QtCore, QtGui
 
 import PlBase
 
@@ -44,17 +41,16 @@ al_ut1utc = 'FITS.SBR.UT1_UTC'
 class RaDec(PlBase.Plugin):
 
     def _build_cluster(self):
-        vbox = QtHelp.VBox()
-        layout = vbox.layout()
-        lt = QtWidgets.QLabel()
-        lt.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        layout.addWidget(lt, stretch=0, alignment=QtCore.Qt.AlignTop)
-        lm = QtWidgets.QLabel()
-        lm.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        layout.addWidget(lm, stretch=0, alignment=QtCore.Qt.AlignTop)
-        lb = QtWidgets.QLabel()
-        lb.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        layout.addWidget(lb, stretch=0, alignment=QtCore.Qt.AlignTop)
+        vbox = Widgets.VBox()
+        lt = Widgets.Label()
+        lt.set_halign('center')
+        vbox.add_widget(lt, stretch=0)
+        lm = Widgets.Label()
+        lm.set_halign('center')
+        vbox.add_widget(lm, stretch=0)
+        lb = Widgets.Label()
+        lb.set_halign('center')
+        vbox.add_widget(lb, stretch=0)
 
         return Bunch.Bunch(box=vbox, lt=lt, lm=lm, lb=lb)
 
@@ -62,7 +58,7 @@ class RaDec(PlBase.Plugin):
         self.root = container
         self.root.set_margins(0, 0, 0, 0)
         self.root.set_spacing(0)
-        self.root.get_widget().setStyleSheet("QWidget { background: lightblue }")
+        #self.root.get_widget().setStyleSheet("QWidget { background: lightblue }")
 
         self.labels = (('ra', al_ra, al_ra_cmd), ('dec', al_dec, al_dec_cmd),
                        ('az', al_az, al_az_cmd), ('el', al_el, al_el_cmd),
@@ -71,47 +67,47 @@ class RaDec(PlBase.Plugin):
         hbox = Widgets.HBox()
         hbox.set_margins(4, 4, 4, 4)
         hbox.set_spacing(2)
+        hbox.set_expanding(True, False)
         self.root.add_widget(hbox, stretch=0)
 
-        #self.bigfont = QtWidgets.QFont("Arial Black", 28)
-        #fontfamily = "DejaVu Sans Mono"
-        fontfamily = "Monospace"
-        self.biggerfont = QtGui.QFont(fontfamily, 36, QtGui.QFont.Bold)
-        self.bigfont = QtGui.QFont(fontfamily, 28, QtGui.QFont.Bold)
-        self.midfont = QtGui.QFont(fontfamily, 18, QtGui.QFont.Bold)
-        self.smfont = QtGui.QFont(fontfamily, 12, QtGui.QFont.Bold)
+        #fontfamily = "DejaVu Sans Mono Bold"
+        fontfamily = "Monospace Bold"
+        self.biggerfont = (fontfamily, 36)
+        self.bigfont = (fontfamily, 28)
+        self.midfont = (fontfamily, 18)
+        self.smfont = (fontfamily, 12)
 
         self.w = Bunch.Bunch()
 
         bnch = self._build_cluster()
-        bnch.lm.setFont(self.smfont)
-        bnch.lm.setText("Current")
-        bnch.lb.setFont(self.smfont)
-        bnch.lb.setText("Commanded")
-        bnch.lt.setFont(self.smfont)
-        hbox.add_widget(Widgets.wrap(bnch.box), stretch=0)
+        bnch.lm.set_font(*self.smfont)
+        bnch.lm.set_text("Current")
+        bnch.lb.set_font(*self.smfont)
+        bnch.lb.set_text("Commanded")
+        bnch.lt.set_font(*self.smfont)
+        hbox.add_widget(bnch.box, stretch=0)
         self.w['rowhdr'] = bnch
 
         for name, alias1, alias2 in self.labels:
             bnch = self._build_cluster()
-            bnch.lm.setFont(self.bigfont)
+            bnch.lm.set_font(*self.bigfont)
             if name == 'airmass':
-                bnch.lm.setFont(self.biggerfont)
-                bnch.lm.setText(name)
+                bnch.lm.set_font(*self.biggerfont)
+                bnch.lm.set_text(name)
             else:
-                bnch.lm.setText(name)
-                bnch.lb.setFont(self.midfont)
-            bnch.lt.setFont(self.smfont)
-            hbox.add_widget(Widgets.wrap(bnch.box), stretch=0)
-            hbox.get_widget().layout().addStretch(stretch=1)
+                bnch.lm.set_text(name)
+                bnch.lb.set_font(*self.midfont)
+            bnch.lt.set_font(*self.smfont)
+            hbox.add_widget(bnch.box, stretch=0)
+            #hbox.get_widget().layout().addStretch(stretch=1)
             self.w[name] = bnch
 
-        self.w.ra.lt.setText("RA (2000.0)")
-        self.w.dec.lt.setText("DEC (2000.0)")
-        self.w.az.lt.setText("Az (deg:S=0,W=90)")
-        self.w.el.lt.setText("El (deg)")
-        self.w.rot.lt.setText("Rot (deg)")
-        self.w.airmass.lt.setText('AirMass')
+        self.w.ra.lt.set_text("RA (2000.0)")
+        self.w.dec.lt.set_text("DEC (2000.0)")
+        self.w.az.lt.set_text("Az (deg:S=0,W=90)")
+        self.w.el.lt.set_text("El (deg)")
+        self.w.rot.lt.set_text("Rot (deg)")
+        self.w.airmass.lt.set_text('AirMass')
 
     def start(self):
         aliases = []
@@ -120,10 +116,10 @@ class RaDec(PlBase.Plugin):
         self.controller.register_select('radec', self.update, aliases)
 
     def update(self, statusDict):
-        self.w.ra.lm.setText(statusDict[al_ra])
-        self.w.dec.lm.setText(statusDict[al_dec])
-        self.w.ra.lb.setText(statusDict[al_ra_cmd])
-        self.w.dec.lb.setText(statusDict[al_dec_cmd])
+        self.w.ra.lm.set_text(statusDict[al_ra])
+        self.w.dec.lm.set_text(statusDict[al_dec])
+        self.w.ra.lb.set_text(statusDict[al_ra_cmd])
+        self.w.dec.lb.set_text(statusDict[al_dec_cmd])
 
         # Airmass calculation
         try:
@@ -140,7 +136,7 @@ class RaDec(PlBase.Plugin):
             am = sz - 0.0018167 * sz1 - 0.002875 * sz1**2 - 0.0008083 * sz1**3
             airmass_str = '{0:.3f}'.format(am)
         finally:
-            self.w.airmass.lm.setText(airmass_str)
+            self.w.airmass.lm.set_text(airmass_str)
 
         # Azimuth, actual
         try:
@@ -150,7 +146,7 @@ class RaDec(PlBase.Plugin):
         except Exception as e:
             self.logger.error("Error displaying azimuth: %s" % (str(e)))
             az_str = "ERROR"
-        self.w.az.lm.setText(az_str)
+        self.w.az.lm.set_text(az_str)
 
         # Azimuth, commanded
         try:
@@ -160,7 +156,7 @@ class RaDec(PlBase.Plugin):
         except Exception as e:
             self.logger.error("Error displaying azimuth: %s" % (str(e)))
             az_str = "ERROR"
-        self.w.az.lb.setText(az_str)
+        self.w.az.lb.set_text(az_str)
 
         # Elevation, actual
         try:
@@ -168,7 +164,7 @@ class RaDec(PlBase.Plugin):
         except Exception as e:
             self.logger.error("Error displaying elevation: %s" % (str(e)))
             el_str = "ERROR"
-        self.w.el.lm.setText(el_str)
+        self.w.el.lm.set_text(el_str)
 
         # Elevation, commanded
         try:
@@ -176,7 +172,7 @@ class RaDec(PlBase.Plugin):
         except Exception as e:
             self.logger.error("Error displaying elevation: %s" % (str(e)))
             el_str = "ERROR"
-        self.w.el.lb.setText(el_str)
+        self.w.el.lb.set_text(el_str)
 
         # Rotator, actual
         try:
@@ -184,7 +180,7 @@ class RaDec(PlBase.Plugin):
         except Exception as e:
             self.logger.error("Error displaying rotation: %s" % (str(e)))
             rot_str = "ERROR"
-        self.w.rot.lm.setText(rot_str)
+        self.w.rot.lm.set_text(rot_str)
 
         # Rotator, commanded
         try:
@@ -192,7 +188,7 @@ class RaDec(PlBase.Plugin):
         except Exception as e:
             self.logger.error("Error displaying rotation: %s" % (str(e)))
             rot_str = "ERROR"
-        self.w.rot.lb.setText(rot_str)
+        self.w.rot.lb.set_text(rot_str)
 
 
     def __str__(self):
@@ -205,7 +201,7 @@ class Times(PlBase.Plugin):
         self.root = container
         self.root.set_margins(0, 0, 0, 0)
         self.root.set_spacing(0)
-        self.root.get_widget().setStyleSheet("QWidget { background: lightblue }")
+        #self.root.get_widget().setStyleSheet("QWidget { background: lightblue }")
 
         self.labels = [ 'ut', 'hst', 'lst', 'ha' ]
         self.hst_tz = tz.gettz('US/Hawaii')
@@ -213,21 +209,22 @@ class Times(PlBase.Plugin):
         hbox = Widgets.HBox()
         hbox.set_margins(4, 4, 4, 4)
         hbox.set_spacing(2)
+        hbox.set_expanding(True, False)
         self.root.add_widget(hbox, stretch=0)
 
         fontfamily = "Monospace"
-        self.bigfont = QtGui.QFont(fontfamily, 24)
+        self.bigfont = (fontfamily, 24)
 
         self.w = Bunch.Bunch()
 
-        layout = hbox.get_widget().layout()
-        layout.addStretch(stretch=1)
+        # layout = hbox.get_widget().layout()
+        # layout.addStretch(stretch=1)
         for name in self.labels:
-            w = QtWidgets.QLabel()
-            w.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-            w.setFont(self.bigfont)
-            layout.addWidget(w, stretch=0, alignment=QtCore.Qt.AlignCenter)
-            layout.addStretch(stretch=1)
+            w = Widgets.Label()
+            w.set_halign('center')
+            w.set_font(*self.bigfont)
+            hbox.add_widget(w, stretch=0)
+            #layout.addStretch(stretch=1)
             self.w[name] = w
 
     def start(self):
@@ -263,10 +260,10 @@ class Times(PlBase.Plugin):
             # TODO
             ha = '%s%02dh:%02dm' % (c, ha_hrs, ha_min)
 
-            self.w.ut.setText("UT: %s" % ut)
-            self.w.hst.setText("HST: %s" % hst)
-            self.w.lst.setText("LST: %s" % lst)
-            self.w.ha.setText("HA: %s" % ha)
+            self.w.ut.set_text("UT: %s" % ut)
+            self.w.hst.set_text("HST: %s" % hst)
+            self.w.lst.set_text("LST: %s" % lst)
+            self.w.ha.set_text("HA: %s" % ha)
 
         except Exception as e:
             self.logger.error("Error updating times: {}".format(str(e)))
