@@ -4,8 +4,6 @@
 import math
 import numpy as np
 
-from ginga.gw.Plot import PlotWidget
-
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
 from matplotlib.lines import Line2D
@@ -13,18 +11,21 @@ import matplotlib.patches as mpatches
 
 from error import ERROR
 from g2cam.status.common import STATNONE, STATERROR
+
 import PlBase
+from CustomPlot import PlotWidget
 
 
 class TopscreenCanvas(PlotWidget):
     """ Topscreen """
     def __init__(self, parent=None, width=1, height=1,  logger=None):
-        super().__init__(None, width=width, height=height)
 
         sub = SubplotParams(left=0, bottom=0, right=1,
                             top=1, wspace=0, hspace=0)
         self.fig = Figure(figsize=(width, height), facecolor='white',
                           subplotpars=sub)
+        super().__init__(self.fig)
+
         self.axes = self.fig.add_subplot(111)
 
         # y axis values. these are fixed values.
@@ -104,7 +105,7 @@ class TopscreenCanvas(PlotWidget):
 
         #self.axes.set_xscale(10)
         self.axes.axison = False
-        self.draw()
+        #self.draw()
 
 
 class Topscreen(TopscreenCanvas):

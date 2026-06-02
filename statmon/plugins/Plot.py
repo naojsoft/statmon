@@ -484,8 +484,8 @@ class Buttons(Widgets.HBox):
         self.plot = plot
         self.logger = logger
 
-    @property
-    def ao_layout(self):
+    def do_ao_layout(self):
+        print("AO BUTTONS LAYOUT")
         spacer = Widgets.Label('')
         spacer.set_expanding(True, True)
         #refresh = Widgets.Button(QtGui.QIcon.fromTheme('view-refresh'), 'Clear')
@@ -496,8 +496,8 @@ class Buttons(Widgets.HBox):
 
         return self
 
-    @property
-    def layout(self):
+    def do_reg_layout(self):
+        print("REGULAR BUTTONS LAYOUT")
         #zoomin = Widgets.Button(QtGui.QIcon.fromTheme('zoom-in'), 'Zoom In')
         zoomin = Widgets.Button('Zoom In')
         zoomin.add_callback('activated', self.plot.zoomin)

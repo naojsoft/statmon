@@ -133,7 +133,7 @@ class PlotPlugin(PlBase.Plugin):
             self.plot = Plot.PfsAgPlot(logger=self.logger)
 
         self.root.remove_all(delete=True)
-        self.root.add_widget(Widgets.wrap(self.plot), stretch=1)
+        self.root.add_widget(self.plot, stretch=1)
 
     def build_gui(self, container):
         self.root = container

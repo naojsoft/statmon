@@ -34,8 +34,10 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         #     self.app.setStyleSheet(rc_file)
 
         # defaults for height and width
-        self.default_height = min(900, self.screen_ht - 100)
-        self.default_width  = min(1600, self.screen_wd)
+        # self.default_height = min(900, self.screen_ht - 100)
+        # self.default_width  = min(1600, self.screen_wd)
+        self.default_height = 900
+        self.default_width  = 1600
 
         # This is where all the widgets get stored
         self.w = Bunch.Bunch()

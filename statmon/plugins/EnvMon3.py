@@ -225,7 +225,9 @@ def make_plot(alias_d, logger, dims, names, aliases, num_pts,
     viewer.set_background('white')
     viewer.set_foreground('black')
     viewer.set_enter_focus(True)
-    viewer.get_widget().resize(win_wd, win_ht)
+    # w = viewer.get_widget()
+    # if w is not None:
+    #     w.resize(win_wd, win_ht)
 
     # our plot
     aide = PlotAide(viewer)
@@ -262,6 +264,7 @@ def make_plot(alias_d, logger, dims, names, aliases, num_pts,
     # add scrollbar interface around this viewer
     sw = Viewers.GingaScrolledViewerWidget(viewer=viewer, width=win_wd,
                                            height=win_ht)
+    sw.resize(win_wd, win_ht)
     aide.configure_scrollbars(sw)
 
     res = Bunch.Bunch(viewer=viewer, aide=aide, sources=srcs, aliases=aliases,

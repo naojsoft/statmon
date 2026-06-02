@@ -187,7 +187,7 @@ class GuidingImage(PlBase.Plugin):
         # self.update_plots()
 
     def start(self):
-        aliases = al_guiding
+        aliases = ['FITS.SBR.MAINOBCP'] + al_guiding
 
         home_dir = os.path.join(os.environ['HOME'], '.statmon')
         if not os.path.isdir(home_dir):
@@ -208,8 +208,8 @@ class GuidingImage(PlBase.Plugin):
         #     if alias not in self.cst:
         #         self.cst[alias] = np.zeros((0, 2), dtype=float)
 
-        obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
-        self.configure_plots(obcp)
+        self.obcp = 'SUKA'
+        self.configure_plots(self.obcp)
 
         self.controller.register_select(str(self), self.update, aliases)
         self.controller.add_callback('change-config', self.change_config)
@@ -224,6 +224,7 @@ class GuidingImage(PlBase.Plugin):
         """
         obcp = d.get('inst', None)
         self.configure_plots(obcp)
+        self.obcp = obcp
 
     def update(self, statusDict):
         #print(statusDict)

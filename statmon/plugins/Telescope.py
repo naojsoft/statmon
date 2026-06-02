@@ -239,7 +239,7 @@ class TelescopeGui:
         empty_shell = Dummy(height=35, logger=self.logger)
         r1layout.add_widget(empty_shell)
 
-        r2layout = QtWidgets.QVBoxLayout()
+        r2layout = Widgets.VBox()
         r2layout.set_spacing(1)
 
         empty_shell = Dummy(height=1, logger=self.logger)
@@ -264,7 +264,7 @@ class TelescopeGui:
         empty_shell = Dummy(height=95, logger=self.logger)
         r1layout.add_widget(empty_shell)
 
-        r2layout = QtWidgets.QVBoxLayout()
+        r2layout = Widgets.VBox()
         r2layout.set_spacing(1)
         empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.add_widget(empty_shell)
