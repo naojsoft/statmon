@@ -29,8 +29,8 @@ al_el = 'TSCS.EL'
 al_el_cmd = 'STATS.EL_CMD'
 al_rot = 'FITS.SBR.INSROT'
 al_rot_cmd = 'FITS.SBR.INSROT_CMD'
-al_airmass = 'TSCS.EL'
-al_airmass_cmd = 'TSCS.EL'
+al_airmass = 'FITS.SBR.AIRMASS'
+al_airmass_cmd = 'FITS.SBR.AIRMASS'
 
 # For "Times" plugin
 al_epoch = 'FITS.SBR.EPOCH'
@@ -40,38 +40,45 @@ al_ut1utc = 'FITS.SBR.UT1_UTC'
 
 class RaDec(PlBase.Plugin):
 
-    def _build_cluster(self):
-        vbox = Widgets.VBox()
+    def _build_cluster(self, gbox, col):
         lt = Widgets.Label()
         lt.set_halign('center')
-        vbox.add_widget(lt, stretch=0)
+        lt.set_valign('center')
+        gbox.add_widget(lt, 0, col)
         lm = Widgets.Label()
         lm.set_halign('center')
-        vbox.add_widget(lm, stretch=0)
+        lm.set_valign('center')
+        gbox.add_widget(lm, 1, col)
         lb = Widgets.Label()
         lb.set_halign('center')
-        vbox.add_widget(lb, stretch=0)
+        lb.set_valign('center')
+        gbox.add_widget(lb, 2, col)
 
-        return Bunch.Bunch(box=vbox, lt=lt, lm=lm, lb=lb)
+        return Bunch.Bunch(box=gbox, lt=lt, lm=lm, lb=lb)
 
     def build_gui(self, container):
         self.root = container
         self.root.set_margins(0, 0, 0, 0)
         self.root.set_spacing(0)
         #self.root.get_widget().setStyleSheet("QWidget { background: lightblue }")
+        self.root.set_bg("lightblue")
 
         self.labels = (('ra', al_ra, al_ra_cmd), ('dec', al_dec, al_dec_cmd),
                        ('az', al_az, al_az_cmd), ('el', al_el, al_el_cmd),
-                       ('rot', al_rot, al_rot_cmd), ('airmass', al_el, al_el))
+                       ('rot', al_rot, al_rot_cmd), ('airmass', al_airmass,
+                                                     al_airmass))
 
-        hbox = Widgets.HBox()
-        hbox.set_margins(4, 4, 4, 4)
-        hbox.set_spacing(2)
-        hbox.set_expanding(True, False)
-        self.root.add_widget(hbox, stretch=0)
+        gbox = Widgets.GridBox()
+        gbox.set_expanding(True, False)
+        self.root.add_widget(gbox, stretch=0)
 
-        #fontfamily = "DejaVu Sans Mono Bold"
-        fontfamily = "Monospace Bold"
+        # hbox = Widgets.HBox()
+        # hbox.set_margins(4, 4, 4, 4)
+        # hbox.set_spacing(2)
+        # hbox.set_expanding(True, False)
+        # self.root.add_widget(hbox, stretch=0)
+
+        fontfamily = "Monospace;normal;Bold"
         self.biggerfont = (fontfamily, 36)
         self.bigfont = (fontfamily, 28)
         self.midfont = (fontfamily, 18)
@@ -79,17 +86,17 @@ class RaDec(PlBase.Plugin):
 
         self.w = Bunch.Bunch()
 
-        bnch = self._build_cluster()
+        bnch = self._build_cluster(gbox, 0)
         bnch.lm.set_font(*self.smfont)
         bnch.lm.set_text("Current")
         bnch.lb.set_font(*self.smfont)
         bnch.lb.set_text("Commanded")
         bnch.lt.set_font(*self.smfont)
-        hbox.add_widget(bnch.box, stretch=0)
         self.w['rowhdr'] = bnch
 
+        col = 1
         for name, alias1, alias2 in self.labels:
-            bnch = self._build_cluster()
+            bnch = self._build_cluster(gbox, col)
             bnch.lm.set_font(*self.bigfont)
             if name == 'airmass':
                 bnch.lm.set_font(*self.biggerfont)
@@ -98,9 +105,8 @@ class RaDec(PlBase.Plugin):
                 bnch.lm.set_text(name)
                 bnch.lb.set_font(*self.midfont)
             bnch.lt.set_font(*self.smfont)
-            hbox.add_widget(bnch.box, stretch=0)
-            #hbox.get_widget().layout().addStretch(stretch=1)
             self.w[name] = bnch
+            col += 1
 
         self.w.ra.lt.set_text("RA (2000.0)")
         self.w.dec.lt.set_text("DEC (2000.0)")
@@ -110,10 +116,11 @@ class RaDec(PlBase.Plugin):
         self.w.airmass.lt.set_text('AirMass')
 
     def start(self):
-        aliases = []
+        aliases = set([])
         for name, alias1, alias2 in self.labels:
-            aliases.extend([alias1, alias2])
-        self.controller.register_select('radec', self.update, aliases)
+            aliases.add(alias1)
+            aliases.add(alias2)
+        self.controller.register_select('radec', self.update, list(aliases))
 
     def update(self, statusDict):
         self.w.ra.lm.set_text(statusDict[al_ra])
@@ -123,18 +130,11 @@ class RaDec(PlBase.Plugin):
 
         # Airmass calculation
         try:
-            el = float(statusDict[al_el])
-            assert 1.0 <= el <=179.0
-        except Exception as e:
-            self.logger.error("Error displaying airmass: %s" % (str(e)))
-            airmass_str = "ERROR"
-        else:
-            zd = 90.0 - el
-            rad = math.radians(zd)
-            sz = 1.0 / math.cos(rad)
-            sz1 = sz - 1.0
-            am = sz - 0.0018167 * sz1 - 0.002875 * sz1**2 - 0.0008083 * sz1**3
-            airmass_str = '{0:.3f}'.format(am)
+            am = statusDict[al_airmass]
+            if isinstance(am, float):
+                airmass_str = '{0:.3f}'.format(am)
+            else:
+                airmass_str = str(am)
         finally:
             self.w.airmass.lm.set_text(airmass_str)
 
@@ -202,6 +202,7 @@ class Times(PlBase.Plugin):
         self.root.set_margins(0, 0, 0, 0)
         self.root.set_spacing(0)
         #self.root.get_widget().setStyleSheet("QWidget { background: lightblue }")
+        self.root.set_bg("lightblue")
 
         self.labels = [ 'ut', 'hst', 'lst', 'ha' ]
         self.hst_tz = tz.gettz('US/Hawaii')
@@ -212,19 +213,19 @@ class Times(PlBase.Plugin):
         hbox.set_expanding(True, False)
         self.root.add_widget(hbox, stretch=0)
 
-        fontfamily = "Monospace"
+        fontfamily = "Monospace;normal;Bold"
         self.bigfont = (fontfamily, 24)
 
         self.w = Bunch.Bunch()
 
-        # layout = hbox.get_widget().layout()
-        # layout.addStretch(stretch=1)
+        hbox.add_widget(Widgets.Label(''), stretch=1)
         for name in self.labels:
             w = Widgets.Label()
             w.set_halign('center')
+            w.set_valign('center')
             w.set_font(*self.bigfont)
             hbox.add_widget(w, stretch=0)
-            #layout.addStretch(stretch=1)
+            hbox.add_widget(Widgets.Label(''), stretch=1)
             self.w[name] = w
 
     def start(self):

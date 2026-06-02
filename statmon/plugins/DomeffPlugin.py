@@ -36,7 +36,7 @@ class DomeffPlugin(PlBase.Plugin):
 
     def build_gui(self, container):
 
-        self.font = GwHelp.get_font("Sans Bold", 11)
+        self.font = GwHelp.get_font("Sans;normal;Bold", 11)
         self.w = Bunch.Bunch()
 
         gbox = Widgets.GridBox(rows=3, columns=6)
@@ -44,11 +44,11 @@ class DomeffPlugin(PlBase.Plugin):
         gbox.set_row_spacing(4)
         gbox.add_widget(self._get_label("DomeFF:"), 0, 0)
         self.w.lamp_600w = self._get_label("600W", halign='center')
-        self.w.lamp_600w.set_font(font[0], size=font[1])
+        self.w.lamp_600w.set_font(self.font)
         gbox.add_widget(self.w.lamp_600w, 0, 1)
         self.set_lamp(self.w.lamp_600w, clr_status['off'], 1.0)
         self.w.lamp_10w = self._get_label("10W", halign='center')
-        self.w.lamp_10w.set_font(font[0], size=font[1])
+        self.w.lamp_10w.set_font(self.font)
         gbox.add_widget(self.w.lamp_10w, 0, 3)
         self.set_lamp(self.w.lamp_10w, clr_status['off'], 1.0)
 

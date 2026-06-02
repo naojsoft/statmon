@@ -136,6 +136,7 @@ class MainWindow:
         GUI.  Call once, after construction."""
         container.set_margins(4, 4, 4, 4)
         container.set_spacing(4)
+        container.set_expanding(True, True)
 
         # Connection-status / heartbeat label at the top.
         self.time_label = Widgets.Label('No time signal!')

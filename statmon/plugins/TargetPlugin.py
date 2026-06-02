@@ -55,7 +55,7 @@ class TargetPlugin(PlBase.Plugin):
 
     def build_gui(self, container):
 
-        self.font = GwHelp.get_font("Sans Bold", 11)
+        self.font = GwHelp.get_font("Sans;normal;Bold", 11)
 
         self.w = Bunch.Bunch()
         self.inscode = 'SUK'

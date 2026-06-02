@@ -20,7 +20,7 @@ class CalprobePlugin(PlBase.Plugin):
     """ Cal Source Probe Plugin """
 
     def build_gui(self, container):
-        self.font = GwHelp.get_font("Sans Bold", 11)
+        self.font = GwHelp.get_font("Sans;normal;Bold", 11)
         self.w = Bunch.Bunch()
 
         gbox = Widgets.GridBox(rows=1, columns=4)
