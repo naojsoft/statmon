@@ -40,19 +40,20 @@ al_ut1utc = 'FITS.SBR.UT1_UTC'
 
 class RaDec(PlBase.Plugin):
 
-    def _build_cluster(self, gbox, col):
+    def _build_cluster(self):
+        gbox = Widgets.GridBox()
         lt = Widgets.Label()
         lt.set_halign('center')
         lt.set_valign('center')
-        gbox.add_widget(lt, 0, col)
+        gbox.add_widget(lt, 0, 0)
         lm = Widgets.Label()
         lm.set_halign('center')
         lm.set_valign('center')
-        gbox.add_widget(lm, 1, col)
+        gbox.add_widget(lm, 1, 0)
         lb = Widgets.Label()
         lb.set_halign('center')
         lb.set_valign('center')
-        gbox.add_widget(lb, 2, col)
+        gbox.add_widget(lb, 2, 0)
 
         return Bunch.Bunch(box=gbox, lt=lt, lm=lm, lb=lb)
 
@@ -60,7 +61,6 @@ class RaDec(PlBase.Plugin):
         self.root = container
         self.root.set_margins(0, 0, 0, 0)
         self.root.set_spacing(0)
-        #self.root.get_widget().setStyleSheet("QWidget { background: lightblue }")
         self.root.set_bg("lightblue")
 
         self.labels = (('ra', al_ra, al_ra_cmd), ('dec', al_dec, al_dec_cmd),
@@ -68,15 +68,11 @@ class RaDec(PlBase.Plugin):
                        ('rot', al_rot, al_rot_cmd), ('airmass', al_airmass,
                                                      al_airmass))
 
-        gbox = Widgets.GridBox()
-        gbox.set_expanding(True, False)
-        self.root.add_widget(gbox, stretch=0)
-
-        # hbox = Widgets.HBox()
-        # hbox.set_margins(4, 4, 4, 4)
-        # hbox.set_spacing(2)
-        # hbox.set_expanding(True, False)
-        # self.root.add_widget(hbox, stretch=0)
+        hbox = Widgets.HBox()
+        hbox.set_margins(4, 4, 4, 4)
+        hbox.set_spacing(2)
+        hbox.set_expanding(True, False)
+        self.root.add_widget(hbox, stretch=0)
 
         fontfamily = "Monospace;normal;Bold"
         self.biggerfont = (fontfamily, 36)
@@ -86,17 +82,20 @@ class RaDec(PlBase.Plugin):
 
         self.w = Bunch.Bunch()
 
-        bnch = self._build_cluster(gbox, 0)
+        #bnch = self._build_cluster(gbox, 0)
+        bnch = self._build_cluster()
         bnch.lm.set_font(*self.smfont)
         bnch.lm.set_text("Current")
         bnch.lb.set_font(*self.smfont)
         bnch.lb.set_text("Commanded")
         bnch.lt.set_font(*self.smfont)
         self.w['rowhdr'] = bnch
+        hbox.add_widget(bnch.box, stretch=0)
 
         col = 1
         for name, alias1, alias2 in self.labels:
-            bnch = self._build_cluster(gbox, col)
+            #bnch = self._build_cluster(gbox, col)
+            bnch = self._build_cluster()
             bnch.lm.set_font(*self.bigfont)
             if name == 'airmass':
                 bnch.lm.set_font(*self.biggerfont)
@@ -106,6 +105,8 @@ class RaDec(PlBase.Plugin):
                 bnch.lb.set_font(*self.midfont)
             bnch.lt.set_font(*self.smfont)
             self.w[name] = bnch
+            hbox.add_widget(Widgets.Label(''), stretch=1)
+            hbox.add_widget(bnch.box, stretch=0)
             col += 1
 
         self.w.ra.lt.set_text("RA (2000.0)")
@@ -201,7 +202,6 @@ class Times(PlBase.Plugin):
         self.root = container
         self.root.set_margins(0, 0, 0, 0)
         self.root.set_spacing(0)
-        #self.root.get_widget().setStyleSheet("QWidget { background: lightblue }")
         self.root.set_bg("lightblue")
 
         self.labels = [ 'ut', 'hst', 'lst', 'ha' ]

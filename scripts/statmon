@@ -245,9 +245,8 @@ def main(options, args):
 
     model = StatusModel(logger)
 
-    StatMon = create_statmon(options.toolkit)
-
     # Start up the control/display engine
+    StatMon = create_statmon(options.toolkit)
     statmon = StatMon(logger, threadPool, mm, prefs,
                       sndsink, ev_quit, model)
 

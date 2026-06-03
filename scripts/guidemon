@@ -15,8 +15,6 @@ import queue as Queue
 from argparse import ArgumentParser
 
 from ginga import toolkit
-toolkit.use('qt5')
-from ginga.gw import Widgets
 
 import statmon.version
 moduleHome = os.path.split(sys.modules['statmon.version'].__file__)[0]
@@ -32,8 +30,6 @@ from ginga.misc import ModuleManager, Settings, log
 
 # Local application imports
 from statmon.Model import StatusModel
-from statmon.View import Viewer
-from statmon.Control import Controller
 
 defaultServiceName = 'guidemon'
 version = "20220517.0"
@@ -71,34 +67,46 @@ plugins = [
     #('debug', 'Debug', 'Debug', 'right', "Debug"),
     ]
 
-class GuideMon(Controller, Viewer):
 
-    def __init__(self, logger, threadPool, module_manager, settings,
-                 ev_quit, model):
+def create_guidemon(t):
+    toolkit.use(t)
 
-        Viewer.__init__(self, logger, ev_quit)
-        Controller.__init__(self, logger, threadPool, module_manager,
-                            settings, ev_quit, model)
-        self.name = 'guidemon'
+    # now we can import widgets
+    from ginga.gw import Widgets
+    from statmon.View import Viewer
+    from statmon.Control import Controller
 
-    def add_menus(self):
-        menubar = Widgets.Menubar()
-        self.w.menubox.add_widget(menubar, stretch=0)
+    class GuideMon(Controller, Viewer):
 
-        # create a File pulldown menu, and add it to the menu bar
-        filemenu = menubar.add_name("File")
+        def __init__(self, logger, threadPool, module_manager, prefs,
+                     ev_quit, model):
 
-        filemenu.add_separator()
+            settings = prefs.create_category('general')
+            Viewer.__init__(self, logger, settings, ev_quit)
+            Controller.__init__(self, logger, threadPool, module_manager,
+                                prefs, ev_quit, model)
+            self.name = 'guidemon'
 
-        item = filemenu.add_name("Quit")
-        item.add_callback('activated', self.quit)
+        def add_menus(self):
+            menubar = Widgets.Menubar()
+            self.w.menubox.add_widget(menubar, stretch=0)
 
-        # create a Option pulldown menu, and add it to the menu bar
-        ## optionmenu = menubar.add_name("Option")
+            # create a File pulldown menu, and add it to the menu bar
+            filemenu = menubar.add_name("File")
 
-    def add_statusbar(self):
-        self.w.status = Widgets.StatusBar()
-        self.w.statusbox.add_widget(self.w.status, stretch=1)
+            filemenu.add_separator()
+
+            item = filemenu.add_name("Quit")
+            item.add_callback('activated', self.quit)
+
+            # create a Option pulldown menu, and add it to the menu bar
+            ## optionmenu = menubar.add_name("Option")
+
+        def add_statusbar(self):
+            self.w.status = Widgets.StatusBar()
+            self.w.statusbox.add_widget(self.w.status, stretch=1)
+
+    return GuideMon
 
 
 def main(options, args):
@@ -131,18 +139,34 @@ def main(options, args):
         os.mkdir(basedir)
     prefs = Settings.Preferences(basefolder=basedir, logger=logger)
 
+    # general settings control initialization of viewer
+    settings = prefs.create_category('general')
+    settings.set_defaults(appname="guidemon",
+                          title="GuideMon",
+                          widgetSet='choose',
+                          recursion_limit=2000,
+                          # this only takes effect if we are using
+                          # the pgwidgets backend
+                          http_server=True,
+                          token='none',
+                          min_threads=10,
+                          threadpool_analyze_interval_sec=None,
+                          pluginmgr_allow_nonsingletons=False,
+                          font_scaling_factor=None)
+    #settings.load(onError='silent')
+
     mm = ModuleManager.ModuleManager(logger)
 
     # Add any custom modules
     if options.modules:
         modules = options.modules.split(',')
         for mdlname in modules:
-            #self.mm.loadModule(name, pfx=pluginconfpfx)
             self.mm.loadModule(name)
 
     model = StatusModel(logger)
 
     # Start up the control/display engine
+    GuideMon = create_guidemon(options.toolkit)
     guidemon = GuideMon(logger, threadPool, mm, prefs, ev_quit, model)
 
     # Build desired layout
@@ -195,7 +219,17 @@ def main(options, args):
         task2.init_and_start(guidemon)
 
         try:
-            print('in mainloop')
+            # if there is a network component, start it
+            if hasattr(guidemon, 'start'):
+                logger.info("Starting guidemon web interface.")
+                guidemon.start()
+
+                if hasattr(guidemon, 'get_url'):
+                    base_url = guidemon.get_url()
+                    if base_url is not None:
+                        print(f"visit {base_url} to view the application")
+                        logger.info(f"visit {base_url} to view the application")
+
             # Main loop to handle GUI events
             guidemon.mainloop(timeout=0.001)
 
@@ -238,6 +272,9 @@ if __name__ == "__main__":
     argprs.add_argument("--svcname", dest="svcname", metavar="NAME",
                         default=defaultServiceName,
                         help="Register using NAME as service name")
+    argprs.add_argument("-t", "--toolkit", dest="toolkit", metavar="NAME",
+                        default='qt',
+                        help="Prefer GUI toolkit (gtk|qt|pg)")
     log.addlogopts(argprs)
 
     (options, args) = argprs.parse_known_args(sys.argv[1:])

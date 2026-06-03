@@ -31,14 +31,10 @@ from g2cam.status.stream import StatusStream
 import g2client.soundsink as SoundSink
 
 from ginga import toolkit
-toolkit.use('qt5')
-from ginga.gw import Widgets
 from ginga.misc import ModuleManager, Settings, log
 
 # Local application imports
 from statmon.Model import StatusModel
-from statmon.View import Viewer
-from statmon.Control import Controller
 
 defaultServiceName = 'statmon'
 version = "20211207.0"
@@ -129,40 +125,52 @@ plugins = [
     ('alarm', 'Alarm', 'Alarm', 'alarm_info', ''),
     ]
 
-class StatMon(Controller, Viewer):
 
-    def __init__(self, logger, threadPool, module_manager, settings,
-                 soundsink, ev_quit, model):
+def create_statmon(t):
+    toolkit.use(t)
 
-        self.soundsink = soundsink
+    # now we can import widgets
+    from ginga.gw import Widgets
+    from statmon.View import Viewer
+    from statmon.Control import Controller
 
-        Viewer.__init__(self, logger, ev_quit)
-        Controller.__init__(self, logger, threadPool, module_manager,
-                            settings, ev_quit, model)
-        self.name = 'statmon2'
+    class StatMon(Controller, Viewer):
 
-    def play_soundfile(self, filepath, format=None, priority=20):
-        self.soundsink.playFile(filepath, format=format,
-                                priority=priority)
+        def __init__(self, logger, threadPool, module_manager, prefs,
+                     soundsink, ev_quit, model):
 
-    def add_menus(self):
-        menubar = Widgets.Menubar()
-        self.w.menubox.add_widget(menubar, stretch=0)
+            self.soundsink = soundsink
+            settings = prefs.create_category('general')
 
-        # create a File pulldown menu, and add it to the menu bar
-        filemenu = menubar.add_name("File")
+            Viewer.__init__(self, logger, settings, ev_quit)
+            Controller.__init__(self, logger, threadPool, module_manager,
+                                prefs, ev_quit, model)
+            self.name = 'statmon2'
 
-        filemenu.add_separator()
+        def play_soundfile(self, filepath, format=None, priority=20):
+            self.soundsink.playFile(filepath, format=format,
+                                    priority=priority)
 
-        item = filemenu.add_name("Quit")
-        item.add_callback('activated', self.quit)
+        def add_menus(self):
+            menubar = Widgets.Menubar()
+            self.w.menubox.add_widget(menubar, stretch=0)
 
-        # create a Option pulldown menu, and add it to the menu bar
-        ## optionmenu = menubar.add_name("Option")
+            # create a File pulldown menu, and add it to the menu bar
+            filemenu = menubar.add_name("File")
 
-    def add_statusbar(self):
-        self.w.status = Widgets.StatusBar()
-        self.w.statusbox.add_widget(self.w.status, stretch=1)
+            filemenu.add_separator()
+
+            item = filemenu.add_name("Quit")
+            item.add_callback('activated', self.quit)
+
+            # create a Option pulldown menu, and add it to the menu bar
+            ## optionmenu = menubar.add_name("Option")
+
+        def add_statusbar(self):
+            self.w.status = Widgets.StatusBar()
+            self.w.statusbox.add_widget(self.w.status, stretch=1)
+
+    return StatMon
 
 
 def main(options, args):
@@ -207,6 +215,22 @@ def main(options, args):
         os.mkdir(basedir)
     prefs = Settings.Preferences(basefolder=basedir, logger=logger)
 
+    # general settings control initialization of viewer
+    settings = prefs.create_category('general')
+    settings.set_defaults(appname="statmon",
+                          title="StatMon",
+                          widgetSet='choose',
+                          recursion_limit=2000,
+                          # this only takes effect if we are using
+                          # the pgwidgets backend
+                          http_server=True,
+                          token='none',
+                          min_threads=10,
+                          threadpool_analyze_interval_sec=None,
+                          pluginmgr_allow_nonsingletons=False,
+                          font_scaling_factor=None)
+    #settings.load(onError='silent')
+
     mm = ModuleManager.ModuleManager(logger)
 
     # Add any custom modules
@@ -219,6 +243,7 @@ def main(options, args):
     model = StatusModel(logger)
 
     # Start up the control/display engine
+    StatMon = create_statmon(options.toolkit)
     statmon = StatMon(logger, threadPool, mm, prefs,
                       sndsink, ev_quit, model)
 
@@ -311,6 +336,17 @@ def main(options, args):
         ctrlsvc.ro_start()
 
         try:
+            # if there is a network component, start it
+            if hasattr(statmon, 'start'):
+                logger.info("Starting statmon web interface.")
+                statmon.start()
+
+                if hasattr(statmon, 'get_url'):
+                    base_url = statmon.get_url()
+                    if base_url is not None:
+                        print(f"visit {base_url} to view the application")
+                        logger.info(f"visit {base_url} to view the application")
+
             # Main loop to handle GUI events
             statmon.mainloop(timeout=0.001)
 
@@ -365,6 +401,9 @@ if __name__ == "__main__":
     argprs.add_argument("--svcname", dest="svcname", metavar="NAME",
                         default=defaultServiceName,
                         help="Register using NAME as service name")
+    argprs.add_argument("-t", "--toolkit", dest="toolkit", metavar="NAME",
+                        default='qt',
+                        help="Prefer GUI toolkit (gtk|qt|pg)")
     log.addlogopts(argprs)
 
     (options, args) = argprs.parse_known_args(sys.argv[1:])

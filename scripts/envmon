@@ -25,14 +25,10 @@ from g2base.remoteObjects import remoteObjects as ro
 from g2cam.status.stream import StatusStream
 
 from ginga import toolkit
-toolkit.use('qt5')
-from ginga.gw import Widgets
 from ginga.misc import ModuleManager, Settings, log
 
 # Local application imports
 from statmon.Model import StatusModel
-from statmon.View import Viewer
-from statmon.Control import Controller
 
 defaultServiceName = 'envmon'
 version = "20211207.0"
@@ -71,34 +67,46 @@ plugins = [
     ('debug', 'Debug', 'Debug', 'right', "Debug"),
     ]
 
-class EnvMon(Controller, Viewer):
 
-    def __init__(self, logger, threadPool, module_manager, settings,
-                 ev_quit, model):
+def create_envmon(t):
+    toolkit.use(t)
 
-        Viewer.__init__(self, logger, ev_quit)
-        Controller.__init__(self, logger, threadPool, module_manager,
-                            settings, ev_quit, model)
-        self.name = 'envmon'
+    # now we can import widgets
+    from ginga.gw import Widgets
+    from statmon.View import Viewer
+    from statmon.Control import Controller
 
-    def add_menus(self):
-        menubar = Widgets.Menubar()
-        self.w.menubox.add_widget(menubar, stretch=0)
+    class EnvMon(Controller, Viewer):
 
-        # create a File pulldown menu, and add it to the menu bar
-        filemenu = menubar.add_name("File")
+        def __init__(self, logger, threadPool, module_manager, prefs,
+                     ev_quit, model):
 
-        filemenu.add_separator()
+            settings = prefs.create_category('general')
+            Viewer.__init__(self, logger, settings, ev_quit)
+            Controller.__init__(self, logger, threadPool, module_manager,
+                                prefs, ev_quit, model)
+            self.name = 'envmon'
 
-        item = filemenu.add_name("Quit")
-        item.add_callback('activated', self.quit)
+        def add_menus(self):
+            menubar = Widgets.Menubar()
+            self.w.menubox.add_widget(menubar, stretch=0)
 
-        # create a Option pulldown menu, and add it to the menu bar
-        ## optionmenu = menubar.add_name("Option")
+            # create a File pulldown menu, and add it to the menu bar
+            filemenu = menubar.add_name("File")
 
-    def add_statusbar(self):
-        self.w.status = Widgets.StatusBar()
-        self.w.statusbox.add_widget(self.w.status, stretch=1)
+            filemenu.add_separator()
+
+            item = filemenu.add_name("Quit")
+            item.add_callback('activated', self.quit)
+
+            # create a Option pulldown menu, and add it to the menu bar
+            ## optionmenu = menubar.add_name("Option")
+
+        def add_statusbar(self):
+            self.w.status = Widgets.StatusBar()
+            self.w.statusbox.add_widget(self.w.status, stretch=1)
+
+    return EnvMon
 
 
 def main(options, args):
@@ -131,18 +139,34 @@ def main(options, args):
         os.mkdir(basedir)
     prefs = Settings.Preferences(basefolder=basedir, logger=logger)
 
+    # general settings control initialization of viewer
+    settings = prefs.create_category('general')
+    settings.set_defaults(appname="envmon",
+                          title="EnvMon",
+                          widgetSet='choose',
+                          recursion_limit=2000,
+                          # this only takes effect if we are using
+                          # the pgwidgets backend
+                          http_server=True,
+                          token='none',
+                          min_threads=10,
+                          threadpool_analyze_interval_sec=None,
+                          pluginmgr_allow_nonsingletons=False,
+                          font_scaling_factor=None)
+    #settings.load(onError='silent')
+
     mm = ModuleManager.ModuleManager(logger)
 
     # Add any custom modules
     if options.modules:
         modules = options.modules.split(',')
         for mdlname in modules:
-            #self.mm.loadModule(name, pfx=pluginconfpfx)
             self.mm.loadModule(name)
 
     model = StatusModel(logger)
 
     # Start up the control/display engine
+    EnvMon = create_envmon(options.toolkit)
     envmon = EnvMon(logger, threadPool, mm, prefs, ev_quit, model)
 
     # Build desired layout
@@ -195,6 +219,17 @@ def main(options, args):
         task2.init_and_start(envmon)
 
         try:
+            # if there is a network component, start it
+            if hasattr(envmon, 'start'):
+                logger.info("Starting envmon web interface.")
+                envmon.start()
+
+                if hasattr(envmon, 'get_url'):
+                    base_url = envmon.get_url()
+                    if base_url is not None:
+                        print(f"visit {base_url} to view the application")
+                        logger.info(f"visit {base_url} to view the application")
+
             # Main loop to handle GUI events
             envmon.mainloop(timeout=0.001)
 
@@ -237,6 +272,9 @@ if __name__ == "__main__":
     argprs.add_argument("--svcname", dest="svcname", metavar="NAME",
                         default=defaultServiceName,
                         help="Register using NAME as service name")
+    argprs.add_argument("-t", "--toolkit", dest="toolkit", metavar="NAME",
+                        default='qt',
+                        help="Prefer GUI toolkit (gtk|qt|pg)")
     log.addlogopts(argprs)
 
     (options, args) = argprs.parse_known_args(sys.argv[1:])
