@@ -15,7 +15,7 @@ ERROR = ["Unknown", None, STATNONE, STATERROR, 'None']
 
 import PlBase
 
-clr_status = dict(off='white', normal='forestgreen', warning='orange', alarm='red')
+clr_status = dict(off='white', normal='darkgreen', warning='orange', alarm='red')
 
 
 class TargetPlugin(PlBase.Plugin):
@@ -23,8 +23,8 @@ class TargetPlugin(PlBase.Plugin):
 
     def __set_aliases(self, inscode):
 
-        self.aliases = ['FITS.{0}.PROP_ID'.format(inscode),
-                        'FITS.{0}.OBJECT'.format(inscode),
+        self.aliases = [f'FITS.{inscode}.PROP_ID',
+                        f'FITS.{inscode}.OBJECT',
                         'TSCL.INSROTPA_PF', 'STATS.ROTDIF_PF',
                         'TSCL.ImgRotPA', 'STATS.ROTDIF',
                         'TSCL.InsRotPA', 'TSCL.LIMIT_FLAG',
@@ -50,7 +50,8 @@ class TargetPlugin(PlBase.Plugin):
             self.logger.debug(f'obcp is not assigned. {obcp}')
             return
 
-        self.logger.debug(f"target changing config dict={str(d)} ins={d['inst']}")
+        self.obcp = obcp
+        self.logger.debug(f"target changing config dict={str(d)} ins={obcp}")
         self.set_layout(obcp)
 
     def build_gui(self, container):
@@ -98,8 +99,8 @@ class TargetPlugin(PlBase.Plugin):
         container.add_widget(gbox, stretch=0)
 
         try:
-            obcp = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
-            self.set_layout(obcp)
+            self.obcp = 'SUKA'
+            self.set_layout(self.obcp)
         except Exception as e:
             self.logger.error(f"error: building layout: {e}")
 
@@ -125,7 +126,7 @@ class TargetPlugin(PlBase.Plugin):
     def update_info(self, status_dct):
 
         try:
-            propid_alias = 'FITS.{0}.PROP_ID'.format(self.inscode)
+            propid_alias = f'FITS.{self.inscode}.PROP_ID'
             propid = status_dct.get(propid_alias, '#')
             color = clr_status['alarm'] if propid.startswith('#') else \
                 clr_status['normal']

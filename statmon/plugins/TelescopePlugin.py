@@ -1,27 +1,16 @@
 #
 # T. Inagaki
+# E. Jeschke (reorg)
 #
 import PlBase
 
 from ginga.gw import Widgets
 
-from DomeShutter import DomeShutter
-from Topscreen import Topscreen
-from Windscreen import Windscreen
-from FocusZ import FocusZ
-from Focus import Focus
-from AzEl import AzEl
-from M2 import M2
-from M1Cover import M1Cover
-from CellCover import CellCover
-import InsRot
-import ImgRot
-import Adc
-from TipChop import TipChop
-from Waveplate import Waveplate
-from AoShutter import AoShutter
-from Dummy import Dummy
-from M3 import M3
+from TelescopeParts import (DomeShutter, Topscreen, Windscreen, FocusZ,
+                            Focus, AzEl, M1Cover, M2, M3, CellCover,
+                            InsRotCs, InsRotPf, ImgRotNsOpt, ImgRotNsIr,
+                            Adc, AdcPf, TipChop, Waveplate, AoShutter,
+                            Dummy)
 
 
 class TelescopeGui:
@@ -113,10 +102,10 @@ class TelescopeGui:
         empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.add_widget(empty_shell)
 
-        self.insrot = InsRot.InsRotPf(logger=self.logger)
+        self.insrot = InsRotPf(logger=self.logger)
         r2layout.add_widget(self.insrot)
 
-        self.adc = Adc.AdcPf(logger=self.logger)
+        self.adc = AdcPf(logger=self.logger)
         r2layout.add_widget(self.adc)
 
         self.m3 = M3(logger=self.logger)
@@ -140,7 +129,7 @@ class TelescopeGui:
         empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.add_widget(empty_shell)
 
-        self.insrot = InsRot.InsRotPf(logger=self.logger)
+        self.insrot = InsRotPf(logger=self.logger)
         r2layout.add_widget(self.insrot)
 
         self.m3 = M3(logger=self.logger)
@@ -164,10 +153,10 @@ class TelescopeGui:
         empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.add_widget(empty_shell)
 
-        self.imgrot = ImgRot.ImgRotNsOpt(logger=self.logger)
+        self.imgrot = ImgRotNsOpt(logger=self.logger)
         r2layout.add_widget(self.imgrot)
 
-        self.adc = Adc.Adc(logger=self.logger)
+        self.adc = Adc(logger=self.logger)
         r2layout.add_widget(self.adc)
 
         self.m3 = M3(logger=self.logger)
@@ -190,7 +179,7 @@ class TelescopeGui:
         r2layout.set_spacing(1)
         empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.add_widget(empty_shell)
-        self.imgrot = ImgRot.ImgRotNsIr(logger=self.logger)
+        self.imgrot = ImgRotNsIr(logger=self.logger)
         r2layout.add_widget(self.imgrot)
         self.waveplate = Waveplate(logger=self.logger)
         r2layout.add_widget(self.waveplate)
@@ -219,7 +208,7 @@ class TelescopeGui:
         empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.add_widget(empty_shell)
 
-        self.insrot = InsRot.InsRotCs(logger=self.logger)
+        self.insrot = InsRotCs(logger=self.logger)
         r2layout.add_widget(self.insrot)
 
         self.m3 = M3(logger=self.logger)
@@ -250,7 +239,7 @@ class TelescopeGui:
         empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.add_widget(empty_shell)
 
-        self.insrot = InsRot.InsRotCs(logger=self.logger)
+        self.insrot = InsRotCs(logger=self.logger)
         r2layout.add_widget(self.insrot)
 
         self.m3 = M3(logger=self.logger)
@@ -274,10 +263,10 @@ class TelescopeGui:
         empty_shell = Dummy(height=1, logger=self.logger)
         r2layout.add_widget(empty_shell)
 
-        self.insrot = InsRot.InsRotCs(logger=self.logger)
+        self.insrot = InsRotCs(logger=self.logger)
         r2layout.add_widget(self.insrot)
 
-        self.adc = Adc.Adc(logger=self.logger)
+        self.adc = Adc(logger=self.logger)
         r2layout.add_widget(self.adc)
 
         self.m3 = M3(logger=self.logger)

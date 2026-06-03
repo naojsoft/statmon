@@ -16,9 +16,8 @@ from ginga.gw import Widgets
 
 import PlBase
 from CustomPlot import PlotWidget
-from Exptime import Exptime
-from Threshold import Threshold
-from Dummy import Dummy
+from CustomLabel import Label
+from TelescopeParts import Dummy
 
 
 class PlotCanvas(PlotWidget):
@@ -97,7 +96,7 @@ class PlotCanvas(PlotWidget):
                                                         relpos=(0.5, -0.09)),
                                         horizontalalignment='center')
 
-        kwargs = dict(alpha=0.4, ec='grey', fc='white' )
+        kwargs = dict(alpha=0.4, ec='grey', fc='white')
         self.title_x = self.axes.text(0.30, 1.03, 'X:%02.2f' %(self.center_x),
                                       color='green', ha='left', va='baseline',
                                       #bbox=kwargs,
@@ -577,7 +576,6 @@ class NsIrPlot(Widgets.VBox):
     def update_plot(self, ao1x, ao1y, ao2x, ao2y):
 
         self.logger.debug(f'ao1x={ao1x}, ao1y={ao1y}, ao2x={ao2x}, ao2y={ao2y}')
-
         try:
             ao1x *= 1000.0
             ao1y *= 1000.0
@@ -607,24 +605,19 @@ class PfsAgPlot(Widgets.VBox):
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
         self.buttons.do_reg_layout()
         self.exptime = Exptime(parent=parent, logger=logger)
-        #self.threshold = Threshold(parent=parent, logger=logger)
         self.empty = Dummy(width=60, height=25,  logger=logger)
-        #self.empty1 = Dummy(width=1, height=25,  logger=logger)
         self.logger = logger
-
-        # w, h = (350, 400)
-        # self.setFixedSize(w, h)
 
         self.set_gui()
 
     def set_gui(self):
         self.add_widget(self.plot)
 
-        hlayout = Widgets.HBox()
-        hlayout.set_spacing(2)
-        hlayout.add_widget(self.exptime)
-        hlayout.add_widget(self.empty)
-        self.add_widget(hlayout)
+        hbox = Widgets.HBox()
+        hbox.set_spacing(2)
+        hbox.add_widget(self.exptime)
+        hbox.add_widget(self.empty)
+        self.add_widget(hbox)
 
         self.add_widget(self.buttons)
 
@@ -656,33 +649,27 @@ class AgPlot(Widgets.VBox):
         self.buttons.do_reg_layout()
         self.exptime = Exptime(parent=parent, logger=logger)
         self.threshold = Threshold(parent=parent, logger=logger)
-        #self.empty = Dummy(width=60, height=25,  logger=logger)
-        #self.empty1 = Dummy(width=1, height=25,  logger=logger)
         self.logger = logger
-
-        # w, h = (350, 400)
-        # self.setFixedSize(w, h)
+        self.ag_guiding = ("Guiding(AG)",  "Guiding(AG1)", "Guiding(AG2)",
+                           "Guiding(HSCSHAG)", "Guiding(HSCSCAG)")
 
         self.set_gui()
 
     def set_gui(self):
-
         self.add_widget(self.plot)
 
-        hlayout = Widgets.HBox()
-        hlayout.set_spacing(2)
-        hlayout.add_widget(self.exptime)
-        hlayout.add_widget(self.threshold)
-        self.add_widget(hlayout)
+        hbox = Widgets.HBox()
+        hbox.set_spacing(2)
+        hbox.add_widget(self.exptime)
+        hbox.add_widget(self.threshold)
+        self.add_widget(hbox)
 
         self.add_widget(self.buttons)
 
     def update_plot(self, state, x, y, exptime, bottom, ceil):
         self.logger.debug(f'state={state}, x={x}, y={y}')
-        ag_guiding = ("Guiding(AG)",  "Guiding(AG1)", "Guiding(AG2)", "Guiding(HSCSHAG)",
-                      "Guiding(HSCSCAG)")
 
-        if state in ag_guiding:
+        if state in self.ag_guiding:
             self.logger.debug('ag guiding...')
             self.plot.update_plot(x, y)
             self.exptime.update_exptime(exptime)
@@ -707,19 +694,19 @@ class TwoGuidingPlot(Widgets.VBox):
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
         self.buttons.do_reg_layout()
         self.logger = logger
-        # w, h = (350, 400)
-        # self.setFixedSize(w, h)
+        self.guiding1 = ("Guiding(AG1)", "Guiding(AG2)", "Guiding(HSCSCAG)")
+        self.guiding2 = ("Guiding(SV1)", "Guiding(SV2)", "Guiding(HSCSHAG)")
+
         self.set_gui()
 
     def set_gui(self):
-
         self.add_widget(self.plot)
 
-        hlayout = Widgets.HBox()
-        hlayout.set_spacing(2)
-        hlayout.add_widget(self.exptime)
-        hlayout.add_widget(self.threshold)
-        self.add_widget(hlayout)
+        hbox = Widgets.HBox()
+        hbox.set_spacing(2)
+        hbox.add_widget(self.exptime)
+        hbox.add_widget(self.threshold)
+        self.add_widget(hbox)
 
         self.add_widget(self.buttons)
 
@@ -732,15 +719,12 @@ class TwoGuidingPlot(Widgets.VBox):
 
         self.logger.debug("state=%s g1x=%s g1y=%s g2x=%s g2y=%s g1exp=%s g2exp=%s g1bottom=%s  g1ceil=%s g2bottom=%s g2ceil=%s" % (state, guiding1_x, guiding1_y, guiding2_x, guiding2_y, guiding1_exp, guiding2_exp, guiding1_bottom, guiding1_ceil, guiding2_bottom, guiding2_ceil))
 
-        guiding1 = ("Guiding(AG1)", "Guiding(AG2)", "Guiding(HSCSCAG)")
-        guiding2 = ("Guiding(SV1)", "Guiding(SV2)", "Guiding(HSCSHAG)")
-
-        if state in guiding1:
+        if state in self.guiding1:
             self.logger.debug(f'state={state} guiding1...')
             self.plot.update_plot(guiding1_x, guiding1_y)
             self.exptime.update_exptime(exptime=guiding1_exp)
             self.threshold.update_threshold(bottom=guiding1_bottom, ceil=guiding1_ceil)
-        elif state in guiding2:
+        elif state in self.guiding2:
             self.logger.debug(f'state={state} guiding2...')
             self.plot.update_plot(guiding2_x, guiding2_y)
             self.exptime.update_exptime(exptime=guiding2_exp)
@@ -750,6 +734,66 @@ class TwoGuidingPlot(Widgets.VBox):
             self.plot.clear()
             self.exptime.clear()
             self.threshold.clear()
+
+
+class Threshold(Label):
+    ''' Threshold(guiding image)  '''
+    def __init__(self, parent=None, logger=None):
+        super().__init__(parent=parent, fs=10, width=85, height=25,
+                         align='vcenter', logger=logger)
+
+        #self.setIndent(10)
+        self.clear()
+
+    def update_threshold(self, bottom, ceil):
+        ''' bottom = TSCV.AG1_I_BOTTOM | TSCV.SV1_I_BOTTOM
+            ceil = TSCV.AG1_I_CEIL | TSCV.SV1_I_CEIL
+        '''
+        self.logger.debug(f'bottom={bottom}, ceil={ceil}')
+        color = self.normal
+
+        try:
+            text = 'Th: {0:.0f} / {1:.0f}'.format(bottom, ceil)
+        except Exception as e:
+            text = 'Threshold: {0}'.format('Undefined')
+            color = self.alarm
+
+        self.set_text(text)
+        self.set_color(fg=color, bg=self.bg)
+
+    def clear(self):
+        self.set_text('')
+        self.set_color(fg=self.normal, bg=self.bg)
+
+
+class Exptime(Label):
+    ''' Exposure Time  '''
+    def __init__(self, parent=None, logger=None):
+        super().__init__(parent=parent, fs=10, width=110, height=25,
+                         align='right', logger=logger)
+
+        #self.setIndent(10)
+        #self.setAlignment(QtCore.Qt.AlignVCenter)
+        self.clear()
+
+    def update_exptime(self, exptime):
+        ''' exptime = TSCV.AGExpTime | TSCV.SVExpTime
+        '''
+        self.logger.debug(f'exptime={exptime}')
+
+        color = self.normal
+        try:
+            text = '{0:.0f} ms :Exp'.format(exptime)
+        except Exception as e:
+            text = '{0} :Exp'.format('Undefined')
+            color = self.alarm
+
+        self.set_text(text)
+        self.set_color(fg=color, bg=self.bg)
+
+    def clear(self):
+        self.set_text('')
+        self.set_color(fg=self.normal, bg=self.bg)
 
 
 class PlotPlugin(PlBase.Plugin):

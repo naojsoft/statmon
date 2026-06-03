@@ -102,13 +102,7 @@ class StatusTablePlugin(PlBase.Plugin):
 
         container.add_widget(vbox, stretch=0)
 
-        try:
-            insname = self.controller.proxystatus.fetchOne('FITS.SBR.MAINOBCP')
-
-        except Exception as e:
-            self.logger.error(f'error: building layout: {e}')
-        else:
-            self.__set_aliases(insname)
+        self.__set_aliases(self.insname)
 
     def start(self):
         self.controller.register_select('statustable', self.update, \
