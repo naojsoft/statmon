@@ -49,7 +49,6 @@ class TelescopeGui:
         return self.widget
 
     def set_layout(self):
-
         self.widget.remove_all(delete=True)
 
         # dome part of telescope
@@ -79,8 +78,6 @@ class TelescopeGui:
         middle.add_widget(telfocus, stretch=0)
         middle.add_widget(self.azel, stretch=5)
         middle.add_widget(telbody, stretch=0)
-        # middle.setStretch(1, 1000)
-        # middle.setStretch(2, 0)
 
         # right layout will be combination of following components:
         # ins/img-rot, adc, tiptilt, waveplate, m3
@@ -88,17 +85,20 @@ class TelescopeGui:
         self.set_focus_layout(rlayout=right)
 
         # combine right, middle, left layout
-        telh = Widgets.HBox()
+        # telh = Widgets.HBox()
+        # telh.set_spacing(0)
+        # telh.add_widget(self.windscreen, stretch=0)
+        # telh.add_widget(middle, stretch=5)
+        # telh.add_widget(right, stretch=0)
+        telh = Widgets.GridBox()
         telh.set_spacing(0)
-        telh.add_widget(self.windscreen, stretch=0)
-        telh.add_widget(middle, stretch=5)
-        telh.add_widget(right, stretch=0)
+        telh.set_border_width(0)
+        telh.add_widget(self.windscreen, 0, 0)
+        telh.add_widget(middle, 0, 1)
+        telh.add_widget(right, 0, 2)
 
         self.widget.add_widget(top)
         self.widget.add_widget(telh, stretch=5)
-
-        # middle.setStretch(1, 1000)
-        # middle.setStretch(2, 0)
 
 
     def popt_layout(self, rlayout):
@@ -406,39 +406,42 @@ class Telescope(TelescopeGui):
     def update_telescope(self, **kargs):
 
         self.logger.debug(f'updating telescope. kargs={kargs}')
+        try:
+            self.dome_shutter.update_dome(dome=kargs.get('STATL.DOMESHUTTER_POS'))
+            #self.dome_shutter.update_dome(dome=kargs.get('TSCV.DomeShutter'))
+            self.topscreen.update_topscreen(mode=kargs.get('TSCV.TopScreen'),
+                                            front=kargs.get('TSCL.TSFPOS'),
+                                            rear=kargs.get('TSCL.TSRPOS'))
 
-        self.dome_shutter.update_dome(dome=kargs.get('STATL.DOMESHUTTER_POS'))
-        #self.dome_shutter.update_dome(dome=kargs.get('TSCV.DomeShutter'))
-        self.topscreen.update_topscreen(mode=kargs.get('TSCV.TopScreen'),
-                                        front=kargs.get('TSCL.TSFPOS'),
-                                        rear=kargs.get('TSCL.TSRPOS'))
+            self.windscreen.update_windscreen(drv=kargs.get('TSCV.WINDSDRV'),
+                                              windscreen=kargs.get('TSCV.WindScreen'),
+                                              cmd=kargs.get('TSCL.WINDSCMD'),
+                                              pos=kargs.get('TSCL.WINDSPOS'),
+                                              el=kargs.get('TSCS.EL'))
 
-        self.windscreen.update_windscreen(drv=kargs.get('TSCV.WINDSDRV'),
-                                          windscreen=kargs.get('TSCV.WindScreen'),
-                                          cmd=kargs.get('TSCL.WINDSCMD'),
-                                          pos=kargs.get('TSCL.WINDSPOS'),
-                                          el=kargs.get('TSCS.EL'))
+            self.z.update_z(z=kargs.get('TSCL.Z'))
 
-        self.z.update_z(z=kargs.get('TSCL.Z'))
+            self.m2.update_m2(focus=kargs.get('STATL.M2_DESCR'))
 
-        self.m2.update_m2(focus=kargs.get('STATL.M2_DESCR'))
+            self.focus.update_focus(focus=kargs.get('STATL.FOC_DESCR'),
+                                    alarm=kargs.get('TSCV.FOCUSALARM'))
 
-        self.focus.update_focus(focus=kargs.get('STATL.FOC_DESCR'),
-                                alarm=kargs.get('TSCV.FOCUSALARM'))
-
-        self.azel.update_azel(az=kargs.get('TSCS.AZ'),
-                              el=kargs.get('TSCS.EL'),
-                              winddir=kargs.get('TSCL.WINDD'),
-                              windspeed=kargs.get('TSCL.WINDS_O'),
-                              state=kargs.get('STATL.TELDRIVE'))
+            self.azel.update_azel(az=kargs.get('TSCS.AZ'),
+                                  el=kargs.get('TSCS.EL'),
+                                  winddir=kargs.get('TSCL.WINDD'),
+                                  windspeed=kargs.get('TSCL.WINDS_O'),
+                                  state=kargs.get('STATL.TELDRIVE'))
 
 
-        self.m1.update_m1cover(m1cover=kargs.get('TSCV.M1Cover'),
-                               m1cover_onway=kargs.get('TSCV.M1CoverOnway'))
+            self.m1.update_m1cover(m1cover=kargs.get('TSCV.M1Cover'),
+                                   m1cover_onway=kargs.get('TSCV.M1CoverOnway'))
 
-        self.cell.update_cell(cell=kargs.get('TSCV.CellCover'))
+            self.cell.update_cell(cell=kargs.get('TSCV.CellCover'))
 
-        self.update_focus(**kargs)
+            self.update_focus(**kargs)
+        except Exception as e:
+            self.logger.error(f"error updating telescope plugin: {e}",
+                              exc_info=True)
 
 
 class TelescopePlugin(PlBase.Plugin):

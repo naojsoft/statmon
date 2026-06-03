@@ -25,6 +25,7 @@ class AzElCanvas(PlotWidget):
         super().__init__(self.fig)
 
         self.axes = self.fig.add_subplot(111)
+        self.axes.set_aspect('equal')
 
         self.limit_low = 0.0
         self.limit_high = 90.0;
@@ -41,10 +42,6 @@ class AzElCanvas(PlotWidget):
         self.alarm_color = 'red'
         self.wind_color = 'blue'
 
-        # y axis values. these are fixed values.
-        #self.x_scale=[-0.007, 1.0]
-        #self.y_scale=[-0.002,  1.011]
-
         self.x_scale = [0, 1]
         self.y_scale = [0, 1]
         self.x_center = (max(self.x_scale) - min(self.x_scale) / len(self.x_scale))
@@ -56,18 +53,12 @@ class AzElCanvas(PlotWidget):
         # width/hight of widget
         self.w = 250
         self.h = 250
-        #self.resize(self.w, self.h)
+        self.set_expanding(True, True)
+        self.set_min_size(self.w, self.h)
 
         self.logger = logger
 
         self.init_figure()
-
-    # def test(self, degree, radius):
-
-    #     rad = math.radians(degree)
-    #     new_y = self.center + radius * math.sin(rad)
-    #     new_x = self.center + radius * math.cos(rad)
-    #     return (new_x, new_y)
 
     def init_figure(self):
         ''' initial drawing '''
@@ -146,7 +137,7 @@ class AzElCanvas(PlotWidget):
         self.axes.add_patch(outer_c)
 
         # telescope elevation
-        self.el_kwargs=dict(r=0.5, theta2=180, alpha=0.5, lw=0.5, width=0.25)
+        self.el_kwargs = dict(r=0.5, theta2=180, alpha=0.5, lw=0.5, width=0.25)
         self.el = mpatches.Wedge((self.center, self.center), theta1=90,
                                   fc=self.normal_color, ec=self.normal_color,
                                   **self.el_kwargs)
@@ -170,7 +161,7 @@ class AzElCanvas(PlotWidget):
         self.axes.set_axis_off()
 
         #self.axes.set_xscale(10)
-        #self.axes.axison=False
+        #self.axes.axison = False
 
         self.draw()
 
@@ -196,9 +187,12 @@ class AzEl(AzElCanvas):
             update_speed = speed / 100.0 # for drawing speed arrow
             # find out new position and shpe of both wind-direction and wind-spped
 
-            a_x, a_y = self.__get_xy(degree=direction+offset_deg, radius=radius_outer)
-            b_x, b_y = self.__get_xy(degree=direction-offset_deg, radius=radius_outer)
-            c_x, c_y = self.__get_xy(degree=direction, radius=radius_inner-update_speed)
+            a_x, a_y = self.__get_xy(degree=direction+offset_deg,
+                                     radius=radius_outer)
+            b_x, b_y = self.__get_xy(degree=direction-offset_deg,
+                                     radius=radius_outer)
+            c_x, c_y = self.__get_xy(degree=direction,
+                                     radius=radius_inner-update_speed)
 
         except Exception as e:
             self.logger.error(f"error: calc wind direction: {e}")
@@ -232,6 +226,7 @@ class AzEl(AzElCanvas):
                 self.logger.error(f'error: updating wind: {e}')
 
             #self.wind.set_xy=([[0.4, 0.9], [0.6, 0.9],[0.5, 0.8]])
+
     def __get_xy(self, degree, sign=1, radius=0):
 
         rad = math.radians(degree)

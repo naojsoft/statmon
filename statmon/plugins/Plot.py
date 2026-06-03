@@ -27,19 +27,19 @@ class PlotCanvas(PlotWidget):
         super().__init__(self.fig)
 
         self.axes = self.fig.add_subplot(111)
+        self.axes.set_aspect('equal')
 
         self.center_x = center_x  # center of canvas
         self.center_y = center_y
         self.w = 350
         self.h = 350
-        #self.setFixedSize(w, h)
+        self.set_expanding(True, True)
+        self.set_min_size(self.w, self.h)
 
         self.plot_color = 'blue'
         self.record_color = 'black'
         self.alarm_color = 'red'
         self.warn_color = 'orange'
-
-        #FigureCanvas.updateGeometry(self)
 
         self.logger = logger
         self.init_figure()

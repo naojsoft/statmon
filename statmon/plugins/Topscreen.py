@@ -32,8 +32,6 @@ class TopscreenCanvas(PlotWidget):
         self.y_axis = [-1.0, 0, 1]
         self.center_y = 0.0
 
-        self.fig.set_canvas(self)
-
         # FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Fixed, \
         #                            QtWidgets.QSizePolicy.Fixed)
         # FigureCanvas.updateGeometry(self)
@@ -41,6 +39,8 @@ class TopscreenCanvas(PlotWidget):
         # width/hight of widget
         self.w = 500
         self.h = 50
+        self.set_expanding(True, False)
+        self.set_min_size(self.w, self.h)
 
         self.logger = logger
 

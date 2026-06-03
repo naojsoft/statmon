@@ -21,4 +21,4 @@ class M2(Label):
             color = self.alarm
 
         self.set_text(focus)
-        self.set_color(color=color, bg=self.bg)
+        self.set_color(fg=color, bg=self.bg)

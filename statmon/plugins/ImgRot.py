@@ -54,7 +54,7 @@ class ImgRotNsOpt(ImgRot):
         self.logger.debug(f'imgrot={imgrot}, mode={mode}, focus={focus}, itype={itype}')
 
         # img-rot blue
-        imrb = [0x40000000, long(0x80000000), 0x00400000, 0x00800000, 0x00008000, 0x00000001]
+        imrb = [0x40000000, 0x80000000, 0x00400000, 0x00800000, 0x00008000, 0x00000001]
         # img-rot red
         imrr = [0x00010000, 0x00020000,  0x00000100, 0x00000200, 0x00000002, 0x00000004]
 

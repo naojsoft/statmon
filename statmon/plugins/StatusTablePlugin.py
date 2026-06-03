@@ -56,7 +56,7 @@ class StatusTablePlugin(PlBase.Plugin):
                         'GEN2.STATUS.TBLTIME.TSCL',
                         'GEN2.STATUS.TBLTIME.TSCV']
 
-        self.logger.info(f'aliases={str(self.aliases)}')
+        self.logger.debug(f'aliases={str(self.aliases)}')
 
         self.controller.register_select('statustable', self.update,
                                         self.aliases)

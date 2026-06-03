@@ -74,8 +74,6 @@ class TelescopeGui:
         middlelayout.add_widget(telfocus, stretch=0)
         middlelayout.add_widget(self.azel, stretch=5)
         middlelayout.add_widget(telbody, stretch=0)
-        # middlelayout.setStretch(1, 1000)
-        # middlelayout.setStretch(2, 0)
 
         # right layout will be combination of following components:
         # ins/img-rot, adc, tiptilt, waveplate, m3
@@ -91,9 +89,6 @@ class TelescopeGui:
 
         self.widget.add_widget(toplayout)
         self.widget.add_widget(telhlayout, stretch=5)
-
-        # middlelayout.setStretch(1, 1000)
-        # middlelayout.setStretch(2, 0)
 
 
     def popt_layout(self, rlayout):

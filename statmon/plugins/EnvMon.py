@@ -126,7 +126,7 @@ class EnvMon(PlBase.Plugin):
         t, trs_temp_C = trs_pt
         t, dew_i_pt_temp_C = d_i_pt
         t, dew_o_pt_temp_C = d_o_pt
-        self.logger.info(f"m1: {m1_temp_C} trs: {trs_temp_C} dew_i: {dew_i_pt_temp_C} dew_o: {dew_o_pt_temp_C}")  # noqa
+        self.logger.debug(f"m1: {m1_temp_C} trs: {trs_temp_C} dew_i: {dew_i_pt_temp_C} dew_o: {dew_o_pt_temp_C}")  # noqa
 
         plot_bg = bnch.aide.get_plot_decor('plot_bg')
         if m1_temp_C - dew_o_pt_temp_C <= 2.0 or \

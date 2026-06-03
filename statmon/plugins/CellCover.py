@@ -28,6 +28,8 @@ class CellCanvas(PlotWidget):
         # width/hight of widget
         self.w = 250
         self.h = 30
+        self.set_expanding(True, False)
+        self.set_min_size(self.w, self.h)
         self.logger = logger
 
         self.init_figure()

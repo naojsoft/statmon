@@ -153,10 +153,14 @@ class MainWindow:
 
         self.active_table = Widgets.TableView(
             columns=[
-                {'label': 'Time',     'key': 'Time',     'type': 'string'},
-                {'label': 'ID',       'key': 'ID',       'type': 'string'},
-                {'label': 'Name',     'key': 'Name',     'type': 'string'},
-                {'label': 'Severity', 'key': 'Severity', 'type': 'string'},
+                {'label': 'Time',     'key': 'Time',     'type': 'string',
+                 'colwidth': 150},
+                {'label': 'ID',       'key': 'ID',       'type': 'string',
+                 'colwidth': 10},
+                {'label': 'Name',     'key': 'Name',     'type': 'string',
+                 'colwidth': 140},
+                {'label': 'Severity', 'key': 'Severity', 'type': 'string',
+                 'colwidth': 85},
                 # Per-row Mute checkbox + Reset button — matches
                 # the original Qt version's layout.  Toggling the
                 # checkbox fires ``cell_edited``; clicking Reset
@@ -167,10 +171,10 @@ class MainWindow:
                 # button is suppressed entirely when
                 # ``userCanReset`` is False (cell stays empty).
                 {'label': 'Mute',     'key': 'muteOn',   'type': 'bool',
-                 'widget': 'checkbox',
+                 'widget': 'checkbox', 'colwidth': 10,
                  'enabled_key': 'userCanMute'},
                 {'label': '',         'key': 'reset',    'type': 'string',
-                 'widget': 'button', 'text': 'Reset',
+                 'widget': 'button', 'text': 'Reset', 'colwidth': 20,
                  'visible_key': 'userCanReset'},
             ],
             selection_mode='single',
@@ -251,7 +255,7 @@ class MainWindow:
     def _update_time_label(self, text):
         self._last_time_update = text
         self.time_label.set_text(text)
-        self.time_label.set_color(fg='green')
+        self.time_label.set_color(fg='forestgreen')
         # If we'd previously inserted the "conn. lost" row, take it
         # out now that the handler is back.
         self._remove_active(ID='N/A',

@@ -27,12 +27,11 @@ class M1Canvas(PlotWidget):
         self.onway_color = 'orange'
         self.alarm_color = 'red'
 
-        self.set_expanding(True, True)
-        # FigureCanvas.updateGeometry(self)
-
         # width/hight of widget
         self.w = 250
-        self.h = 70
+        self.h = 50
+        self.set_min_size(self.w, self.h)
+        self.set_expanding(True, False)
         self.logger = logger
 
         self.init_figure()
@@ -46,8 +45,8 @@ class M1Canvas(PlotWidget):
         self.axes.add_patch(self.m1)
 
         # draw text
-        self.text = self.axes.text(0.5, 0.5, 'Initializing', va='baseline', \
-                                 ha='center', \
+        self.text = self.axes.text(0.5, 0.5, 'Initializing', va='baseline',
+                                 ha='center',
                                  transform=self.axes.transAxes, fontsize=13)
 
         self.axes.axison=False
