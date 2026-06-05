@@ -39,7 +39,6 @@ class Label(Widgets.Label):
         self.set_color(fg=self.fg, bg=self.bg)
 
         if fixsize:
-            #self.resize(self.width, self.height)
             self.set_min_size(self.width, self.height)
             self.set_max_size(self.width, self.height)
 

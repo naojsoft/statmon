@@ -22,6 +22,7 @@ class Limit(PlotWidget):
 
         self.axes = self.fig.add_subplot(111)
 
+        self.logger = logger
         self.title = title
         self.limit_low = min(limit)
         self.limit_high = max(limit)
@@ -42,13 +43,12 @@ class Limit(PlotWidget):
         self.center_y = 0.0
         self.init_x = 0.0  # initial value of x
 
-        self.set_expanding(True, True)
-        #FigureCanvas.updateGeometry(self)
-
         # width/hight of widget
         self.w = 350
-        self.h = 80
-        self.logger = logger
+        self.h = 100
+        self.set_expanding(True, True)
+        self.set_min_size(None, self.h)
+        #self.set_max_size(None, self.h)
 
         self.init_figure()
 

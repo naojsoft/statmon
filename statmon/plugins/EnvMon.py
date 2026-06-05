@@ -52,6 +52,10 @@ class EnvMon(PlBase.Plugin):
         self.root.set_margins(2, 2, 2, 2)
         self.root.set_spacing(2)
 
+        # min size for individual plots
+        self.wd = 450
+        self.ht = 170
+
         self.alias_d = {}
 
         self.plots = Bunch.Bunch()
@@ -62,6 +66,7 @@ class EnvMon(PlBase.Plugin):
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['windd'], num_pts,
                         y_acc=np.mean, title="Wind Dir N:0 E:90")
+        res.widget.set_min_size(self.wd, self.ht)
         self.root.add_widget(res.widget, stretch=1)
         self.plots.wind_direction = res
 
@@ -70,6 +75,7 @@ class EnvMon(PlBase.Plugin):
                         names, al_envmon['winds'], num_pts,
                         y_acc=np.mean, title="Windspeed (m/s)",
                         warn_y=7.0, alert_y=19.9)
+        res.widget.set_min_size(self.wd, self.ht)
         self.root.add_widget(res.widget, stretch=1)
         self.plots.wind_speed = res
 
@@ -77,6 +83,7 @@ class EnvMon(PlBase.Plugin):
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['temp'], num_pts,
                         y_acc=np.mean, title="Temperature (C)")
+        res.widget.set_min_size(self.wd, self.ht)
         self.root.add_widget(res.widget, stretch=1)
         self.plots.temperature = res
 
@@ -85,6 +92,7 @@ class EnvMon(PlBase.Plugin):
                         names, al_envmon['humid'], num_pts,
                         y_acc=np.mean, title="Humidity (%)",
                         warn_y=70.0, alert_y=80.0)
+        res.widget.set_min_size(self.wd, self.ht)
         self.root.add_widget(res.widget, stretch=1)
         self.plots.humidity = res
 
@@ -92,6 +100,7 @@ class EnvMon(PlBase.Plugin):
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon['m1dew'], num_pts,
                         y_acc=np.mean, title="M T & D (C)")
+        res.widget.set_min_size(self.wd, self.ht)
         self.root.add_widget(res.widget, stretch=1)
         self.plots.m1_and_dew = res
 
@@ -103,6 +112,7 @@ class EnvMon(PlBase.Plugin):
                         names, al_envmon['topring'], num_pts,
                         y_acc=np.mean, title="TopRing WS",
                         alert_y=2.0)
+        res.widget.set_min_size(self.wd, self.ht)
         self.root.add_widget(res.widget, stretch=1)
         self.plots.topring_windspeed = res
 

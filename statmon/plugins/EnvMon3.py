@@ -75,11 +75,16 @@ class EnvMon3(PlBase.Plugin):
         self.update_time = time.time()
         self.save_time = time.time()
 
+        # min size for individual plots
+        self.wd = 450
+        self.ht = 170
+
         # y_rng = (-30.0, 50.0)
         names = ["NE", "SE", "SW", "NW"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon3['cat_temp'], num_pts,
                         y_acc=np.mean, title="Temp (C)")
+        res.widget.set_min_size(self.wd, self.ht)
         self.root.add_widget(res.widget, stretch=1)
         self.plots.catwalk_temp = res
 
@@ -89,6 +94,7 @@ class EnvMon3(PlBase.Plugin):
                         names, al_envmon3['cat_rh'], num_pts,
                         y_acc=np.mean, title="RH (%)",
                         warn_y=70, alert_y=80)
+        res.widget.set_min_size(self.wd, self.ht)
         self.root.add_widget(res.widget, stretch=1)
         self.plots.catwalk_rh = res
 
@@ -97,6 +103,7 @@ class EnvMon3(PlBase.Plugin):
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_envmon3['cat_dew'], num_pts,
                         y_acc=np.mean, title="Dew Pt")
+        res.widget.set_min_size(self.wd, self.ht)
         self.root.add_widget(res.widget, stretch=1)
         self.plots.catwalk_dew = res
 
@@ -264,7 +271,7 @@ def make_plot(alias_d, logger, dims, names, aliases, num_pts,
     # add scrollbar interface around this viewer
     sw = Viewers.GingaScrolledViewerWidget(viewer=viewer, width=win_wd,
                                            height=win_ht)
-    sw.resize(win_wd, win_ht)
+    #sw.set_expanding(True, True)
     aide.configure_scrollbars(sw)
 
     res = Bunch.Bunch(viewer=viewer, aide=aide, sources=srcs, aliases=aliases,

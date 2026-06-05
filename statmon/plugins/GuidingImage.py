@@ -95,6 +95,10 @@ class GuidingImage(PlBase.Plugin):
         self.update_time = time.time()
         self.save_time = time.time()
 
+        # min size for individual plots
+        self.wd = 450
+        self.ht = 170
+
         self.sub_widget = None
         self.gui_up = True
 
@@ -153,12 +157,14 @@ class GuidingImage(PlBase.Plugin):
         res = make_plot(self.alias_d, self.logger, dims,
                         names_err, al_error, num_pts,
                         y_acc=np.mean, title="Error")
+        res.widget.set_min_size(self.wd, self.ht)
         w.add_widget(res.widget, stretch=1)
         self.plots.guiding_error = res
 
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_bright, num_pts,
                         y_acc=np.mean, title="Brightness")
+        res.widget.set_min_size(self.wd, self.ht)
         w.add_widget(res.widget, stretch=1)
         self.plots.brightness = res
 
@@ -166,6 +172,7 @@ class GuidingImage(PlBase.Plugin):
                         names, al_seeing, num_pts,
                         y_acc=np.mean, title="Seeing",
                         warn_y=1.0)
+        res.widget.set_min_size(self.wd, self.ht)
         w.add_widget(res.widget, stretch=1)
         self.plots.seeing = res
 

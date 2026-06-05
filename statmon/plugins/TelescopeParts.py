@@ -216,12 +216,10 @@ class Windscreen(PlotWidget):
         self.center_x = 0.5
         self.init_x = 0.0  # initial value of x
 
-        self.set_expanding(True, True)
-
         # width/hight of widget
         self.w = 125
         self.h = 450
-        #self.resize(self, self.w, self.h)
+        self.set_expanding(False, True)
 
         # top screen lenght/width
         self.ts_len = 6
@@ -756,8 +754,8 @@ class M1Cover(PlotWidget):
         # width/hight of widget
         self.w = 250
         self.h = 50
-        self.set_min_size(self.w, self.h)
         self.set_expanding(True, False)
+        self.set_min_size(self.w, self.h)
         self.logger = logger
 
         self.init_figure()
@@ -1345,5 +1343,6 @@ class Dummy(Widgets.Label):
 
         self.bg = 'white'
 
-        self.resize(width, height)
+        #self.resize(width, height)
+        self.set_expanding(True, True)
         self.set_color(fg=self.bg, bg=self.bg)

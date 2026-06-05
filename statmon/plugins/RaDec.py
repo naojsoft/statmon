@@ -71,6 +71,7 @@ class RaDec(PlBase.Plugin):
         hbox = Widgets.HBox()
         hbox.set_margins(4, 4, 4, 4)
         hbox.set_spacing(2)
+        hbox.set_align('center')
         hbox.set_expanding(True, False)
         self.root.add_widget(hbox, stretch=0)
 

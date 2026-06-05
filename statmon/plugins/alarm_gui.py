@@ -136,7 +136,6 @@ class MainWindow:
         GUI.  Call once, after construction."""
         container.set_margins(4, 4, 4, 4)
         container.set_spacing(4)
-        container.set_expanding(True, True)
 
         # Connection-status / heartbeat label at the top.
         self.time_label = Widgets.Label('No time signal!')
@@ -145,6 +144,8 @@ class MainWindow:
 
         # Tabs for Active vs History.
         self.tabs = Widgets.TabWidget()
+        self.tabs.set_expanding(True, True)
+        self.tabs.set_min_size(300, 300)
         container.add_widget(self.tabs, stretch=1)
 
         # ----- Active tab --------------------------------------
@@ -171,10 +172,10 @@ class MainWindow:
                 # button is suppressed entirely when
                 # ``userCanReset`` is False (cell stays empty).
                 {'label': 'Mute',     'key': 'muteOn',   'type': 'bool',
-                 'widget': 'checkbox', 'colwidth': 10,
+                 'widget': 'checkbox', 'colwidth': 85,
                  'enabled_key': 'userCanMute'},
                 {'label': '',         'key': 'reset',    'type': 'string',
-                 'widget': 'button', 'text': 'Reset', 'colwidth': 20,
+                 'widget': 'button', 'text': 'Reset', 'colwidth': 70,
                  'visible_key': 'userCanReset'},
             ],
             selection_mode='single',

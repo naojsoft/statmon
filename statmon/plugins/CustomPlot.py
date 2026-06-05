@@ -21,13 +21,7 @@ class PlotWidget(GingaPlotWidget):
         # assigns to self.plot
         super().__init__(plot)
 
-    # def get_widget(self):
-    #     return self.widget
-
-    # def set_figure(self, figure):
-    #     self.figure = figure
-    #     figure.set_canvas(self.get_widget())
+        #self.set_expanding(False, False)
 
     def draw(self):
-        #self.figure.canvas.draw()
         self.plot.redraw()

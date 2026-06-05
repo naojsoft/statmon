@@ -91,7 +91,6 @@ class GuidingError(PlBase.Plugin):
         hbox.add_widget(Widgets.Label(''), stretch=1)
 
         top.add_widget(hbox, stretch=0)
-        #top.resize(500, 600)
 
         container.add_widget(top, stretch=1)
 

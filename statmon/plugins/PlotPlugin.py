@@ -20,7 +20,7 @@ from CustomLabel import Label
 from TelescopeParts import Dummy
 
 
-class PlotCanvas(PlotWidget):
+class GuidingErrorPlot(PlotWidget):
     """ AG/SV/FMOS/AO188 Plotting """
     def __init__(self, parent=None, center_x=0, center_y=0, logger=None):
 
@@ -42,20 +42,70 @@ class PlotCanvas(PlotWidget):
         self.alarm_color = 'red'
         self.warn_color = 'orange'
 
+        self.rlock = threading.RLock()
         self.logger = logger
+        self.c = 0
+        self.plot_record = []
+
+        self.max_record = 500   # max number of record to draw on canvas
+
+        self.label_offset = 0.03    # offset potision of label of y-axis
+        self.record_radius = 0.005  # the radius of a circle of record
+
+        self.scale_index = 1  # default scale
+
+        # those values are measured not to waggle redrawn circles when a widget is reconfigured
+        self.scale = ([-0.28, 0.28], [-0.56, 0.56],
+                      [-0.84, 0.84], [-1.12, 1.12],
+                      [-1.40, 1.40], [-1.68, 1.68],
+                      [-1.96, 1.96], [-2.24, 2.24])
+
+        # the radius of inner/outer circle
+        self.circle = ([0.125, 0.25], [0.25, 0.5],
+                       [0.375, 0.75], [0.5, 1.0],
+                       [0.625, 1.25], [0.75, 1.5],
+                       [0.875, 1.75], [1.0, 2.0])
+        # y axis values
+        self.y_axis = ([-0.25, -0.125, 0.0, 0.125,  0.25],
+                       [-0.5, -0.25, 0.0, 0.25, 0.5],
+                       [-0.75, -0.375, 0.0, 0.375, 0.75],
+                       [-1.0, -0.5, 0.0, 0.5, 1.0],
+                       [-1.25, -0.625, 0.0, 0.625, 1.25],
+                       [-1.5, -0.75, 0.0, 0.75, 1.5],
+                       [-1.75, -0.875, 0.0, 0.875, 1.75],
+                       [-2.0, -1.0, 0.0, 1.0, 2.0])
+        # x axis values
+        self.x_axis = ([-0.25, -0.125, 0.0, 0.125,  0.25],
+                       [-0.5, -0.25, 0.0, 0.25, 0.5],
+                       [-0.75, -0.375, 0.0, 0.375, 0.75],
+                       [-1.0, -0.5,  0.0, 0.5, 1.0],
+                       [-1.25, -0.625, 0.0, 0.625, 1.25],
+                       [-1.5, -0.75, 0.0, 0.75, 1.5],
+                       [-1.75, -0.875, 0.0, 0.875, 1.75],
+                       [-2.0, -1.0, 0.0, 1.0, 2.0])
+        # y axis labels
+        self.y_label = ([-0.25, -0.125, 'arcsec', 0.125, 0.25],
+                        [-0.5, -0.25, 'arcsec', 0.25, 0.5],
+                        [-0.75, -0.375, 'arcsec', 0.375, 0.75],
+                        [-1.0, -0.5, 'arcsec', 0.5, 1.0],
+                        [-1.25, -0.625, 'arcsec', 0.625, 1.25],
+                        [-1.5, -0.75, 'arcsec', 0.75, 1.5],
+                        [-1.75, -0.875, 'arcsec', 0.875, 1.75],
+                        [-2.0, -1.0,  'arcsec', 1.0, 2.0])
+
         self.init_figure()
 
-    def zoomin(self):
+    def zoomin(self, w):
         self.logger.debug('zooming in')
         self.scale_index -= 1
         self.reconfigure()
 
-    def zoomout(self):
+    def zoomout(self, w):
         self.logger.debug('zooming out')
         self.scale_index += 1
         self.reconfigure()
 
-    def refresh(self):
+    def refresh(self, w):
         self.logger.debug('refresh')
         self.clear()
 
@@ -193,68 +243,6 @@ class PlotCanvas(PlotWidget):
 
         self.draw()
 
-
-class Plot(PlotCanvas):
-
-    """A canvas that updates itself every second with a new plot."""
-    def __init__(self, parent=None, center_x=0, center_y=0, logger=None):
-        super().__init__(parent=parent, center_x=center_x, center_y=center_y,
-                         logger=logger)
-
-        self.c = 0
-        self.plot_record = []
-
-        self.max_record = 500   # max number of record to draw on canvas
-
-        self.label_offset = 0.03    # offset potision of label of y-axis
-        self.record_radius = 0.005  # the radius of a circle of record
-
-        self.scale_index = 1  # default scale
-
-        # those values are measured not to waggle redrawn circles when a widget is reconfigured
-        self.scale = ([-0.28, 0.28], [-0.56, 0.56],
-                      [-0.84, 0.84], [-1.12, 1.12],
-                      [-1.40, 1.40], [-1.68, 1.68],
-                      [-1.96, 1.96], [-2.24, 2.24])
-
-        # the radius of inner/outer circle
-        self.circle = ([0.125, 0.25], [0.25, 0.5],
-                       [0.375, 0.75], [0.5, 1.0],
-                       [0.625, 1.25], [0.75, 1.5],
-                       [0.875, 1.75], [1.0, 2.0])
-        # y axis values
-        self.y_axis = ([-0.25, -0.125, 0.0, 0.125,  0.25],
-                       [-0.5, -0.25, 0.0, 0.25, 0.5],
-                       [-0.75, -0.375, 0.0, 0.375, 0.75],
-                       [-1.0, -0.5, 0.0, 0.5, 1.0],
-                       [-1.25, -0.625, 0.0, 0.625, 1.25],
-                       [-1.5, -0.75, 0.0, 0.75, 1.5],
-                       [-1.75, -0.875, 0.0, 0.875, 1.75],
-                       [-2.0, -1.0, 0.0, 1.0, 2.0])
-        # x axis values
-        self.x_axis = ([-0.25, -0.125, 0.0, 0.125,  0.25],
-                       [-0.5, -0.25, 0.0, 0.25, 0.5],
-                       [-0.75, -0.375, 0.0, 0.375, 0.75],
-                       [-1.0, -0.5,  0.0, 0.5, 1.0],
-                       [-1.25, -0.625, 0.0, 0.625, 1.25],
-                       [-1.5, -0.75, 0.0, 0.75, 1.5],
-                       [-1.75, -0.875, 0.0, 0.875, 1.75],
-                       [-2.0, -1.0, 0.0, 1.0, 2.0])
-        # y axis labels
-        self.y_label = ([-0.25, -0.125, 'arcsec', 0.125, 0.25],
-                        [-0.5, -0.25, 'arcsec', 0.25, 0.5],
-                        [-0.75, -0.375, 'arcsec', 0.375, 0.75],
-                        [-1.0, -0.5, 'arcsec', 0.5, 1.0],
-                        [-1.25, -0.625, 'arcsec', 0.625, 1.25],
-                        [-1.5, -0.75, 'arcsec', 0.75, 1.5],
-                        [-1.75, -0.875, 'arcsec', 0.875, 1.75],
-                        [-2.0, -1.0,  'arcsec', 1.0, 2.0])
-
-        PlotCanvas.__init__(self, parent=parent, center_x=center_x,
-                            center_y=center_y, logger=logger)
-
-        self.rlock = threading.RLock()
-
     def draw_path(self):
         ''' draw a path to a current plotting from previous one '''
         with self.rlock:
@@ -354,9 +342,9 @@ class Plot(PlotCanvas):
             self.plot_record.append(plot)
 
 
-class Ao1Plot(Plot):
+class Ao1Plot(GuidingErrorPlot):
     def __init__(self, parent=None, logger=None):
-        Plot.__init__(self, parent=parent, logger=logger)
+        GuidingErrorPlot.__init__(self, parent=parent, logger=logger)
 
         self.scale_index = 0
         self.label_offset = 1.033
@@ -414,10 +402,11 @@ class Ao1Plot(Plot):
         return plot
 
 
-class Ao2Plot(Plot):
+class Ao2Plot(GuidingErrorPlot):
     def __init__(self, parent=None, logger=None):
 
-        Plot.__init__(self, parent=parent, center_x=5, center_y=5, logger=logger)
+        GuidingErrorPlot.__init__(self, parent=parent,
+                                  center_x=5, center_y=5, logger=logger)
 
         self.scale_index = 0
         self.label_offset = 0.553
@@ -477,8 +466,8 @@ class Ao2Plot(Plot):
 class Buttons(Widgets.HBox):
     def __init__(self, parent=None, plot=None, logger=None):
         super().__init__()
-        self.set_spacing(0)
-        self.set_margins(0, 0, 0, 0)
+        self.set_spacing(2)
+        self.set_border_width(2)
 
         self.plot = plot
         self.logger = logger
@@ -515,7 +504,7 @@ class FmosPlot(Widgets.VBox):
         self.set_spacing(0)
         self.set_margins(0, 0, 0, 0)
 
-        self.plot = Plot(parent=parent, logger=logger)
+        self.plot = GuidingErrorPlot(parent=parent, logger=logger)
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
         self.buttons.do_reg_layout()
         self.logger = logger
@@ -601,7 +590,7 @@ class PfsAgPlot(Widgets.VBox):
         self.set_spacing(1)
         self.set_margins(0, 0, 0, 0)
 
-        self.plot = Plot(parent=parent, logger=logger)
+        self.plot = GuidingErrorPlot(parent=parent, logger=logger)
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
         self.buttons.do_reg_layout()
         self.exptime = Exptime(parent=parent, logger=logger)
@@ -644,7 +633,7 @@ class AgPlot(Widgets.VBox):
         self.set_spacing(1)
         self.set_margins(0, 0, 0, 0)
 
-        self.plot = Plot(parent=parent, logger=logger)
+        self.plot = GuidingErrorPlot(parent=parent, logger=logger)
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
         self.buttons.do_reg_layout()
         self.exptime = Exptime(parent=parent, logger=logger)
@@ -688,7 +677,7 @@ class TwoGuidingPlot(Widgets.VBox):
         self.set_spacing(1)
         self.set_margins(0, 0, 0, 0)
 
-        self.plot = Plot(parent=parent, logger=logger)
+        self.plot = GuidingErrorPlot(parent=parent, logger=logger)
         self.exptime = Exptime(parent=parent, logger=logger)
         self.threshold = Threshold(parent=parent, logger=logger)
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)

@@ -65,13 +65,13 @@ class TelescopeGui:
         telbody.add_widget(self.cell, stretch=0)
 
         middle.add_widget(telfocus, stretch=0)
-        middle.add_widget(self.azel, stretch=5)
+        middle.add_widget(self.azel, stretch=1)
         middle.add_widget(telbody, stretch=0)
 
         # right layout will be combination of following components:
         # ins/img-rot, adc, tiptilt, waveplate, m3
         right = Widgets.VBox()
-        self.set_focus_layout(rlayout=right)
+        self.set_focus_layout(right_vbox=right)
 
         # combine right, middle, left layout
         # telh = Widgets.HBox()
@@ -86,199 +86,198 @@ class TelescopeGui:
         telh.add_widget(middle, 0, 1)
         telh.add_widget(right, 0, 2)
 
-        self.widget.add_widget(top)
-        self.widget.add_widget(telh, stretch=5)
+        self.widget.add_widget(top, stretch=0)
+        self.widget.add_widget(telh, stretch=1)
 
-
-    def popt_layout(self, rlayout):
+    def popt_layout(self, right_vbox):
         ''' prime focus optical'''
-        r1layout = Widgets.VBox()
+        r1_vbox = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.add_widget(empty_shell)
+        r1_vbox.add_widget(empty_shell)
 
-        r2layout = Widgets.VBox()
-        r2layout.set_spacing(1)
+        r2_vbox = Widgets.VBox()
+        r2_vbox.set_spacing(1)
 
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
         self.insrot = InsRotPf(logger=self.logger)
-        r2layout.add_widget(self.insrot)
+        r2_vbox.add_widget(self.insrot)
 
         self.adc = AdcPf(logger=self.logger)
-        r2layout.add_widget(self.adc)
+        r2_vbox.add_widget(self.adc)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.add_widget(self.m3)
+        r2_vbox.add_widget(self.m3)
 
         empty_shell = Dummy(height=285, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
-        rlayout.add_widget(r1layout)
-        rlayout.add_widget(r2layout)
+        right_vbox.add_widget(r1_vbox)
+        right_vbox.add_widget(r2_vbox, stretch=1)
 
-    def pir_layout(self, rlayout):
+    def pir_layout(self, right_vbox):
         ''' prime focus infrared'''
-        r1layout = Widgets.VBox()
+        r1_vbox = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.add_widget(empty_shell)
+        r1_vbox.add_widget(empty_shell)
 
-        r2layout = Widgets.VBox()
-        r2layout.set_spacing(1)
+        r2_vbox = Widgets.VBox()
+        r2_vbox.set_spacing(1)
 
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
         self.insrot = InsRotPf(logger=self.logger)
-        r2layout.add_widget(self.insrot)
+        r2_vbox.add_widget(self.insrot)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.add_widget(self.m3)
+        r2_vbox.add_widget(self.m3)
 
         empty_shell = Dummy(height=320, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
-        rlayout.add_widget(r1layout)
-        rlayout.add_widget(r2layout)
+        right_vbox.add_widget(r1_vbox)
+        right_vbox.add_widget(r2_vbox, stretch=1)
 
-    def nsopt_layout(self, rlayout):
+    def nsopt_layout(self, right_vbox):
         ''' nasmyth focus optical'''
-        r1layout = Widgets.VBox()
+        r1_vbox = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.add_widget(empty_shell)
+        r1_vbox.add_widget(empty_shell)
 
-        r2layout = Widgets.VBox()
-        r2layout.set_spacing(1)
+        r2_vbox = Widgets.VBox()
+        r2_vbox.set_spacing(1)
 
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
         self.imgrot = ImgRotNsOpt(logger=self.logger)
-        r2layout.add_widget(self.imgrot)
+        r2_vbox.add_widget(self.imgrot)
 
         self.adc = Adc(logger=self.logger)
-        r2layout.add_widget(self.adc)
+        r2_vbox.add_widget(self.adc)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.add_widget(self.m3)
+        r2_vbox.add_widget(self.m3)
 
         empty_shell = Dummy(height=277, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
-        rlayout.add_widget(r1layout)
-        rlayout.add_widget(r2layout)
+        right_vbox.add_widget(r1_vbox)
+        right_vbox.add_widget(r2_vbox, stretch=1)
 
-    def nsir_layout(self, rlayout):
+    def nsir_layout(self, right_vbox):
         ''' nasmyth focus infrared'''
 
-        r1layout = Widgets.VBox()
+        r1_vbox = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.add_widget(empty_shell)
+        r1_vbox.add_widget(empty_shell)
 
-        r2layout = Widgets.VBox()
-        r2layout.set_spacing(1)
+        r2_vbox = Widgets.VBox()
+        r2_vbox.set_spacing(1)
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
         self.imgrot = ImgRotNsIr(logger=self.logger)
-        r2layout.add_widget(self.imgrot)
+        r2_vbox.add_widget(self.imgrot)
         self.waveplate = Waveplate(logger=self.logger)
-        r2layout.add_widget(self.waveplate)
+        r2_vbox.add_widget(self.waveplate)
         empty_shell = Dummy(height=30, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
         self.aoshutter = AoShutter(logger=self.logger)
-        r2layout.add_widget(self.aoshutter)
+        r2_vbox.add_widget(self.aoshutter)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.add_widget(self.m3)
+        r2_vbox.add_widget(self.m3)
 
         empty_shell = Dummy(height=150, logger=self.logger)
-        r2layout.add_widget(empty_shell)
-        rlayout.add_widget(r1layout)
-        rlayout.add_widget(r2layout)
+        r2_vbox.add_widget(empty_shell)
+        right_vbox.add_widget(r1_vbox)
+        right_vbox.add_widget(r2_vbox, stretch=1)
 
-    def cs_layout(self, rlayout):
+    def cs_layout(self, right_vbox):
         ''' cassegrain focus '''
-        r1layout = Widgets.VBox()
+        r1_vbox = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.add_widget(empty_shell)
+        r1_vbox.add_widget(empty_shell)
 
-        r2layout = Widgets.VBox()
-        r2layout.set_spacing(1)
+        r2_vbox = Widgets.VBox()
+        r2_vbox.set_spacing(1)
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
         self.insrot = InsRotCs(logger=self.logger)
-        r2layout.add_widget(self.insrot)
+        r2_vbox.add_widget(self.insrot)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.add_widget(self.m3)
+        r2_vbox.add_widget(self.m3)
 
         empty_shell = Dummy(height=320, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
-        rlayout.add_widget(r1layout)
-        rlayout.add_widget(r2layout)
+        right_vbox.add_widget(r1_vbox)
+        right_vbox.add_widget(r2_vbox, stretch=1)
 
-    def csir_layout(self, rlayout):
+    def csir_layout(self, right_vbox):
         ''' cassegrain focus infrared '''
 
-        r1layout = Widgets.VBox()
+        r1_vbox = Widgets.VBox()
         empty_shell = Dummy(height=25, logger=self.logger)
-        r1layout.add_widget(empty_shell)
+        r1_vbox.add_widget(empty_shell)
 
         self.tipchop = TipChop(logger=self.logger)
-        r1layout.add_widget(self.tipchop)
+        r1_vbox.add_widget(self.tipchop)
 
         empty_shell = Dummy(height=35, logger=self.logger)
-        r1layout.add_widget(empty_shell)
+        r1_vbox.add_widget(empty_shell)
 
-        r2layout = Widgets.VBox()
-        r2layout.set_spacing(1)
+        r2_vbox = Widgets.VBox()
+        r2_vbox.set_spacing(1)
 
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
         self.insrot = InsRotCs(logger=self.logger)
-        r2layout.add_widget(self.insrot)
+        r2_vbox.add_widget(self.insrot)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.add_widget(self.m3)
+        r2_vbox.add_widget(self.m3)
 
         empty_shell = Dummy(height=320, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
-        rlayout.add_widget(r1layout)
-        rlayout.add_widget(r2layout)
+        right_vbox.add_widget(r1_vbox)
+        right_vbox.add_widget(r2_vbox, stretch=1)
 
-    def csopt_layout(self, rlayout):
+    def csopt_layout(self, right_vbox):
         ''' cassegrain focus optical '''
 
-        r1layout = Widgets.VBox()
+        r1_vbox = Widgets.VBox()
         empty_shell = Dummy(height=95, logger=self.logger)
-        r1layout.add_widget(empty_shell)
+        r1_vbox.add_widget(empty_shell)
 
-        r2layout = Widgets.VBox()
-        r2layout.set_spacing(1)
+        r2_vbox = Widgets.VBox()
+        r2_vbox.set_spacing(1)
         empty_shell = Dummy(height=1, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
         self.insrot = InsRotCs(logger=self.logger)
-        r2layout.add_widget(self.insrot)
+        r2_vbox.add_widget(self.insrot)
 
         self.adc = Adc(logger=self.logger)
-        r2layout.add_widget(self.adc)
+        r2_vbox.add_widget(self.adc)
 
         self.m3 = M3(logger=self.logger)
-        r2layout.add_widget(self.m3)
+        r2_vbox.add_widget(self.m3)
 
         empty_shell = Dummy(height=285, logger=self.logger)
-        r2layout.add_widget(empty_shell)
+        r2_vbox.add_widget(empty_shell)
 
-        rlayout.add_widget(r1layout)
-        rlayout.add_widget(r2layout)
+        right_vbox.add_widget(r1_vbox)
+        right_vbox.add_widget(r2_vbox, stretch=1)
 
-    def set_focus_layout(self, rlayout):
+    def set_focus_layout(self, right_vbox):
         ''' spcam/hsc: insrot,adc
             fmos: insrot
             hds:  imgrot,adc
@@ -301,7 +300,7 @@ class TelescopeGui:
         self.logger.debug(f'telescope focuslayout ins={self.obcp}')
 
         try:
-            focus[self.obcp](rlayout)
+            focus[self.obcp](right_vbox)
         except Exception as e:
             self.logger.error(f'error: setting focus layout. {e}')
             pass

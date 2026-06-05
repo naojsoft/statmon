@@ -53,11 +53,16 @@ class EnvMon2(PlBase.Plugin):
         self.update_time = time.time()
         self.save_time = time.time()
 
+        # min size for individual plots
+        self.wd = 450
+        self.ht = 170
+
         names = ["Center"]
         res = make_plot(self.alias_d, self.logger, dims,
                         names, al_ctr_winds, num_pts,
                         y_acc=np.mean, title="Wind Speed Center",
                         alert_y=2.0)
+        res.widget.set_min_size(self.wd, self.ht)
         self.root.add_widget(res.widget, stretch=1)
         self.plots.windspeed_center = res
 
