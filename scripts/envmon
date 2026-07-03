@@ -31,28 +31,19 @@ from ginga.misc import ModuleManager, Settings, log
 from statmon.Model import StatusModel
 
 defaultServiceName = 'envmon'
-version = "20211207.0"
+version = "20260606.0"
 
 default_layout = ['seq', {},
                   ['vbox', dict(name='toplvl', width=2100, height=1200),
                    ['hbox', dict(name='menubox', stretch=0)],
-                   ['vbox', dict(stretch=1),
-                     ['hpanel', dict(stretch=1),
-                      ['scrollable', dict(width=700, stretch=1),
-                       ['vbox', dict(height=1000, stretch=1),
-                        ['ws', dict(name='left', width=350, show_tabs=False), ],
-                        ]],
-                      ['scrollable', dict(width=700, stretch=1),
-                       ['vbox', dict(height=1000, stretch=1),
-                        ['ws', dict(name='middle', width=350, show_tabs=False), ],
-                        ]],
-                      ['scrollable', dict(width=700, stretch=1),
-                       ['vbox', dict(height=1000, spacing=0, stretch=1),
-                        ['ws', dict(name='precip', height=25, stretch=0,
-                                    show_tabs=False), ],
-                        ['ws', dict(name='right', show_tabs=False, stretch=1), ],
-                        ]],
-                     ]
+                   ['hpanel', dict(stretch=1),
+                    ['ws', dict(name='left', width=700, show_tabs=False), ],
+                    ['ws', dict(name='middle', width=700, show_tabs=False), ],
+                    ['vbox', dict(width=700, spacing=0, stretch=1),
+                     ['ws', dict(name='precip', height=25, stretch=0,
+                                 show_tabs=False), ],
+                     ['ws', dict(name='right', show_tabs=False, stretch=1), ],
+                     ],
                     ],
                    ['hbox', dict(name='statusbox', stretch=0)],
                    ]

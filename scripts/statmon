@@ -37,7 +37,7 @@ from ginga.misc import ModuleManager, Settings, log
 from statmon.Model import StatusModel
 
 defaultServiceName = 'statmon'
-version = "20120405.0"
+version = "20260606.0"
 
 default_layout = ['seq', {},
                   ['vbox', dict(name='toplvl', width=2400, height=1300),
