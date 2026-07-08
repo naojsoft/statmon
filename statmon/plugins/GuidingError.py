@@ -105,13 +105,11 @@ class GuidingError(PlBase.Plugin):
         if not isinstance(t, float):
             t = cur_time
         #t = statusDict.get('FITS.SBR.EPOCH', time.time())
-        self.logger.info("status update t={}".format(t))
+        self.logger.debug("status update t={}".format(t))
 
         try:
-            print('**', statusDict)
             upd_dct = {key: statusDict[key]
                        for key in aliases if key in statusDict}
-            print('--', upd_dct)
             self.stat_d.update(upd_dct)
 
             t = time.time()

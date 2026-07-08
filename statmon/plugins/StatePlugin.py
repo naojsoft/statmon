@@ -42,7 +42,7 @@ class State(Label):
                 self.logger.debug(f'sv state={state}')
         # else is pointing, tracking with green color
 
-        self.logger.debug(f'state={state}, bg={bg}')
+        self.logger.debug(f'state={state}, intensity={intensity} valerr={valerr} bg={bg}')
         self.set_text(state)
         self.set_color(fg=self.fg, bg=bg)
 
@@ -75,7 +75,7 @@ class StatePlugin(PlBase.Plugin):
         self.set_layout(obcp=obcp)
 
     def set_layout(self, obcp):
-
+        self.obcp = obcp
         self.root.remove_all(delete=True)
         self.root.add_widget(self.state, stretch=1)
 
@@ -88,7 +88,8 @@ class StatePlugin(PlBase.Plugin):
         self.obcp = 'SUKA'
 
     def start(self):
-        self.controller.register_select('state', self.update, self.aliases)
+        self.controller.register_select('state', self.update,
+                                        self.aliases)
         self.controller.add_callback('change-config', self.change_config)
 
     def update(self, statusDict):
