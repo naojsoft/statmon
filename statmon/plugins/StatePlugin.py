@@ -3,7 +3,8 @@
 #
 import PlBase
 
-from CustomLabel import Label, ERROR
+from CustomLabel import Label
+from error import ERROR
 
 
 class State(Label):
