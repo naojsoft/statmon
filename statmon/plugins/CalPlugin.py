@@ -184,7 +184,7 @@ class CalPlugin(PlBase.Plugin):
                     if num_on > pwr_vals['on']: # at least 2 lamps are on
                         self.set_lamp(lamp, clr_status['warning'], 1.0)
                     else: # 1 lamp is on
-                        if not val.amp in ERROR:
+                        if val.amp not in ERROR:
                             ma = '%+5.3fmA' % val.amp
                         self.w.ma.set_text(ma)
                         self.logger.debug(f'amp={ma}')

@@ -10,7 +10,6 @@
 # E. Jeschke
 #
 
-import os
 import time
 import threading
 

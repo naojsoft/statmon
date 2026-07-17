@@ -2,7 +2,6 @@
 # T. Inagaki
 #
 import math
-import numpy as np
 
 from matplotlib.figure import Figure
 from matplotlib.figure import SubplotParams
@@ -12,11 +11,9 @@ from matplotlib.patches import Circle
 from matplotlib.artist import Artist
 
 from error import ERROR
-from g2cam.status.common import STATNONE, STATERROR
 from ginga.gw import Widgets
 
-import PlBase
-from CustomLabel import Label, ERROR
+from CustomLabel import Label
 from CustomPlot import PlotWidget
 
 
@@ -361,7 +358,7 @@ class Windscreen(PlotWidget):
         self.msg.set_color(color)
 
         self.windscreen.set_color(color)
-        if not pos in ERROR:
+        if pos not in ERROR:
             self.windscreen.set_height(pos)
 
         self.__update_lightpath(el)
@@ -463,7 +460,7 @@ class AzEl(PlotWidget):
         self.axes.set_aspect('equal')
 
         self.limit_low = 0.0
-        self.limit_high = 90.0;
+        self.limit_high = 90.0
 
         self.alarm_high = 89.5
         self.alarm_low = 10.0
@@ -1070,7 +1067,7 @@ class ImgRotNsOpt(ImgRot):
                 text += '\n(type undef)'
                 color = self.warn
             else:
-                if type(res) == list:
+                if type(res) is list:
                     if focus in imrb:
                         text += '\n(Blue)'
                     elif focus in imrr:

@@ -5,7 +5,6 @@
 #
 # stdlib imports
 import sys, os
-import queue as Queue
 import traceback
 
 # GUI imports
@@ -184,7 +183,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
         pInfo = self.plugins[pluginName]
         try:
             self.close_plugin(pluginName)
-        except:
+        except Exception:
             pass
 
         return self.load_plugin(pInfo.officialname, pInfo.modulename,
@@ -233,7 +232,7 @@ class Viewer(GwMain.GwMain, Widgets.Application):
             # spec is position only
             dim = None
 
-        if dim != None:
+        if dim is not None:
             # user specified dimensions
             dim = map(int, dim.split('x'))
             self.setSize(*dim)

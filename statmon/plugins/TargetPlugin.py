@@ -167,7 +167,7 @@ class TargetPlugin(PlBase.Plugin):
                 hr, mn, sec = int(hr), int(mn), int(sec)
                 self.w.slew_time.set_text(f"{hr:02d}:{mn:02d}:{sec:02d}")
             else:
-                self.w.slew_time.set_text(f"ERROR")
+                self.w.slew_time.set_text("ERROR")
 
         except Exception as e:
             self.logger.error(f'error: target update: {e}')
@@ -372,8 +372,7 @@ def to_hour_min(limit):
     try:
         h = limit // 60
         m = limit % 60
-    except Exception as e:
-        self.logger.error(f'error: to hour min. {e}')
+    except Exception:
         hm = '--h --m calc error'
     else:
         hm = '%dh %dm' %(h,m)

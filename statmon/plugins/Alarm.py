@@ -60,7 +60,6 @@ class Alarm(PlBase.Plugin):
         # installed in the "cfg" module's directory tree.
         cfg_filename = '*_alarm_cfg.yml'
         try:
-            import cfg
             cfgDir = os.path.join(
                 os.path.dirname(sys.modules['cfg'].__file__), 'alarm')
         except Exception as e:

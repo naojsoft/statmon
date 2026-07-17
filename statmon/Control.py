@@ -4,7 +4,7 @@
 # E. Jeschke
 #
 # stdlib imports
-import sys, os
+import sys
 import traceback
 import time
 import threading
@@ -13,7 +13,7 @@ import _thread as thread
 
 from g2base.remoteObjects import remoteObjects as ro
 
-from ginga.misc import Bunch, Callback, Future, Task
+from ginga.misc import Callback, Future, Task
 
 class ControlError(Exception):
     """Exception for errors thrown in this module."""
@@ -73,7 +73,7 @@ class Controller(Callback.Callbacks):
     def register_channels(self, ident, cb_fn, channels):
         # channels can be supplied as either a comma-separated string
         # or as a list or a set
-        if type(channels) == str:
+        if type(channels) is str:
             channels = set([c.strip() for c in channels.split(',')])
         else:
             channels = set(channels)

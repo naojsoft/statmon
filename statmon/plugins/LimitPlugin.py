@@ -329,13 +329,13 @@ class RotLimitPlugin(PlBase.Plugin):
     def update(self, statusDict):
         self.logger.debug('status=%s' %str(statusDict))
 
-        if obcp in PlBase.pf_inst:
+        if self.obcp in PlBase.pf_inst:
             cur = statusDict['TSCS.INSROTPOS_PF']
             cmd = statusDict['TSCS.INSROTCMD_PF']
-        elif obcp in PlBase.cs_inst:
+        elif self.obcp in PlBase.cs_inst:
             cur = statusDict['TSCS.INSROTPOS']
             cmd =  statusDict['TSCS.INSROTCMD']
-        elif obcp in PlBase.ns_inst:
+        elif self.obcp in PlBase.ns_inst:
             cur = statusDict['TSCS.ImgRotPos']
             cmd =  statusDict['TSCS.IMGROTCMD']
         else:
@@ -452,10 +452,10 @@ class Probe1LimitPlugin(ProbeLimitPlugin):
         if self.obcp in self.ag:
             cur = statusDict['TSCV.AGR']
             cmd = statusDict['TSCL.AG_R_CMD']
-        elif obcp in self.popt:
+        elif self.obcp in self.popt:
             cur = statusDict['TSCL.AGPF_X']
             cmd = statusDict['TSCL.AGPF_X_CMD']
-        elif obcp in self.pir:
+        elif self.obcp in self.pir:
             cur = statusDict['TSCL.AGPIR_X']
             cmd = statusDict['TSCL.AGPIR_X_CMD']
         else:
@@ -500,10 +500,10 @@ class Probe2LimitPlugin(ProbeLimitPlugin):
         if self.obcp in self.ag:
             cur = statusDict['TSCV.AGTheta']
             cmd = statusDict['TSCL.AG_THETA_CMD']
-        elif obcp in self.popt:
+        elif self.obcp in self.popt:
             cur = statusDict['TSCL.AGPF_Y']
             cmd = statusDict['TSCL.AGPF_Y_CMD']
-        elif obcp in self.pir:
+        elif self.obcp in self.pir:
             cur = statusDict['TSCL.AGPIR_Y']
             cmd = statusDict['TSCL.AGPIR_Y_CMD']
         else:

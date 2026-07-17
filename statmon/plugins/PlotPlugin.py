@@ -6,7 +6,6 @@ import math
 import threading
 
 from matplotlib.figure import Figure
-from matplotlib.axes import Axes
 from matplotlib.patches import Circle
 from matplotlib.artist import Artist
 from matplotlib.lines import Line2D
@@ -918,7 +917,7 @@ class PlotPlugin(PlBase.Plugin):
 
         try:
             self.obcp = 'SUKA'
-            self.set_layout(obcp=obcp)
+            self.set_layout(obcp=self.obcp)
         except Exception as e:
             self.logger.error(f'error: building layout. {e}')
 

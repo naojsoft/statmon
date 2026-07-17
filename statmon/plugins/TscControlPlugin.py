@@ -4,7 +4,6 @@
 # T. Inagaki
 # E. Jeschke
 #
-import math
 
 from ginga.gw import Widgets
 from ginga.misc import Bunch

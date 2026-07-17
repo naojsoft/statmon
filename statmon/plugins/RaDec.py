@@ -11,7 +11,7 @@ from dateutil import tz
 import g2base.astro.radec as radec
 import g2base.astro.wcs as wcs
 
-from ginga.gw import Widgets, GwHelp
+from ginga.gw import Widgets
 from ginga.misc import Bunch
 
 import PlBase

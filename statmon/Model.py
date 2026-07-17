@@ -3,7 +3,6 @@
 #
 # E. Jeschke
 #
-import time
 import threading
 import queue as Queue
 

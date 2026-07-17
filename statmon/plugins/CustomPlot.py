@@ -4,7 +4,7 @@
 
 from matplotlib.figure import Figure
 
-from ginga.gw.Plot import FigureCanvas, PlotWidget as GingaPlotWidget
+from ginga.gw.Plot import PlotWidget as GingaPlotWidget
 from ginga.plot.PlotView import PlotViewEvent
 from ginga.misc.Settings import SettingGroup
 

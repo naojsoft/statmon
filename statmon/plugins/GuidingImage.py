@@ -7,12 +7,8 @@ import os
 import time
 import numpy as np
 
-import ginga.toolkit as ginga_toolkit
 from ginga.misc import Bunch
-from ginga.gw import Widgets, Viewers
-from ginga.plot.plotaide import PlotAide
-from ginga.canvas.types import plots as gplots
-from ginga.plot import time_series as tsp
+from ginga.gw import Widgets
 from ginga.plot import data_source as dsp
 
 import PlBase

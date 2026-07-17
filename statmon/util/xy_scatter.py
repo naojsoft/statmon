@@ -40,7 +40,7 @@ class XYScatterPlot:
 
     def build_gui(self, container):
 
-        from ginga.gw import Widgets, Viewers
+        from ginga.gw import Viewers
 
         zi = Viewers.CanvasView(logger=self.logger)
         zi.set_desired_size(self._wd, self._ht)

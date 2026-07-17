@@ -3,7 +3,6 @@
 #
 from ginga.gw import Widgets, GwHelp
 
-from error import ERROR
 
 
 class Label(Widgets.Label):

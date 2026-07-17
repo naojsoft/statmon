@@ -6,7 +6,6 @@
 #
 from ginga.gw import Widgets, GwHelp
 from ginga.misc import Bunch
-from ginga import colors
 
 import PlBase
 
