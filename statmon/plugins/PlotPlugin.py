@@ -18,15 +18,6 @@ from CustomPlot import PlotWidget
 from CustomLabel import Label
 
 
-class Dummy(Widgets.Label):
-    """A blank, expanding spacer widget (formerly in TelescopeParts)."""
-    def __init__(self, parent=None, width=125, height=60, logger=None):
-        super().__init__('')
-        self.bg = 'white'
-        self.set_expanding(True, True)
-        self.set_color(fg=self.bg, bg=self.bg)
-
-
 class GuidingErrorPlot(PlotWidget):
     """ AG/SV/FMOS/AO188 Plotting """
     def __init__(self, parent=None, center_x=0, center_y=0, logger=None):
@@ -601,7 +592,6 @@ class PfsAgPlot(Widgets.VBox):
         self.buttons = Buttons(parent=parent, plot=self.plot, logger=logger)
         self.buttons.do_reg_layout()
         self.exptime = Exptime(parent=parent, logger=logger)
-        self.empty = Dummy(width=60, height=25,  logger=logger)
         self.logger = logger
 
         self.set_gui()
@@ -611,8 +601,8 @@ class PfsAgPlot(Widgets.VBox):
 
         hbox = Widgets.HBox()
         hbox.set_spacing(2)
-        hbox.add_widget(self.exptime)
-        hbox.add_widget(self.empty)
+        hbox.add_widget(self.exptime, stretch=0)
+        hbox.add_widget(Widgets.Label(''), stretch=1)   # spacer
         self.add_widget(hbox)
 
         self.add_widget(self.buttons)
