@@ -16,7 +16,15 @@ from ginga.gw import Widgets
 import PlBase
 from CustomPlot import PlotWidget
 from CustomLabel import Label
-from TelescopeParts import Dummy
+
+
+class Dummy(Widgets.Label):
+    """A blank, expanding spacer widget (formerly in TelescopeParts)."""
+    def __init__(self, parent=None, width=125, height=60, logger=None):
+        super().__init__('')
+        self.bg = 'white'
+        self.set_expanding(True, True)
+        self.set_color(fg=self.bg, bg=self.bg)
 
 
 class GuidingErrorPlot(PlotWidget):
