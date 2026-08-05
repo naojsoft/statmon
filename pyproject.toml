@@ -13,8 +13,8 @@ requires-python = ">=3.11"
 dynamic = ["version"]
 dependencies = [
     "pyyaml>=5.3.1",
-    "matplotlib>=3.4",
-    "ginga>=6.0.0",
+    "matplotlib>=3.8",
+    "ginga>=7.1.0",
 ]
 
 [project.optional-dependencies]
