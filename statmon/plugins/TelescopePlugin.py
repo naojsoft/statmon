@@ -317,12 +317,13 @@ class TelescopeCanvas(object):
         base sitting on the outer edge of the blue center circle and the tip
         reaching out toward the inner ring (as in the original).
 
-        NOTE: the exact az->screen mapping mirrors the original loosely and
-        may need tuning against live telemetry.
+        NOTE: Subaru measures azimuth from South (S=0, W=90), so az 0
+        points at the bottom of the compass and az 90 at the left -- not
+        the compass-bearing convention.
         """
         cx, cy = self.compass_c
         a = math.radians(az)
-        ux, uy = math.sin(a), math.cos(a)      # unit pointing vector
+        ux, uy = -math.sin(a), -math.cos(a)    # unit pointing vector, S=0
         r0 = self.subaru_r                     # base rides the center circle
         r1 = self.R_in - 4.0                   # tip stops just inside the ring
         ba = math.radians(42.0)                # half-angle subtended by base
@@ -510,6 +511,10 @@ class TelescopeCanvas(object):
         cx, cy = self.compass_c
         try:
             speed = float(speed)
+            # NOTE: unlike the telescope azimuth (S=0), TSCL.WINDD is a
+            # compass bearing -- N=0, E=90 -- so it needs its own
+            # mapping: rotate by 270 and flip to land N at the top of
+            # the compass and E at its right.
             rot = 270.0
             ang = math.radians((float(direction) + rot) * -1.0)
             if speed < 7.0:
