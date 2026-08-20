@@ -23,12 +23,11 @@ from ginga.gw import Widgets
 # Default persistent data file
 default_persist_data_filename = 'alarm_handler3.pickle'
 
-# Per-severity row styling, applied via ``TableView.set_row_color``.
-# Coloured-text-on-bold-weight, no background fill — Qt's
-# ``setItemWidget`` (used for the per-row Mute checkbox and Reset
-# button) suppresses the QTreeWidgetItem background brush, so a
-# bg-based scheme would look inconsistent across the row.  Bold
-# coloured text is honoured uniformly by every backend.
+# Per-severity row styling, applied via ``TableView.set_row_color``:
+# black text on a filled background, as the Qt-only version had it.
+# The fill runs the whole row, including the Mute and Reset cells --
+# the TableView paints the background of a widget-bearing cell itself
+# rather than leaving the toolkit to composite it under the widget.
 #
 # The keys are *prefixes* — the alarm handler emits values like
 # ``CriticalHi`` / ``CriticalLo`` / ``WarningHi`` / ``WarningLo``
@@ -36,23 +35,28 @@ default_persist_data_filename = 'alarm_handler3.pickle'
 # the same style.  Order matters: longer prefixes first so e.g.
 # ``Critical`` is checked before ``Ok`` (no overlap today, but
 # leaves room for ``OkHi`` and friends).
+#
+# The fills are spelled as hex rather than by name: a widget toolkit
+# reads a colour name from the CSS/SVG list, where ``green`` is the
+# dark #008000 rather than the bright Qt.green the Qt-only version
+# used.  Hex says exactly what we mean on every backend.
 _SEVERITY_PREFIXES = (
-    ('Critical', '#cc0000', True),   # red, bold
-    ('Warning',  '#cc6a00', True),   # amber, bold
-    ('Ok',       '#1a7f1a', True),   # green, bold
-    ('Info',     '#444444', False),  # dark grey, normal
+    ('Critical', 'black', '#ff0000'),   # red
+    ('Warning',  'black', '#ffff00'),   # yellow
+    ('Ok',       'black', '#00ff00'),   # green
+    ('Info',     'black', '#00ff00'),   # green
 )
 
 
 def _severity_style(severity):
     """Map a severity string (possibly with a Hi/Lo suffix) to
-    ``(fg, bold)``.  Unknown severities return ``(None, None)``
+    ``(fg, bg)``.  Unknown severities return ``(None, None)``
     so the row gets default styling."""
     if not severity:
         return None, None
-    for prefix, fg, bold in _SEVERITY_PREFIXES:
+    for prefix, fg, bg in _SEVERITY_PREFIXES:
         if severity.startswith(prefix):
-            return fg, bold
+            return fg, bg
     return None, None
 
 
@@ -340,15 +344,17 @@ class MainWindow:
 
     @staticmethod
     def _apply_severity_colors(table, rows):
-        """Paint each visible row in ``table`` according to its
-        severity (rows[i][3]) — coloured bold text via
-        ``_severity_style`` (which prefix-matches so CriticalHi,
-        WarningLo, etc. map to the bare-severity style).  No
-        background fill (see the module-level comment for why)."""
+        """Fill each visible row in ``table`` according to its
+        severity (rows[i][3]) via ``_severity_style`` (which
+        prefix-matches, so CriticalHi, WarningLo, etc. map to the
+        bare-severity style).  A severity we don't recognise leaves
+        the row at the table's default colours."""
         for i, r in enumerate(rows):
-            fg, bold = _severity_style(r[3])
-            if fg is not None or bold is not None:
-                table.set_row_color([i], fg=fg, bold=bold)
+            fg, bg = _severity_style(r[3])
+            if bg is None:
+                table.clear_row_color([i])
+            else:
+                table.set_row_color([i], fg=fg, bg=bg)
 
     # ----- per-row Mute / Reset callbacks ---------------------
 
