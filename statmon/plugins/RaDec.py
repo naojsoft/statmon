@@ -83,7 +83,6 @@ class RaDec(PlBase.Plugin):
 
         self.w = Bunch.Bunch()
 
-        #bnch = self._build_cluster(gbox, 0)
         bnch = self._build_cluster()
         bnch.lm.set_font(*self.smfont)
         bnch.lm.set_text("Current")
@@ -97,7 +96,7 @@ class RaDec(PlBase.Plugin):
         for name, alias1, alias2 in self.labels:
             #bnch = self._build_cluster(gbox, col)
             bnch = self._build_cluster()
-            bnch.lm.set_font(*self.bigfont)
+            bnch.lm.set_font(*self.biggerfont)
             if name == 'airmass':
                 bnch.lm.set_font(*self.biggerfont)
                 bnch.lm.set_text(name)
