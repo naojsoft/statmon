@@ -93,7 +93,7 @@ class GuidingImage(PlBase.Plugin):
 
         # min size for individual plots
         self.wd = 450
-        self.ht = 170
+        self.ht = 120
 
         self.sub_widget = None
         self.gui_up = True

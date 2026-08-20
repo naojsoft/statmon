@@ -31,7 +31,7 @@ class GuidingErrorPlot(PlotWidget):
         self.center_x = center_x  # center of canvas
         self.center_y = center_y
         self.w = 350
-        self.h = 350
+        self.h = 220
         self.set_expanding(True, True)
         self.set_min_size(self.w, self.h)
 
